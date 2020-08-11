@@ -23,7 +23,20 @@ This file is part of Jedi Academy.
 #include "../server/exe_headers.h"
 
 #include "tr_local.h"
+
+// Cowcat
+#undef LittleShort
+#undef LittleLong
+#define LittleShort(x) ((((uint16_t)(x) & 0xff) << 8 ) | ((uint16_t)(x) >> 8))
+#define LittleLong(x) (((uint32_t)(x) << 24 ) | (((uint32_t)(x) & 0xff00) << 8 ) | (((uint32_t)(x) & 0x00ff0000) >> 8 ) | ((uint32_t)(x) >> 24))
+//
+
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 #include "qcommon/matcomp.h"
+#else
+#include "../qcommon/matcomp.h"
+#endif
+
 #include "../qcommon/sstring.h"
 
 #define	LL(x) x=LittleLong(x)

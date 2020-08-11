@@ -1,0 +1,1237 @@
+#
+B = objs_wos
+BC = $(B)/game
+BP = $(B)/png
+BZ = $(B)/zlib
+
+CXX = g++ --specs=warpup
+CC = gcc --specs=warpup
+CC68K = vc +aos68k -c99 -O2 -speed -cpu=68060
+DO_CC68K = $(CC68K) -o $@ -c $<
+
+AR = ar
+RANLIB = ranlib
+
+# FULL PATH DIR HERE !
+BD = Work:OpenJK-Speed-master/
+
+CXXFLAGS = -O2 -Wall -noixemul -fomit-frame-pointer -ffast-math -fno-strict-aliasing -fno-strict-overflow -fsigned-char -fpermissive 
+CFLAGS = -O2 -noixemul -fomit-frame-pointer -ffast-math -fno-strict-aliasing -fno-strict-overflow -fsigned-char
+
+C_DEFINES = -DFINAL_BUILD -DJK2_MODE -D_JK2EXE -DNDEBUG -DAMIGAOS -DDLL
+C_DEFINES_RENDER = -DFINAL_BUILD -DJK2_MODE -D_JK2EXE -DRENDERER -DSP_GAME -DNDEBUG -DAMIGAOS -DDLL
+C_DEFINES_GAME = -DFINAL_BUILD -DJK2_MODE -DSP_GAME -DNDEBUG -DAMIGAOS -DDLL
+
+C_INCLUDES = -I$(BD)lib/ -I$(BD)game/
+C_INCLUDES_GAME = -I$(BD)codeJK2/game/
+
+DO_CC = $(CC) $(CFLAGS) $(C_DEFINES) $(C_INCLUDES) -o $@ -c $<
+DO_CCR = $(CC) $(CFLAGS) $(C_DEFINES_RENDER) $(C_INCLUDES) -o $@ -c $<
+
+DO_CXX = $(CXX) $(CXXFLAGS) $(C_DEFINES) $(C_INCLUDES) -o $@ -c $<
+DO_CXXR = $(CXX) $(CXXFLAGS) $(C_DEFINES_RENDER) $(C_INCLUDES) -o $@ -c $<
+DO_CXXG = $(CXX) $(CXXFLAGS) $(C_DEFINES_GAME) $(C_INCLUDES_GAME) -o $@ -c $<
+
+OBJS = \
+	$(B)/cl_cgame.o \
+	$(B)/cl_cin.o \
+	$(B)/cl_console.o \
+	$(B)/cl_input.o \
+	$(B)/cl_keys.o \
+	$(B)/cl_main.o \
+	$(B)/cl_mp3.o \
+	$(B)/cl_parse.o \
+	$(B)/cl_scrn.o \
+	$(B)/cl_ui.o \
+	$(B)/snd_ambient.o \
+	$(B)/snd_dma.o \
+	$(B)/snd_mem.o \
+	$(B)/snd_mix.o \
+	$(B)/snd_music.o \
+	$(B)/vmachine.o \
+	\
+	$(B)/cm_load.o \
+	$(B)/cm_patch.o \
+ 	$(B)/cm_polylib.o \
+ 	$(B)/cm_test.o \
+ 	$(B)/cm_trace.o \
+	$(B)/cmd.o \
+	$(B)/common.o \
+	$(B)/cvar.o \
+	$(B)/files_common.o \
+	$(B)/files_pc.o \
+	$(B)/md4.o \
+	$(B)/msg.o \
+	$(B)/net_chan.o \
+	$(B)/q_math.o \
+	$(B)/q_shared.o \
+	$(B)/stringed_ingame.o \
+	$(B)/stringed_interface.o \
+	$(B)/strip.o \
+	$(B)/persistence.o \
+	$(B)/z_memman_pc.o \
+	$(B)/ioapi.o \
+	$(B)/unzip.o \
+	\
+	$(B)/exe_headers.o \
+	$(B)/sv_ccmds.o \
+	$(B)/sv_client.o \
+	$(B)/sv_game.o \
+	$(B)/sv_init.o \
+	$(B)/sv_main.o \
+	$(B)/sv_savegame.o \
+	$(B)/sv_snapshot.o \
+	$(B)/sv_world.o \
+	\
+	$(B)/genericparser2.o \
+	\
+	$(B)/cdct.o \
+	$(B)/csbt.o \
+	$(B)/csbtb.o \
+	$(B)/csbtl3.o \
+	$(B)/cup.o \
+	$(B)/cupini.o \
+	$(B)/cupl1.o \
+	$(B)/cupl3.o \
+	$(B)/cwin.o \
+	$(B)/cwinb.o \
+	$(B)/cwinm.o \
+	$(B)/hwin.o \
+	$(B)/l3dq.o \
+	$(B)/l3init.o \
+	$(B)/mdct.o \
+	$(B)/mhead.o \
+	$(B)/msis.o \
+	$(B)/towave.o \
+	$(B)/uph.o \
+	$(B)/upsf.o \
+	$(B)/wavep.o \
+	\
+	$(B)/ui_atoms.o \
+	$(B)/ui_connect.o \
+	$(B)/ui_main.o \
+	$(B)/ui_saber.o \
+	$(B)/ui_shared.o \
+	$(B)/ui_syscalls.o \
+	\
+	$(B)/jaricom.o \
+	$(B)/jcapimin.o \
+	$(B)/jcapistd.o \
+	$(B)/jcarith.o \
+	$(B)/jccoefct.o \
+	$(B)/jccolor.o \
+	$(B)/jcdctmgr.o \
+	$(B)/jchuff.o \
+	\
+	$(B)/jcinit.o \
+	$(B)/jcmainct.o \
+	$(B)/jcmarker.o \
+	$(B)/jcmaster.o \
+	$(B)/jcomapi.o \
+	$(B)/jcparam.o \
+	$(B)/jcprepct.o \
+	$(B)/jcsample.o \
+	$(B)/jctrans.o \
+	\
+	$(B)/jdapimin.o \
+	$(B)/jdapistd.o \
+	$(B)/jdarith.o \
+	$(B)/jdatadst.o \
+	$(B)/jdatasrc.o \
+	$(B)/jdcoefct.o \
+	$(B)/jdcolor.o \
+	$(B)/jddctmgr.o \
+	\
+	$(B)/jdhuff.o \
+	$(B)/jdinput.o \
+	$(B)/jdmainct.o \
+	$(B)/jdmarker.o \
+	$(B)/jdmaster.o \
+	$(B)/jdmerge.o \
+	$(B)/jdpostct.o \
+	$(B)/jdsample.o \
+	$(B)/jdtrans.o \
+	$(B)/jerror.o \
+	\
+	$(B)/jfdctflt.o \
+	$(B)/jfdctfst.o \
+	$(B)/jfdctint.o \
+	$(B)/jidctflt.o \
+	$(B)/jidctfst.o \
+	$(B)/jidctint.o \
+	$(B)/jmemmgr.o \
+	$(B)/jmemnobs.o \
+	$(B)/jquant1.o \
+	$(B)/jquant2.o \
+	$(B)/jutils.o \
+	\
+	$(B)/G2_API.o \
+	$(B)/G2_bolts.o \
+	$(B)/G2_bones.o \
+	$(B)/G2_misc.o \
+	$(B)/G2_surfaces.o \
+	\
+	$(B)/matcomp.o \
+	$(B)/tr_backend.o \
+	$(B)/tr_bsp.o \
+	$(B)/tr_cmds.o \
+	$(B)/tr_curve.o \
+	$(B)/tr_draw.o \
+	$(B)/tr_ghoul2.o \
+	$(B)/tr_image.o \
+	$(B)/tr_init.o \
+	$(B)/tr_light.o \
+	$(B)/tr_main.o \
+	$(B)/tr_marks.o \
+	$(B)/tr_mesh.o \
+	$(B)/tr_model.o \
+	$(B)/tr_quicksprite.o \
+	$(B)/tr_scene.o \
+	$(B)/tr_shade.o \
+	$(B)/tr_shade_calc.o \
+	$(B)/tr_shader.o \
+	$(B)/tr_shadows.o \
+	$(B)/tr_sky.o \
+	$(B)/tr_stl.o \
+	$(B)/tr_surface.o \
+	$(B)/tr_surfacesprites.o \
+	$(B)/tr_world.o \
+	$(B)/tr_WorldEffects.o \
+	$(B)/tr_font.o \
+	$(B)/tr_image_load.o \
+	$(B)/tr_image_jpg.o \
+	$(B)/tr_image_tga.o \
+	$(B)/tr_image_png.o \
+	$(B)/tr_noise.o \
+	\
+	$(B)/amiga_main.o \
+	$(B)/amiga_shared.o \
+	$(B)/amiga_input.o \
+	$(B)/amiga_snd.o \
+	$(B)/amiga_glimp.o \
+	$(B)/amiga_68k.o \
+	$(B)/amiga_mhandler.o
+	\
+
+OBJGAME = \
+$(BC)/AI_Atst.o \
+$(BC)/AI_Default.o \
+$(BC)/AI_Droid.o \
+$(BC)/AI_GalakMech.o \
+$(BC)/AI_Grenadier.o \
+$(BC)/AI_Howler.o \
+$(BC)/AI_ImperialProbe.o \
+$(BC)/AI_Interrogator.o \
+$(BC)/AI_Jedi.o \
+$(BC)/AI_Mark1.o \
+$(BC)/AI_Mark2.o \
+$(BC)/AI_MineMonster.o \
+$(BC)/AI_Remote.o \
+$(BC)/AI_Seeker.o \
+$(BC)/AI_Sentry.o \
+$(BC)/AI_Sniper.o \
+$(BC)/AI_Stormtrooper.o \
+$(BC)/AI_Utils.o \
+$(BC)/G_Timer.o \
+$(BC)/NPC.o \
+$(BC)/NPC_behavior.o \
+$(BC)/NPC_combat.o \
+$(BC)/NPC_goal.o \
+$(BC)/NPC_misc.o \
+$(BC)/NPC_move.o \
+$(BC)/NPC_reactions.o \
+$(BC)/NPC_senses.o \
+$(BC)/NPC_sounds.o \
+$(BC)/NPC_spawn.o \
+$(BC)/NPC_stats.o \
+$(BC)/NPC_utils.o \
+$(BC)/Q3_Interface.o \
+$(BC)/Q3_Registers.o \
+$(BC)/bg_misc.o \
+$(BC)/bg_pangles.o \
+$(BC)/bg_panimate.o \
+$(BC)/bg_pmove.o \
+$(BC)/bg_slidemove.o \
+\
+$(BC)/g_ICARUS.o \
+$(BC)/g_active.o \
+$(BC)/g_breakable.o \
+$(BC)/g_camera.o \
+$(BC)/g_client.o \
+$(BC)/g_cmds.o \
+$(BC)/g_combat.o \
+$(BC)/g_functions.o \
+$(BC)/g_fx.o \
+$(BC)/g_inventory.o \
+$(BC)/g_itemLoad.o \
+$(BC)/g_items.o \
+$(BC)/g_main.o \
+$(BC)/g_mem.o \
+$(BC)/g_misc.o \
+$(BC)/g_misc_model.o \
+$(BC)/g_missile.o \
+$(BC)/g_mover.o \
+$(BC)/g_nav.o \
+$(BC)/g_navnew.o \
+$(BC)/g_navigator.o \
+$(BC)/g_object.o \
+$(BC)/g_objectives.o \
+$(BC)/g_ref.o \
+$(BC)/g_roff.o \
+$(BC)/g_savegame.o \
+$(BC)/g_session.o \
+$(BC)/g_spawn.o \
+$(BC)/g_svcmds.o \
+$(BC)/g_target.o \
+$(BC)/g_trigger.o \
+$(BC)/g_turret.o \
+$(BC)/g_usable.o \
+$(BC)/g_utils.o \
+$(BC)/g_weapon.o \
+$(BC)/g_weaponLoad.o \
+$(BC)/genericparser2.o \
+\
+$(BC)/wp_atst.o \
+$(BC)/wp_blaster_rifle.o \
+$(BC)/wp_bot_laser.o \
+$(BC)/wp_bowcaster.o \
+$(BC)/wp_bryar_pistol.o \
+$(BC)/wp_demp2.o \
+$(BC)/wp_det_pack.o \
+$(BC)/wp_disruptor.o \
+$(BC)/wp_emplaced_gun.o \
+$(BC)/wp_flechette.o \
+$(BC)/wp_melee.o \
+$(BC)/wp_repeater.o \
+$(BC)/wp_rocket_launcher.o \
+$(BC)/wp_saber.o \
+$(BC)/wp_stun_baton.o \
+$(BC)/wp_thermal.o \
+$(BC)/wp_trip_mine.o \
+\
+$(BC)/FX_ATSTMain.o \
+$(BC)/FX_Blaster.o \
+$(BC)/FX_Bowcaster.o \
+$(BC)/FX_BryarPistol.o \
+$(BC)/FX_DEMP2.o \
+$(BC)/FX_Disruptor.o \
+$(BC)/FX_Emplaced.o \
+$(BC)/FX_Flechette.o \
+$(BC)/FX_HeavyRepeater.o \
+$(BC)/FX_RocketLauncher.o \
+$(BC)/FxPrimitives.o \
+$(BC)/FxScheduler.o \
+$(BC)/FxSystem.o \
+$(BC)/FxTemplate.o \
+$(BC)/FxUtil.o \
+$(BC)/cg_camera.o \
+$(BC)/cg_consolecmds.o \
+$(BC)/cg_credits.o \
+$(BC)/cg_draw.o \
+$(BC)/cg_drawtools.o \
+$(BC)/cg_effects.o \
+$(BC)/cg_ents.o \
+$(BC)/cg_event.o \
+$(BC)/cg_info.o \
+$(BC)/cg_lights.o \
+$(BC)/cg_localents.o \
+$(BC)/cg_main.o \
+$(BC)/cg_marks.o \
+$(BC)/cg_players.o \
+$(BC)/cg_playerstate.o \
+$(BC)/cg_predict.o \
+$(BC)/cg_scoreboard.o \
+$(BC)/cg_servercmds.o \
+$(BC)/cg_snapshot.o \
+$(BC)/cg_syscalls.o \
+$(BC)/cg_text.o \
+$(BC)/cg_view.o \
+$(BC)/cg_weapons.o \
+\
+$(BC)/gameinfo.o \
+$(BC)/tri_coll_test.o \
+$(BC)/q_shared.o \
+$(BC)/q_math.o \
+\
+$(BC)/BlockStream.o \
+$(BC)/Sequence.o \
+$(BC)/Sequencer.o \
+$(BC)/TaskManager.o \
+$(BC)/Instance.o \
+$(BC)/hstring.o \
+$(BC)/amiga_game.o
+\
+
+OBJPNG = \
+	$(BP)/png.o \
+	$(BP)/pngerror.o \
+	$(BP)/pngget.o \
+	$(BP)/pngmem.o \
+	$(BP)/pngpread.o \
+	$(BP)/pngread.o \
+	$(BP)/pngrio.o \
+	$(BP)/pngrtran.o \
+	$(BP)/pngrutil.o \
+	$(BP)/pngset.o \
+	$(BP)/pngtrans.o \
+	$(BP)/pngwio.o \
+	$(BP)/pngwrite.o \
+	$(BP)/pngwtran.o \
+	$(BP)/pngwutil.o
+	\
+OBJZLIB = \
+	$(BZ)/adler32.o \
+	$(BZ)/compress.o \
+	$(BZ)/crc32.o \
+	$(BZ)/deflate.o \
+	$(BZ)/gzclose.o \
+	$(BZ)/gzlib.o \
+	$(BZ)/gzread.o \
+	$(BZ)/gzwrite.o \
+	$(BZ)/infback.o \
+	$(BZ)/inffast.o \
+	$(BZ)/inflate.o \
+	$(BZ)/inftrees.o \
+	$(BZ)/trees.o \
+	$(BZ)/uncompr.o \
+	$(BZ)/zutil.o
+
+##
+
+LIBS  = -noixemul -ldll $(PNG) $(ZLIB) -lmglQ3
+#LIBS  = -noixemul -ldll -lpng -lz -lmglQ3
+LIBSGAME = -noixemul -ldll
+
+JEDI = $(B)/jedi
+GAME = $(BC)/jospgameppc.dll
+PNG = $(BP)/libpng.a
+ZLIB = $(BZ)/libzlib.a
+
+#all: $(JEDI) $(GAME)
+all: $(PNG) $(ZLIB) $(JEDI) $(GAME) 
+
+
+$(JEDI): $(OBJS)
+	$(CXX) -o $@ $(B)/*.o $(LIBS)
+ 
+$(GAME): $(OBJGAME)
+	$(CXX) -o $@ $(BC)/*.o $(LIBSGAME)
+
+$(PNG): $(OBJPNG)
+	$(AR) r $(PNG) $(OBJPNG)
+	$(RANLIB) $@
+
+$(ZLIB): $(OBJZLIB)
+	$(AR) r $(ZLIB) $(OBJZLIB)
+	$(RANLIB) $@
+
+
+$(B)/cl_cgame.o:  code/client/cl_cgame.cpp
+	$(DO_CXX)
+$(B)/cl_cin.o:  code/client/cl_cin.cpp
+	$(DO_CXX)
+$(B)/cl_console.o:  code/client/cl_console.cpp
+	$(DO_CXX)
+$(B)/cl_input.o:  code/client/cl_input.cpp
+	$(DO_CXX)
+$(B)/cl_keys.o:  code/client/cl_keys.cpp
+	$(DO_CXX)
+$(B)/cl_main.o:  code/client/cl_main.cpp
+	$(DO_CXX)
+$(B)/net_chan.o:  code/qcommon/net_chan.cpp
+	$(DO_CXX)
+$(B)/cl_parse.o:  code/client/cl_parse.cpp
+	$(DO_CXX)
+$(B)/cl_scrn.o:  code/client/cl_scrn.cpp
+	$(DO_CXX)
+$(B)/cl_ui.o:  code/client/cl_ui.cpp
+	$(DO_CXX)
+$(B)/cl_avi.o:  code/client/cl_avi.c
+	$(DO_CXX)
+$(B)/cl_mp3.o:  code/client/cl_mp3.cpp
+	$(DO_CXX)
+$(B)/vmachine.o:  code/client/vmachine.cpp
+	$(DO_CXX)
+
+$(B)/buffer.o:  code/encryption/buffer.cpp
+	$(DO_CXX)
+$(B)/cpp_interface.o:  code/encryption/cpp_interface.cpp
+	$(DO_CXX)
+$(B)/sockets.o:  code/encryption/sockets.cpp
+	$(DO_CXX)
+
+
+
+$(B)/cdct.o:  code/mp3code/cdct.c
+	$(DO_CC)
+$(B)/csbt.o:  code/mp3code/csbt.c
+	$(DO_CC)
+$(B)/csbtl3.o:  code/mp3code/csbtl3.c
+	$(DO_CC)
+$(B)/csbtb.o:  code/mp3code/csbtb.c
+	$(DO_CC)
+$(B)/cup.o:  code/mp3code/cup.c
+	$(DO_CC)
+$(B)/cupl1.o:  code/mp3code/cupl1.c
+	$(DO_CC)
+$(B)/cupini.o:  code/mp3code/cupini.c
+	$(DO_CC)
+$(B)/cupl3.o:  code/mp3code/cupl3.c
+	$(DO_CC)
+$(B)/cwin.o:  code/mp3code/cwin.c
+	$(DO_CC)
+$(B)/cwinb.o:  code/mp3code/cwinb.c
+	$(DO_CC)
+$(B)/cwinm.o:  code/mp3code/cwinm.c
+	$(DO_CC)
+$(B)/hwin.o:  code/mp3code/hwin.c
+	$(DO_CC)
+$(B)/l3dq.o:  code/mp3code/l3dq.c
+	$(DO_CC)
+$(B)/l3init.o:  code/mp3code/l3init.c
+	$(DO_CC)
+$(B)/mdct.o:  code/mp3code/mdct.c
+	$(DO_CC)
+$(B)/mhead.o:  code/mp3code/mhead.c
+	$(DO_CC)
+$(B)/msis.o:  code/mp3code/msis.c
+	$(DO_CC)
+$(B)/towave.o:  code/mp3code/towave.c
+	$(DO_CC)
+$(B)/uph.o:  code/mp3code/uph.c
+	$(DO_CC)
+$(B)/upsf.o:  code/mp3code/upsf.c
+	$(DO_CC)
+$(B)/wavep.o:  code/mp3code/wavep.c
+	$(DO_CC)
+$(B)/wcvt.o:  code/mp3code/wcvt.c
+	$(DO_CC)
+
+
+$(B)/cm_load.o:  code/qcommon/cm_load.cpp
+	$(DO_CXX)
+$(B)/cm_patch.o:  code/qcommon/cm_patch.cpp
+	$(DO_CXX)
+$(B)/cm_polylib.o:  code/qcommon/cm_polylib.cpp
+	$(DO_CXX)
+$(B)/cm_test.o:  code/qcommon/cm_test.cpp
+	$(DO_CXX)
+$(B)/cm_trace.o:  code/qcommon/cm_trace.cpp
+	$(DO_CXX)
+$(B)/cmd.o:  code/qcommon/cmd.cpp
+	$(DO_CXX)
+$(B)/common.o:  code/qcommon/common.cpp
+	$(DO_CXX)
+$(B)/cvar.o:  code/qcommon/cvar.cpp
+	$(DO_CXX)
+
+$(B)/hstring.o:  code/qcommon/hstring.cpp
+	$(DO_CXX)
+$(B)/huffman.o:  code/qcommon/huffman.c
+	$(DO_CXX)
+$(B)/md4.o:  code/qcommon/md4.cpp
+	$(DO_CXX)
+$(B)/msg.o:  code/qcommon/msg.cpp
+	$(DO_CXX)
+
+$(B)/exe_headers.o:  code/server/exe_headers.cpp
+	$(DO_CXX)
+$(B)/sv_ccmds.o:  code/server/sv_ccmds.cpp
+	$(DO_CXX)
+$(B)/sv_client.o:  code/server/sv_client.cpp
+	$(DO_CXX)
+$(B)/sv_game.o:  code/server/sv_game.cpp
+	$(DO_CXX)
+$(B)/sv_init.o:  code/server/sv_init.cpp
+	$(DO_CXX)
+$(B)/sv_main.o:  code/server/sv_main.cpp
+	$(DO_CXX)
+$(B)/sv_savegame.o:  code/server/sv_savegame.cpp
+	$(DO_CXX)
+$(B)/sv_snapshot.o:  code/server/sv_snapshot.cpp
+	$(DO_CXX)
+$(B)/sv_net_chan.o:  code/server/sv_net_chan.c
+	$(DO_CXX)
+$(B)/sv_world.o:  code/server/sv_world.cpp
+	$(DO_CXX)
+
+$(B)/ui_atoms.o:  code/ui/ui_atoms.cpp
+	$(DO_CXX)
+$(B)/ui_connect.o:  code/ui/ui_connect.cpp
+	$(DO_CXX)
+$(B)/ui_debug.o:  code/ui/ui_debug.cpp
+	$(DO_CXX)
+$(B)/ui_main.o:  code/ui/ui_main.cpp
+	$(DO_CXX)
+$(B)/ui_saber.o:  code/ui/ui_saber.cpp
+	$(DO_CXX)
+$(B)/ui_shared.o:  code/ui/ui_shared.cpp
+	$(DO_CXX)
+$(B)/ui_syscalls.o:  code/ui/ui_syscalls.cpp
+	$(DO_CXX)
+$(B)/sys_event.o:  shared/sys/sys_event.cpp
+	$(DO_CXX)
+$(B)/amiga_main.o:  code/amiga/amiga_main.cpp
+	$(DO_CXX)
+$(B)/amiga_snd.o:  code/amiga/amiga_snd.cpp
+	$(DO_CXX)
+$(B)/amiga_input.o:  code/amiga/amiga_input.cpp
+	$(DO_CXX)
+$(B)/amiga_shared.o:  code/amiga/amiga_shared.cpp
+	$(DO_CXX)
+$(B)/amiga_glimp.o:  code/amiga/amiga_glimp.cpp
+	$(DO_CXX)
+$(B)/amiga_mhandler.o:  code/amiga/amiga_mhandler.cpp
+	$(DO_CXX)
+$(B)/amiga_68k.o:  code/amiga/amiga_68k.c
+	$(DO_CC68K)
+	vlink -belf32morphos -r -set-deluscore $(B)/amiga_68k.o -o $(B)/amiga_68k.o
+
+## RENDER
+
+$(B)/amiga_render.o:  code/amiga/amiga_render.cpp
+	$(DO_CXXR)
+$(B)/G2_API.o:  code/rd-vanilla/G2_API.cpp
+	$(DO_CXXR)
+$(B)/G2_bolts.o:  code/rd-vanilla/G2_bolts.cpp
+	$(DO_CXXR)
+$(B)/G2_bones.o:  code/rd-vanilla/G2_bones.cpp
+	$(DO_CXXR)
+$(B)/G2_misc.o:  code/rd-vanilla/G2_misc.cpp
+	$(DO_CXXR)
+$(B)/G2_surfaces.o:  code/rd-vanilla/G2_surfaces.cpp
+	$(DO_CXXR)
+
+$(B)/tr_WorldEffects.o:  code/rd-vanilla/tr_WorldEffects.cpp
+	$(DO_CXXR)
+$(B)/tr_animation.o:  code/rd-vanilla/tr_animation.cpp
+	$(DO_CXXR)
+$(B)/tr_backend.o:  code/rd-vanilla/tr_backend.cpp
+	$(DO_CXXR)
+$(B)/tr_bsp.o:  code/rd-vanilla/tr_bsp.cpp
+	$(DO_CXXR)
+$(B)/tr_cmds.o:  code/rd-vanilla/tr_cmds.cpp
+	$(DO_CXXR)
+$(B)/tr_curve.o:  code/rd-vanilla/tr_curve.cpp
+	$(DO_CXXR)
+$(B)/tr_draw.o:  code/rd-vanilla/tr_draw.cpp
+	$(DO_CXXR)
+$(B)/tr_ghoul2.o:  code/rd-vanilla/tr_ghoul2.cpp
+	$(DO_CXXR)
+$(B)/tr_image.o:  code/rd-vanilla/tr_image.cpp
+	$(DO_CXXR)
+$(B)/tr_init.o:  code/rd-vanilla/tr_init.cpp
+	$(DO_CXXR)
+$(B)/tr_light.o:  code/rd-vanilla/tr_light.cpp
+	$(DO_CXXR)
+$(B)/tr_quicksprite.o:  code/rd-vanilla/tr_quicksprite.cpp
+	$(DO_CXXR)
+$(B)/tr_skin.o:  code/rd-vanilla/tr_skin.cpp
+	$(DO_CXXR)
+$(B)/tr_font.o:  code/rd-common/tr_font.cpp
+	$(DO_CXXR)
+$(B)/tr_main.o:  code/rd-vanilla/tr_main.cpp
+	$(DO_CXXR)
+$(B)/tr_marks.o:  code/rd-vanilla/tr_marks.cpp
+	$(DO_CXXR)
+$(B)/tr_mesh.o:  code/rd-vanilla/tr_mesh.cpp
+	$(DO_CXXR)
+$(B)/tr_model.o:  code/rd-vanilla/tr_model.cpp
+	$(DO_CXXR)
+
+$(B)/tr_scene.o:  code/rd-vanilla/tr_scene.cpp
+	$(DO_CXXR)
+$(B)/tr_shade.o:  code/rd-vanilla/tr_shade.cpp
+	$(DO_CXXR)
+$(B)/tr_shade_calc.o:  code/rd-vanilla/tr_shade_calc.cpp
+	$(DO_CXXR)
+$(B)/tr_shader.o:  code/rd-vanilla/tr_shader.cpp
+	$(DO_CXXR)
+$(B)/tr_shadows.o:  code/rd-vanilla/tr_shadows.cpp
+	$(DO_CXXR)
+$(B)/tr_sky.o:  code/rd-vanilla/tr_sky.cpp
+	$(DO_CXXR)
+$(B)/tr_surface.o:  code/rd-vanilla/tr_surface.cpp
+	$(DO_CXXR)
+$(B)/tr_surfacesprites.o:  code/rd-vanilla/tr_surfacesprites.cpp
+	$(DO_CXXR)
+$(B)/tr_world.o:  code/rd-vanilla/tr_world.cpp
+	$(DO_CXXR)
+$(B)/tr_stl.o:  code/rd-vanilla/tr_stl.cpp
+	$(DO_CXXR)
+$(B)/tr_subs.o:  code/rd-vanilla/tr_subs.cpp
+	$(DO_CXXR)
+$(B)/tr_image_load.o:  code/rd-common/tr_image_load.cpp
+	$(DO_CXXR)
+$(B)/tr_image_jpg.o:  code/rd-common/tr_image_jpg.cpp
+	$(DO_CXXR)
+$(B)/tr_image_tga.o:  code/rd-common/tr_image_tga.cpp
+	$(DO_CXXR)
+$(B)/tr_image_png.o:  code/rd-common/tr_image_png.cpp
+	$(DO_CXXR)
+$(B)/tr_noise.o:  code/rd-common/tr_noise.cpp
+	$(DO_CXXR)
+
+$(B)/matcomp.o:  code/qcommon/matcomp.cpp
+	$(DO_CXX)
+$(B)/q_shared.o:  code/qcommon/q_shared.cpp
+	$(DO_CXX)
+$(B)/q_math.o:  code/qcommon/q_math.cpp
+	$(DO_CXX)
+
+
+
+$(B)/files_common.o:  code/qcommon/files_common.cpp
+	$(DO_CXX)
+$(B)/files_pc.o:  code/qcommon/files_pc.cpp
+	$(DO_CXX)
+
+$(B)/stringed_ingame.o:  code/qcommon/stringed_ingame.cpp
+	$(DO_CXX)
+$(B)/stringed_interface.o:  code/qcommon/stringed_interface.cpp
+	$(DO_CXX)
+$(B)/strip.o:  code/qcommon/strip.cpp
+	$(DO_CXX)
+$(B)/persistence.o:  code/qcommon/persistence.cpp
+	$(DO_CXX)
+$(B)/z_memman_pc.o:  code/qcommon/z_memman_pc.cpp
+	$(DO_CXX)
+$(B)/unzip.o:  lib/minizip/unzip.cpp
+	$(DO_CXX)
+$(B)/ioapi.o:  lib/minizip/ioapi.c
+	$(DO_CC)
+$(B)/ojk_saved_game.o:  code/qcommon/ojk_saved_game.cpp
+	$(DO_CXX)
+
+$(B)/genericparser2.o:  code/game/genericparser2.cpp
+	$(DO_CXX)
+
+
+
+
+
+$(B)/jaricom.o:  lib/jpeg-8c/jaricom.c
+	$(DO_CCR)
+$(B)/jcarith.o:  lib/jpeg-8c/jcarith.c
+	$(DO_CCR)
+$(B)/jcapimin.o:  lib/jpeg-8c/jcapimin.c
+	$(DO_CCR)
+$(B)/jccoefct.o:  lib/jpeg-8c/jccoefct.c
+	$(DO_CCR)
+$(B)/jccolor.o:  lib/jpeg-8c/jccolor.c
+	$(DO_CCR)
+$(B)/jcdctmgr.o:  lib/jpeg-8c/jcdctmgr.c
+	$(DO_CCR)
+$(B)/jchuff.o:  lib/jpeg-8c/jchuff.c
+	$(DO_CCR)
+$(B)/jcinit.o:  lib/jpeg-8c/jcinit.c
+	$(DO_CCR)
+$(B)/jcmainct.o:  lib/jpeg-8c/jcmainct.c
+	$(DO_CCR)
+$(B)/jcmaster.o:  lib/jpeg-8c/jcmaster.c
+	$(DO_CCR)
+$(B)/jcmarker.o:  lib/jpeg-8c/jcmarker.c
+	$(DO_CCR)
+$(B)/jcomapi.o:  lib/jpeg-8c/jcomapi.c
+	$(DO_CCR)
+$(B)/jcparam.o:  lib/jpeg-8c/jcparam.c
+	$(DO_CCR)
+$(B)/jcphuff.o:  lib/jpeg-8c/jcphuff.c
+	$(DO_CCR)
+$(B)/jcprepct.o:  lib/jpeg-8c/jcprepct.c
+	$(DO_CCR)
+$(B)/jcsample.o:  lib/jpeg-8c/jcsample.c
+	$(DO_CCR)
+$(B)/jctrans.o:  lib/jpeg-8c/jctrans.c
+	$(DO_CCR)
+$(B)/jdapimin.o:  lib/jpeg-8c/jdapimin.c
+	$(DO_CCR)
+$(B)/jdapistd.o:  lib/jpeg-8c/jdapistd.c
+	$(DO_CCR)
+$(B)/jdarith.o:  lib/jpeg-8c/jdarith.c
+	$(DO_CCR)
+$(B)/jdatadst.o:  lib/jpeg-8c/jdatadst.c
+	$(DO_CCR)
+$(B)/jdatasrc.o:  lib/jpeg-8c/jdatasrc.c
+	$(DO_CCR)
+$(B)/jdcoefct.o:  lib/jpeg-8c/jdcoefct.c
+	$(DO_CCR)
+$(B)/jdcolor.o:  lib/jpeg-8c/jdcolor.c
+	$(DO_CCR)
+$(B)/jddctmgr.o:  lib/jpeg-8c/jddctmgr.c
+	$(DO_CCR)
+$(B)/jdhuff.o:  lib/jpeg-8c/jdhuff.c
+	$(DO_CCR)
+$(B)/jdinput.o:  lib/jpeg-8c/jdinput.c
+	$(DO_CCR)
+$(B)/jdmainct.o:  lib/jpeg-8c/jdmainct.c
+	$(DO_CCR)
+$(B)/jdmarker.o:  lib/jpeg-8c/jdmarker.c
+	$(DO_CCR)
+$(B)/jdmaster.o:  lib/jpeg-8c/jdmaster.c
+	$(DO_CCR)
+$(B)/jdpostct.o:  lib/jpeg-8c/jdpostct.c
+	$(DO_CCR)
+$(B)/jdsample.o:  lib/jpeg-8c/jdsample.c
+	$(DO_CCR)
+$(B)/jdtrans.o:  lib/jpeg-8c/jdtrans.c
+	$(DO_CCR)
+$(B)/jerror.o:  lib/jpeg-8c/jerror.c
+	$(DO_CCR)
+$(B)/jfdctflt.o:  lib/jpeg-8c/jfdctflt.c
+	$(DO_CCR)
+$(B)/jidctflt.o:  lib/jpeg-8c/jidctflt.c
+	$(DO_CCR)
+$(B)/jmemmgr.o:  lib/jpeg-8c/jmemmgr.c
+	$(DO_CCR)
+$(B)/jmemnobs.o:  lib/jpeg-8c/jmemnobs.c
+	$(DO_CCR)
+$(B)/jutils.o:  lib/jpeg-8c/jutils.c
+	$(DO_CCR)
+$(B)/jcapistd.o:  lib/jpeg-8c/jcapistd.c
+	$(DO_CCR)
+$(B)/jdmerge.o:  lib/jpeg-8c/jdmerge.c
+	$(DO_CCR)
+$(B)/jfdctfst.o:  lib/jpeg-8c/jfdctfst.c
+	$(DO_CCR)
+$(B)/jfdctint.o:  lib/jpeg-8c/jfdctint.c
+	$(DO_CCR)
+$(B)/jidctfst.o:  lib/jpeg-8c/jidctfst.c
+	$(DO_CCR)
+$(B)/jidctint.o:  lib/jpeg-8c/jidctint.c
+	$(DO_CCR)
+$(B)/jquant1.o:  lib/jpeg-8c/jquant1.c
+	$(DO_CCR)
+$(B)/jquant2.o:  lib/jpeg-8c/jquant2.c
+	$(DO_CCR)
+$(B)/rdbmp.o:  lib/jpeg-8c/rdbmp.c
+	$(DO_CCR)
+$(B)/rdcolmap.o:  lib/jpeg-8c/rdcolmap.c
+	$(DO_CCR)
+$(B)/rdgif.o:  lib/jpeg-8c/rdgif.c
+	$(DO_CCR)
+$(B)/rdppm.o:  lib/jpeg-8c/rdppm.c
+	$(DO_CCR)
+$(B)/rdrle.o:  lib/jpeg-8c/rdrle.c
+	$(DO_CCR)
+$(B)/rdswitch.o:  lib/jpeg-8c/rdswitch.c
+	$(DO_CCR)
+$(B)/rdtarga.o:  lib/jpeg-8c/rdtarga.c
+	$(DO_CCR)
+$(B)/wrbmp.o:  lib/jpeg-8c/wrbmp.c
+	$(DO_CCR)
+$(B)/wrgif.o:  lib/jpeg-8c/wrgif.c
+	$(DO_CCR)
+$(B)/wrppm.o:  lib/jpeg-8c/wrppm.c
+	$(DO_CCR)
+$(B)/wrrle.o:  lib/jpeg-8c/wrrle.c
+	$(DO_CCR)
+$(B)/wrtarga.o:  lib/jpeg-8c/wrtarga.c
+	$(DO_CCR)
+
+
+
+
+$(B)/morphos_in.o:  code/morphos/morphos_in.c
+	$(DO_CXX)
+$(B)/morphos_main.o:  code/morphos/morphos_main.c
+	$(DO_CXX)
+$(B)/morphos_glimp.o:  code/morphos/morphos_glimp.c
+	$(DO_CXX)
+$(B)/morphos_snd.o:  code/morphos/morphos_snd.c
+	$(DO_CXX)
+$(B)/unix_shared.o:  code/morphos/unix_shared.c
+	$(DO_CXX)
+
+$(B)/snd_adpcm.o:  code/client/snd_adpcm.c
+	$(DO_CXX)
+$(B)/snd_ambient.o:  code/client/snd_ambient.cpp
+	$(DO_CXX)
+$(B)/snd_dma.o:  code/client/snd_dma.cpp
+	$(DO_CXX)
+$(B)/snd_mem.o:  code/client/snd_mem.cpp
+	$(DO_CXX)
+$(B)/snd_mix.o:  code/client/snd_mix.cpp
+	$(DO_CXX)
+$(B)/snd_music.o:  code/client/snd_music.cpp
+	$(DO_CXX)
+
+
+
+
+# GAMEDLL
+
+$(BC)/amiga_game.o:  code/amiga/amiga_game.cpp
+	$(DO_CXXG)
+$(BC)/AI_Atst.o:  codeJK2/game/AI_Atst.cpp
+	$(DO_CXXG)
+$(BC)/AI_Default.o:  codeJK2/game/AI_Default.cpp
+	$(DO_CXXG)
+$(BC)/AI_Droid.o:  codeJK2/game/AI_Droid.cpp
+	$(DO_CXXG)
+$(BC)/AI_GalakMech.o:  codeJK2/game/AI_GalakMech.cpp
+	$(DO_CXXG)
+$(BC)/AI_Grenadier.o:  codeJK2/game/AI_Grenadier.cpp
+	$(DO_CXXG)
+$(BC)/AI_Howler.o:  codeJK2/game/AI_Howler.cpp
+	$(DO_CXXG)
+$(BC)/AI_ImperialProbe.o:  codeJK2/game/AI_ImperialProbe.cpp
+	$(DO_CXXG)
+$(BC)/AI_Interrogator.o:  codeJK2/game/AI_Interrogator.cpp
+	$(DO_CXXG)
+$(BC)/AI_Jedi.o:  codeJK2/game/AI_Jedi.cpp
+	$(DO_CXXG)
+$(BC)/AI_Mark1.o:  codeJK2/game/AI_Mark1.cpp
+	$(DO_CXXG)
+$(BC)/AI_Mark2.o:  codeJK2/game/AI_Mark2.cpp
+	$(DO_CXXG)
+$(BC)/AI_MineMonster.o:  codeJK2/game/AI_MineMonster.cpp
+	$(DO_CXXG)
+$(BC)/AI_Remote.o:  codeJK2/game/AI_Remote.cpp
+	$(DO_CXXG)
+$(BC)/AI_Seeker.o:  codeJK2/game/AI_Seeker.cpp
+	$(DO_CXXG)
+$(BC)/AI_Sentry.o:  codeJK2/game/AI_Sentry.cpp
+	$(DO_CXXG)
+$(BC)/AI_Sniper.o:  codeJK2/game/AI_Sniper.cpp
+	$(DO_CXXG)
+$(BC)/AI_Stormtrooper.o:  codeJK2/game/AI_Stormtrooper.cpp
+	$(DO_CXXG)
+$(BC)/AI_Utils.o:  codeJK2/game/AI_Utils.cpp
+	$(DO_CXXG)
+
+$(BC)/G_Timer.o:  codeJK2/game/G_Timer.cpp
+	$(DO_CXXG)
+$(BC)/NPC.o:  codeJK2/game/NPC.cpp
+	$(DO_CXXG)
+$(BC)/NPC_behavior.o:  codeJK2/game/NPC_behavior.cpp
+	$(DO_CXXG)
+$(BC)/NPC_combat.o:  codeJK2/game/NPC_combat.cpp
+	$(DO_CXXG)
+$(BC)/NPC_goal.o:  codeJK2/game/NPC_goal.cpp
+	$(DO_CXXG)
+$(BC)/NPC_misc.o:  codeJK2/game/NPC_misc.cpp
+	$(DO_CXXG)
+$(BC)/NPC_move.o:  codeJK2/game/NPC_move.cpp
+	$(DO_CXXG)
+$(BC)/NPC_reactions.o:  codeJK2/game/NPC_reactions.cpp
+	$(DO_CXXG)
+$(BC)/NPC_senses.o:  codeJK2/game/NPC_senses.cpp
+	$(DO_CXXG)
+$(BC)/NPC_sounds.o:  codeJK2/game/NPC_sounds.cpp
+	$(DO_CXXG)
+$(BC)/NPC_spawn.o:  codeJK2/game/NPC_spawn.cpp
+	$(DO_CXXG)
+$(BC)/NPC_stats.o:  codeJK2/game/NPC_stats.cpp
+	$(DO_CXXG)
+$(BC)/NPC_utils.o:  codeJK2/game/NPC_utils.cpp
+	$(DO_CXXG)
+$(BC)/Q3_Interface.o:  codeJK2/game/Q3_Interface.cpp
+	$(DO_CXXG)
+$(BC)/Q3_Registers.o:  codeJK2/game/Q3_Registers.cpp
+	$(DO_CXXG)
+
+
+$(BC)/g_main.o:  codeJK2/game/g_main.cpp
+	$(DO_CXXG)
+$(BC)/bg_lib.o:  codeJK2/game/bg_lib.cpp
+	$(DO_CXXG)
+$(BC)/bg_misc.o:  codeJK2/game/bg_misc.cpp
+	$(DO_CXXG)
+$(BC)/bg_pangles.o:  codeJK2/game/bg_pangles.cpp
+	$(DO_CXXG)
+$(BC)/bg_panimate.o:  codeJK2/game/bg_panimate.cpp
+	$(DO_CXXG)
+$(BC)/bg_pmove.o:  codeJK2/game/bg_pmove.cpp
+	$(DO_CXXG)
+$(BC)/bg_slidemove.o:  codeJK2/game/bg_slidemove.cpp
+	$(DO_CXXG)
+$(BC)/g_ICARUS.o:  codeJK2/game/g_ICARUS.cpp
+	$(DO_CXXG)
+$(BC)/g_active.o:  codeJK2/game/g_active.cpp
+	$(DO_CXXG)
+$(BC)/g_breakable.o:  codeJK2/game/g_breakable.cpp
+	$(DO_CXXG)
+$(BC)/g_camera.o:  codeJK2/game/g_camera.cpp
+	$(DO_CXXG)
+$(BC)/g_client.o:  codeJK2/game/g_client.cpp
+	$(DO_CXXG)
+$(BC)/g_cmds.o:  codeJK2/game/g_cmds.cpp
+	$(DO_CXXG)
+$(BC)/g_combat.o:  codeJK2/game/g_combat.cpp
+	$(DO_CXXG)
+$(BC)/g_functions.o:  codeJK2/game/g_functions.cpp
+	$(DO_CXXG)
+$(BC)/g_fx.o:  codeJK2/game/g_fx.cpp
+	$(DO_CXXG)
+$(BC)/g_headers.o:  codeJK2/game/g_headers.cpp
+	$(DO_CXXG)
+$(BC)/g_inventory.o:  codeJK2/game/g_inventory.cpp
+	$(DO_CXXG)
+$(BC)/g_itemLoad.o:  codeJK2/game/g_itemLoad.cpp
+	$(DO_CXXG)
+$(BC)/g_items.o:  codeJK2/game/g_items.cpp
+	$(DO_CXXG)
+$(BC)/g_mem.o:  codeJK2/game/g_mem.cpp
+	$(DO_CXXG)
+$(BC)/g_misc.o:  codeJK2/game/g_misc.cpp
+	$(DO_CXXG)
+$(BC)/g_misc_model.o:  codeJK2/game/g_misc_model.cpp
+	$(DO_CXXG)
+$(BC)/g_missile.o:  codeJK2/game/g_missile.cpp
+	$(DO_CXXG)
+$(BC)/g_mover.o:  codeJK2/game/g_mover.cpp
+	$(DO_CXXG)
+$(BC)/g_nav.o:  codeJK2/game/g_nav.cpp
+	$(DO_CXXG)
+$(BC)/g_navnew.o:  codeJK2/game/g_navnew.cpp
+	$(DO_CXXG)
+$(BC)/g_navigator.o:  codeJK2/game/g_navigator.cpp
+	$(DO_CXXG)
+$(BC)/g_session.o:  codeJK2/game/g_session.cpp
+	$(DO_CXXG)
+$(BC)/g_object.o:  codeJK2/game/g_object.cpp
+	$(DO_CXXG)
+$(BC)/g_objectives.o:  codeJK2/game/g_objectives.cpp
+	$(DO_CXXG)
+$(BC)/g_ref.o:  codeJK2/game/g_ref.cpp
+	$(DO_CXXG)
+$(BC)/g_roff.o:  codeJK2/game/g_roff.cpp
+	$(DO_CXXG)
+$(BC)/g_savegame.o:  codeJK2/game/g_savegame.cpp
+	$(DO_CXXG)
+$(BC)/genericparser2.o:  codeJK2/game/genericparser2.cpp
+	$(DO_CXXG)
+$(BC)/g_spawn.o:  codeJK2/game/g_spawn.cpp
+	$(DO_CXXG)
+$(BC)/g_svcmds.o:  codeJK2/game/g_svcmds.cpp
+	$(DO_CXXG)
+$(BC)/g_target.o:  codeJK2/game/g_target.cpp
+	$(DO_CXXG)
+$(BC)/g_trigger.o:  codeJK2/game/g_trigger.cpp
+	$(DO_CXXG)
+$(BC)/g_utils.o:  codeJK2/game/g_utils.cpp
+	$(DO_CXXG)
+$(BC)/g_weapon.o:  codeJK2/game/g_weapon.cpp
+	$(DO_CXXG)
+$(BC)/g_weaponLoad.o:  codeJK2/game/g_weaponLoad.cpp
+	$(DO_CXXG)
+$(BC)/g_turret.o:  codeJK2/game/g_turret.cpp
+	$(DO_CXXG)
+$(BC)/g_usable.o:  codeJK2/game/g_usable.cpp
+	$(DO_CXXG)
+
+
+$(BC)/gameinfo.o:  code/ui/gameinfo.cpp
+	$(DO_CXXG)
+$(BC)/tri_coll_test.o:  code/qcommon/tri_coll_test.cpp
+	$(DO_CXXG)
+$(BC)/q_shared.o:  code/qcommon/q_shared.cpp
+	$(DO_CXXG)
+$(BC)/q_math.o:  code/qcommon/q_math.cpp
+	$(DO_CXXG)
+
+
+
+$(BC)/BlockStream.o: codeJK2/icarus/BlockStream.cpp
+	$(DO_CXXG)
+$(BC)/Sequence.o: codeJK2/icarus/Sequence.cpp
+	$(DO_CXXG)
+$(BC)/Sequencer.o: codeJK2/icarus/Sequencer.cpp
+	$(DO_CXXG)
+$(BC)/TaskManager.o: codeJK2/icarus/TaskManager.cpp
+	$(DO_CXXG)
+$(BC)/Instance.o: codeJK2/icarus/Instance.cpp
+	$(DO_CXXG)
+$(BC)/hstring.o:  code/Rufl/hstring.cpp
+	$(DO_CXXG)
+
+
+$(BC)/wp_atst.o: codeJK2/game/wp_atst.cpp
+	$(DO_CXXG)
+$(BC)/wp_blaster_rifle.o: codeJK2/game/wp_blaster_rifle.cpp
+	$(DO_CXXG)
+$(BC)/wp_bot_laser.o: codeJK2/game/wp_bot_laser.cpp
+	$(DO_CXXG)
+$(BC)/wp_bowcaster.o: codeJK2/game/wp_bowcaster.cpp
+	$(DO_CXXG)
+$(BC)/wp_bryar_pistol.o: codeJK2/game/wp_bryar_pistol.cpp
+	$(DO_CXXG)
+$(BC)/wp_demp2.o: codeJK2/game/wp_demp2.cpp
+	$(DO_CXXG)
+$(BC)/wp_det_pack.o: codeJK2/game/wp_det_pack.cpp
+	$(DO_CXXG)
+$(BC)/wp_disruptor.o: codeJK2/game/wp_disruptor.cpp
+	$(DO_CXXG)
+$(BC)/wp_emplaced_gun.o: codeJK2/game/wp_emplaced_gun.cpp
+	$(DO_CXXG)
+$(BC)/wp_flechette.o: codeJK2/game/wp_flechette.cpp
+	$(DO_CXXG)
+$(BC)/wp_melee.o: codeJK2/game/wp_melee.cpp
+	$(DO_CXXG)
+$(BC)/wp_repeater.o: codeJK2/game/wp_repeater.cpp
+	$(DO_CXXG)
+$(BC)/wp_rocket_launcher.o: codeJK2/game/wp_rocket_launcher.cpp
+	$(DO_CXXG)
+$(BC)/wp_saber.o: codeJK2/game/wp_saber.cpp
+	$(DO_CXXG)
+$(BC)/wp_stun_baton.o: codeJK2/game/wp_stun_baton.cpp
+	$(DO_CXXG)
+$(BC)/wp_thermal.o: codeJK2/game/wp_thermal.cpp
+	$(DO_CXXG)
+$(BC)/wp_trip_mine.o: codeJK2/game/wp_trip_mine.cpp
+	$(DO_CXXG)
+
+
+
+$(BC)/FX_ATSTMain.o: codeJK2/cgame/FX_ATSTMain.cpp
+	$(DO_CXXG)
+$(BC)/FX_Blaster.o: codeJK2/cgame/FX_Blaster.cpp
+	$(DO_CXXG)
+$(BC)/FX_Bowcaster.o: codeJK2/cgame/FX_Bowcaster.cpp
+	$(DO_CXXG)
+$(BC)/FX_BryarPistol.o: codeJK2/cgame/FX_BryarPistol.cpp
+	$(DO_CXXG)
+$(BC)/FX_DEMP2.o: codeJK2/cgame/FX_DEMP2.cpp
+	$(DO_CXXG)
+$(BC)/FX_Disruptor.o: codeJK2/cgame/FX_Disruptor.cpp
+	$(DO_CXXG)
+$(BC)/FX_Emplaced.o: codeJK2/cgame/FX_Emplaced.cpp
+	$(DO_CXXG)
+$(BC)/FX_Flechette.o: codeJK2/cgame/FX_Flechette.cpp
+	$(DO_CXXG)
+$(BC)/FX_HeavyRepeater.o: codeJK2/cgame/FX_HeavyRepeater.cpp
+	$(DO_CXXG)
+$(BC)/FX_RocketLauncher.o: codeJK2/cgame/FX_RocketLauncher.cpp
+	$(DO_CXXG)
+$(BC)/FxParsing.o: codeJK2/cgame/FxParsing.cpp
+	$(DO_CXXG)
+$(BC)/FxPrimitives.o: codeJK2/cgame/FxPrimitives.cpp
+	$(DO_CXXG)
+$(BC)/FxScheduler.o: codeJK2/cgame/FxScheduler.cpp
+	$(DO_CXXG)
+$(BC)/FxSystem.o: codeJK2/cgame/FxSystem.cpp
+	$(DO_CXXG)
+$(BC)/FxTemplate.o: codeJK2/cgame/FxTemplate.cpp
+	$(DO_CXXG)
+$(BC)/FxUtil.o: codeJK2/cgame/FxUtil.cpp
+	$(DO_CXXG)
+
+$(BC)/cg_camera.o:  codeJK2/cgame/cg_camera.cpp
+	$(DO_CXXG)
+$(BC)/cg_consolecmds.o:  codeJK2/cgame/cg_consolecmds.cpp
+	$(DO_CXXG)
+$(BC)/cg_credits.o:  codeJK2/cgame/cg_credits.cpp
+	$(DO_CXXG)
+$(BC)/cg_main.o:  codeJK2/cgame/cg_main.cpp
+	$(DO_CXXG)
+$(BC)/cg_draw.o:  codeJK2/cgame/cg_draw.cpp
+	$(DO_CXXG)
+$(BC)/cg_drawtools.o:  codeJK2/cgame/cg_drawtools.cpp
+	$(DO_CXXG)
+$(BC)/cg_effects.o:  codeJK2/cgame/cg_effects.cpp
+	$(DO_CXXG)
+$(BC)/cg_ents.o:  codeJK2/cgame/cg_ents.cpp
+	$(DO_CXXG)
+$(BC)/cg_event.o:  codeJK2/cgame/cg_event.cpp
+	$(DO_CXXG)
+$(BC)/cg_headers.o:  codeJK2/cgame/cg_headers.cpp
+	$(DO_CXXG)
+$(BC)/cg_info.o:  codeJK2/cgame/cg_info.cpp
+	$(DO_CXXG)
+$(BC)/cg_lights.o:  codeJK2/cgame/cg_lights.cpp
+	$(DO_CXXG)
+$(BC)/cg_localents.o:  codeJK2/cgame/cg_localents.cpp
+	$(DO_CXXG)
+$(BC)/cg_marks.o:  codeJK2/cgame/cg_marks.cpp
+	$(DO_CXXG)
+$(BC)/cg_players.o:  codeJK2/cgame/cg_players.cpp
+	$(DO_CXXG)
+$(BC)/cg_playerstate.o:  codeJK2/cgame/cg_playerstate.cpp
+	$(DO_CXXG)
+$(BC)/cg_predict.o:  codeJK2/cgame/cg_predict.cpp
+	$(DO_CXXG)
+$(BC)/cg_scoreboard.o:  codeJK2/cgame/cg_scoreboard.cpp
+	$(DO_CXXG)
+$(BC)/cg_servercmds.o:  codeJK2/cgame/cg_servercmds.cpp
+	$(DO_CXXG)
+$(BC)/cg_snapshot.o:  codeJK2/cgame/cg_snapshot.cpp
+	$(DO_CXXG)
+$(BC)/cg_syscalls.o:  codeJK2/cgame/cg_syscalls.cpp
+	$(DO_CXXG)
+$(BC)/cg_text.o:  codeJK2/cgame/cg_text.cpp
+	$(DO_CXXG)
+$(BC)/cg_view.o:  codeJK2/cgame/cg_view.cpp
+	$(DO_CXXG)
+$(BC)/cg_weapons.o:  codeJK2/cgame/cg_weapons.cpp
+	$(DO_CXXG)
+
+
+# PNG
+
+$(BP)/png.o:  lib/libpng/png.c
+	$(DO_CC)
+$(BP)/pngerror.o:  lib/libpng/pngerror.c
+	$(DO_CC)
+$(BP)/pngget.o:  lib/libpng/pngget.c
+	$(DO_CC)
+$(BP)/pngmem.o:  lib/libpng/pngmem.c
+	$(DO_CC)
+$(BP)/pngpread.o:  lib/libpng/pngpread.c
+	$(DO_CC)
+$(BP)/pngread.o:  lib/libpng/pngread.c
+	$(DO_CC)
+$(BP)/pngrio.o:  lib/libpng/pngrio.c
+	$(DO_CC)
+$(BP)/pngrtran.o:  lib/libpng/pngrtran.c
+	$(DO_CC)
+$(BP)/pngrutil.o:  lib/libpng/pngrutil.c
+	$(DO_CC)
+$(BP)/pngset.o:  lib/libpng/pngset.c
+	$(DO_CC)
+$(BP)/pngtrans.o:  lib/libpng/pngtrans.c
+	$(DO_CC)
+$(BP)/pngwio.o:  lib/libpng/pngwio.c
+	$(DO_CC)
+$(BP)/pngwrite.o:  lib/libpng/pngwrite.c
+	$(DO_CC)
+$(BP)/pngwtran.o:  lib/libpng/pngwtran.c
+	$(DO_CC)
+$(BP)/pngwutil.o:  lib/libpng/pngwutil.c
+	$(DO_CC)
+
+
+# ZLIB
+
+$(BZ)/adler32.o:  lib/zlib/adler32.c
+	$(DO_CC)
+$(BZ)/compress.o:  lib/zlib/compress.c
+	$(DO_CC)
+$(BZ)/crc32.o:  lib/zlib/crc32.c
+	$(DO_CC)
+$(BZ)/deflate.o:  lib/zlib/deflate.c
+	$(DO_CC)
+$(BZ)/gzclose.o:  lib/zlib/gzclose.c
+	$(DO_CC)
+$(BZ)/gzlib.o:  lib/zlib/gzlib.c
+	$(DO_CC)
+$(BZ)/gzread.o:  lib/zlib/gzread.c
+	$(DO_CC)
+$(BZ)/gzwrite.o:  lib/zlib/gzwrite.c
+	$(DO_CC)
+$(BZ)/infback.o:  lib/zlib/infback.c
+	$(DO_CC)
+$(BZ)/inffast.o:  lib/zlib/inffast.c
+	$(DO_CC)
+$(BZ)/inflate.o:  lib/zlib/inflate.c
+	$(DO_CC)
+$(BZ)/inftrees.o:  lib/zlib/inftrees.c
+	$(DO_CC)
+$(BZ)/trees.o:  lib/zlib/trees.c
+	$(DO_CC)
+$(BZ)/uncompr.o:  lib/zlib/uncompr.c
+	$(DO_CC)
+$(BZ)/zutil.o:  lib/zlib/zutil.c
+	$(DO_CC)
+
+

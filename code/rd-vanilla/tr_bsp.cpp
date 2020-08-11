@@ -25,6 +25,13 @@ This file is part of Jedi Academy.
 
 #include "tr_local.h"
 
+//#undef LittleShort
+//#undef LittleLong
+
+//#define LittleShort(x) ((((uint16_t)(x) & 0xff) << 8 ) | ((uint16_t)(x) >> 8))
+//#define LittleLong(x) (((uint32_t)(x) << 24 ) | (((uint32_t)(x) & 0xff00) << 8 ) | (((uint32_t)(x) & 0x00ff0000) >> 8 ) | ((uint32_t)(x) >> 24))
+
+
 /*
 
 Loads and prepares a map file for scene rendering.

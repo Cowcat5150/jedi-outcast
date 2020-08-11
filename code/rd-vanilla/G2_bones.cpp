@@ -33,7 +33,11 @@ This file is part of Jedi Academy.
 	#include "../qcommon/qcommon.h"
 #endif
 
+#if !defined(AMIGAOS) && !defined(MORPHOS) // Cowcat
 #include "qcommon/matcomp.h"
+#else
+#include "../qcommon/matcomp.h"
+#endif
 
 #if !defined(G2_H_INC)
 	#include "../ghoul2/G2.h"
@@ -96,6 +100,7 @@ int G2_Add_Bone (const model_t *mod, boneInfo_v &blist, const char *boneName)
 	
 	//rww - RAGDOLL_BEGIN
 	memset(&tempBone, 0, sizeof(tempBone));
+	//tempBone = {}; // Cowcat test
 	//rww - RAGDOLL_END
 
    	offsets = (mdxaSkelOffsets_t *)((byte *)mod->mdxa + sizeof(mdxaHeader_t));

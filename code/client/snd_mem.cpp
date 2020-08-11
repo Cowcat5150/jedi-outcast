@@ -730,16 +730,18 @@ of a forced fallback of a player specific sound	(or of a wav/mp3 substitution no
 ==============
 */
 qboolean gbInsideLoadSound = qfalse;
+
 static qboolean S_LoadSound_Actual( sfx_t *sfx )
 {
-	byte	*data;
-	short	*samples;
+	byte		*data;
+	short		*samples;
 	wavinfo_t	info;
 	int		size;
-	char	*psExt;
-	char	sLoadName[MAX_QPATH];
+	char		*psExt;
+	char		sLoadName[MAX_QPATH];
 	
 	int		len = strlen(sfx->sSoundName);
+
 	if (len<5)
 	{
 		return qfalse;
@@ -750,6 +752,7 @@ static qboolean S_LoadSound_Actual( sfx_t *sfx )
 	if ( sfx->sSoundName[0] == '*') {
 		return qfalse;
 	}
+
 	// make up a local filename to try wav/mp3 substitutes...
 	//	
 	Q_strncpyz(sLoadName, sfx->sSoundName, sizeof(sLoadName));	
@@ -758,6 +761,7 @@ static qboolean S_LoadSound_Actual( sfx_t *sfx )
 	// Ensure name has an extension (which it must have, but you never know), and get ptr to it...
 	//
 	psExt = &sLoadName[strlen(sLoadName)-4];
+
 	if (*psExt != '.')
 	{
 		//Com_Printf( "WARNING: soundname '%s' does not have 3-letter extension\n",sLoadName);
@@ -773,6 +777,7 @@ static qboolean S_LoadSound_Actual( sfx_t *sfx )
 
 	SND_TouchSFX(sfx);
 //=========
+
 	if (Q_stricmpn(psExt,".mp3",4)==0)
 	{
 		// load MP3 file instead...
@@ -799,11 +804,13 @@ static qboolean S_LoadSound_Actual( sfx_t *sfx )
 				}
 #endif
 			}
+
 			else
 			{
 				// small file, not worth keeping as MP3 since it would increase in size (with MP3 header etc)...
 				//
 				Com_DPrintf("S_LoadSound: Unpacking MP3 file \"%s\" to wav.\n",sLoadName);
+
 				//
 				// unpack and convert into WAV...
 				//
@@ -813,7 +820,8 @@ static qboolean S_LoadSound_Actual( sfx_t *sfx )
 					{
 						int iResultBytes = MP3_UnpackRawPCM( sLoadName, data, size, pbUnpackBuffer, qfalse );
 
-						if (iResultBytes!= iRawPCMDataSize){
+						if (iResultBytes!= iRawPCMDataSize)
+						{
 							Com_Printf(S_COLOR_YELLOW"**** MP3 %s final unpack size %d different to previous value %d\n",sLoadName,iResultBytes,iRawPCMDataSize);
 							//assert (iResultBytes == iRawPCMDataSize);
 						}
@@ -824,10 +832,10 @@ static qboolean S_LoadSound_Actual( sfx_t *sfx )
 						// (this is a bit crap really, but it lets me drop through into existing code)...
 						//
 						MP3_FakeUpWAVInfo( sLoadName, data, size, iResultBytes,
-											// these params are all references...
-											info.format, info.rate, info.width, info.channels, info.samples, info.dataofs,
-											qfalse
-										);
+								// these params are all references...
+								info.format, info.rate, info.width, info.channels, info.samples, info.dataofs,
+								qfalse
+								);
 
 						S_LoadSound_Finalize(&info,sfx,pbUnpackBuffer);
 
@@ -839,9 +847,12 @@ static qboolean S_LoadSound_Actual( sfx_t *sfx )
 						for (int i = 0; i < sfx->iSoundLengthInSamples; i++)
 						{
 							sfx->pSoundData[i] = LittleShort(sfx->pSoundData[i]);
+
 							if (sfx->fVolRange < (abs(sfx->pSoundData[i]) >> 8))
+							//if (sfx->fVolRange < (abs(static_cast<int>(sfx->pSoundData[i])) >> 8)) // new Cowcat
 							{
 								sfx->fVolRange = abs(sfx->pSoundData[i]) >> 8;
+								//sfx->fVolRange = abs(static_cast<int>(sfx->pSoundData[i])) >> 8;  // new Cowcat
 							}
 						}
 #endif
@@ -968,7 +979,7 @@ qboolean S_LoadSound( sfx_t *sfx )
 {
 	gbInsideLoadSound = qtrue;	// !!!!!!!!!!!!!
 		
-		qboolean bReturn = S_LoadSound_Actual( sfx );
+	qboolean bReturn = S_LoadSound_Actual( sfx );
 
 	gbInsideLoadSound = qfalse;	// !!!!!!!!!!!!!
 

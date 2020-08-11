@@ -150,7 +150,7 @@ ambientSet_t *CSetGroup::AddSet( const char *name )
 	set->time_end	= 25;
 
 	set->volRange_start = MAX_SET_VOLUME;
-	set->volRange_end	= MAX_SET_VOLUME;
+	set->volRange_end   = MAX_SET_VOLUME;
 
 	m_ambientSets->insert( m_ambientSets->end(), set );
 
@@ -170,6 +170,8 @@ GetSet
 
 ambientSet_t *CSetGroup::GetSet( const char *name )
 {
+	#if 1
+
 	map<sstring_t, ambientSet_t *>::iterator	mi;
 
 	if ( name == NULL )
@@ -181,6 +183,12 @@ ambientSet_t *CSetGroup::GetSet( const char *name )
 		return NULL;
 
 	return (*mi).second;
+
+	#else // when sound is disabled - Hedeon test
+
+	return NULL;
+
+	#endif
 }
 
 ambientSet_t *CSetGroup::GetSet( int ID )
@@ -411,14 +419,14 @@ static void AS_GetVolumeRange( ambientSet_t &set )
 		Com_Printf(S_COLOR_YELLOW"WARNING: Corrected swapped min / max range in a \"volRange\" keyword\n");
 		#endif
 		
-		int swap =	min;
-					min = max;
-						  max = swap;		
+		int swap = min;
+		min = max;
+		max = swap;		
 	}
 
 	//Store the data
-	set.volRange_start	= min;
-	set.volRange_end	= max;
+	set.volRange_start = min;
+	set.volRange_end = max;
 
 	AS_SkipLine();
 }

@@ -29,7 +29,8 @@ This file is part of Jedi Academy.
 R_PerformanceCounters
 =====================
 */
-void R_PerformanceCounters( void ) {
+void R_PerformanceCounters( void )
+{
 	if ( !r_speeds->integer ) {
 		// clear the counters even if we aren't printing
 		memset( &tr.pc, 0, sizeof( tr.pc ) );
@@ -363,7 +364,8 @@ If running in stereo, RE_BeginFrame will be called twice
 for each RE_EndFrame
 ====================
 */
-void RE_BeginFrame( stereoFrame_t stereoFrame ) {
+void RE_BeginFrame( stereoFrame_t stereoFrame )
+{
 	drawBufferCommand_t	*cmd;
 
 	if ( !tr.registered ) {
@@ -377,6 +379,9 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 	//
 	// do overdraw measurement
 	//
+	
+	#if !defined(AMIGAOS)
+
 	if ( r_measureOverdraw->integer )
 	{
 		if ( glConfig.stencilBits < 4 )
@@ -411,11 +416,14 @@ void RE_BeginFrame( stereoFrame_t stereoFrame ) {
 			r_measureOverdraw->modified = qfalse;
 		}
 	}
+	
+	#endif
 
 	//
 	// texturemode stuff
 	//
-	if ( r_textureMode->modified || r_ext_texture_filter_anisotropic->modified) {
+	if ( r_textureMode->modified || r_ext_texture_filter_anisotropic->modified)
+	{
 		R_SyncRenderThread();
 		GL_TextureMode( r_textureMode->string );
 		r_textureMode->modified = qfalse;
@@ -480,13 +488,15 @@ RE_EndFrame
 Returns the number of msec spent in the back end
 =============
 */
-void RE_EndFrame( int *frontEndMsec, int *backEndMsec ) {
+void RE_EndFrame( int *frontEndMsec, int *backEndMsec )
+{
 	swapBuffersCommand_t	*cmd;
 
 	if ( !tr.registered ) {
 		return;
 	}
 	cmd = (swapBuffersCommand_t *) R_GetCommandBuffer( sizeof( *cmd ) );
+
 	if ( !cmd ) {
 		return;
 	}

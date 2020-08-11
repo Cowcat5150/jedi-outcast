@@ -122,6 +122,8 @@ struct PNGFileReader
 	{
 		ri.FS_FreeFile (buf);
 
+		#if 0
+
 		if ( info_ptr != NULL )
 		{
 			// Destroys both structs
@@ -131,6 +133,12 @@ struct PNGFileReader
 		{
 			png_destroy_read_struct (&png_ptr, NULL, NULL);
 		}
+
+		#else // fix memory leak - new Cowcat
+
+		png_destroy_read_struct (&png_ptr, &info_ptr, NULL);
+
+		#endif
 	}
 
 	int Read ( byte **data, int *width, int *height )

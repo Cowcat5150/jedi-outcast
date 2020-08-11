@@ -182,6 +182,33 @@
 	#endif
 	
 	#define DLL_EXT ".so"
+
+#elif defined(AMIGAOS)
+
+	#define OS_STRING "amigaos"
+
+	#define ARCH_STRING "ppc"
+
+	#define QINLINE inline
+	#define PATH_SEP '/'
+
+	#define Q3_BIG_ENDIAN
+
+	#define DLL_EXT ".dll"
+
+#elif defined(MORPHOS)
+
+	#define OS_STRING "morphos"
+
+	#define ARCH_STRING "ppc"
+
+	#define QINLINE inline
+	#define PATH_SEP '/'
+
+	#define Q3_BIG_ENDIAN
+
+	#define DLL_EXT ".so"
+	
 #endif
 
 // catch missing defines in above blocks

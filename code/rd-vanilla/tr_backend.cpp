@@ -31,8 +31,11 @@ extern qboolean tr_distortionPrePost; //tr_shadows.cpp
 extern qboolean tr_distortionNegate; //tr_shadows.cpp
 extern void RB_CaptureScreenImage(void); //tr_shadows.cpp
 extern void RB_DistortionFill(void); //tr_shadows.cpp
+
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 static void RB_DrawGlowOverlay();
 static void RB_BlurGlowTexture();
+#endif
 
 // Whether we are currently rendering only glowing objects or not.
 bool g_bRenderGlowingObjects = false;
@@ -40,7 +43,8 @@ bool g_bRenderGlowingObjects = false;
 // Whether the current hardware supports dynamic glows/flares.
 bool g_bDynamicGlowSupported = false;
 
-static const float s_flipMatrix[16] = {
+static const float s_flipMatrix[16] = 
+{
 	// convert from our coordinate system (looking down X)
 	// to OpenGL's coordinate system (looking down -Z)
 	0, 0, -1, 0,
@@ -53,7 +57,8 @@ static const float s_flipMatrix[16] = {
 /*
 ** GL_Bind
 */
-void GL_Bind( image_t *image ) {
+void GL_Bind( image_t *image )
+{
 	int texnum;
 
 	if ( !image ) {
@@ -87,31 +92,35 @@ void GL_SelectTexture( int unit )
 	if ( unit == 0 )
 	{
 		qglActiveTextureARB( GL_TEXTURE0_ARB );
-		GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE0_ARB )\n" );
+		//GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE0_ARB )\n" );
 		qglClientActiveTextureARB( GL_TEXTURE0_ARB );
-		GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE0_ARB )\n" );
+		//GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE0_ARB )\n" );
 	}
+
 	else if ( unit == 1 )
 	{
 		qglActiveTextureARB( GL_TEXTURE1_ARB );
-		GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE1_ARB )\n" );
+		//GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE1_ARB )\n" );
 		qglClientActiveTextureARB( GL_TEXTURE1_ARB );
-		GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE1_ARB )\n" );
+		//GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE1_ARB )\n" );
 	}
+
 	else if ( unit == 2 )
 	{
 		qglActiveTextureARB( GL_TEXTURE2_ARB );
-		GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE2_ARB )\n" );
+		//GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE2_ARB )\n" );
 		qglClientActiveTextureARB( GL_TEXTURE2_ARB );
-		GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE2_ARB )\n" );
+		//GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE2_ARB )\n" );
 	}
+
 	else if ( unit == 3 )
 	{
 		qglActiveTextureARB( GL_TEXTURE3_ARB );
-		GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE3_ARB )\n" );
+		//GLimp_LogComment( "glActiveTextureARB( GL_TEXTURE3_ARB )\n" );
 		qglClientActiveTextureARB( GL_TEXTURE3_ARB );
-		GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE3_ARB )\n" );
+		//GLimp_LogComment( "glClientActiveTextureARB( GL_TEXTURE3_ARB )\n" );
 	}
+
 	else {
 		Com_Error( ERR_DROP, "GL_SelectTexture: unit = %i", unit );
 	}
@@ -123,11 +132,14 @@ void GL_SelectTexture( int unit )
 /*
 ** GL_Cull
 */
-void GL_Cull( int cullType ) {
+void GL_Cull( int cullType )
+{
 	if ( glState.faceCulling == cullType ) {
 		return;
 	}
+
 	glState.faceCulling = cullType;
+
 	if (backEnd.projection2D){	//don't care, we're in 2d when it's always disabled
 		return;	
 	}
@@ -151,6 +163,7 @@ void GL_Cull( int cullType ) {
 				qglCullFace( GL_BACK );
 			}
 		}
+
 		else
 		{
 			if ( backEnd.viewParms.isMirror )
@@ -189,9 +202,11 @@ void GL_TexEnv( int env )
 	case GL_DECAL:
 		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL );
 		break;
+	#if !defined(AMIGAOS)
 	case GL_ADD:
 		qglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_ADD );
 		break;
+	#endif
 	default:
 		Com_Error( ERR_DROP, "GL_TexEnv: invalid env '%d' passed\n", env );
 		break;
@@ -331,6 +346,7 @@ void GL_State( uint32_t stateBits )
 	//
 	// fill/line mode
 	//
+	#if !defined(AMIGAOS)
 	if ( diff & GLS_POLYMODE_LINE )
 	{
 		if ( stateBits & GLS_POLYMODE_LINE )
@@ -342,6 +358,7 @@ void GL_State( uint32_t stateBits )
 			qglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 		}
 	}
+	#endif
 
 	//
 	// depthtest
@@ -402,7 +419,8 @@ RB_Hyperspace
 A player has predicted a teleport, but hasn't arrived yet
 ================
 */
-static void RB_Hyperspace( void ) {
+static void RB_Hyperspace( void )
+{
 	float		c;
 
 	if ( !backEnd.isHyperspace ) {
@@ -417,16 +435,15 @@ static void RB_Hyperspace( void ) {
 }
 
 
-void SetViewportAndScissor( void ) {
+void SetViewportAndScissor( void )
+{
 	qglMatrixMode(GL_PROJECTION);
 	qglLoadMatrixf( backEnd.viewParms.projectionMatrix );
 	qglMatrixMode(GL_MODELVIEW);
 
 	// set the window clipping
-	qglViewport( backEnd.viewParms.viewportX, backEnd.viewParms.viewportY, 
-		backEnd.viewParms.viewportWidth, backEnd.viewParms.viewportHeight );
-	qglScissor( backEnd.viewParms.viewportX, backEnd.viewParms.viewportY, 
-		backEnd.viewParms.viewportWidth, backEnd.viewParms.viewportHeight );
+	qglViewport( backEnd.viewParms.viewportX, backEnd.viewParms.viewportY, backEnd.viewParms.viewportWidth, backEnd.viewParms.viewportHeight );
+	qglScissor( backEnd.viewParms.viewportX, backEnd.viewParms.viewportY, backEnd.viewParms.viewportWidth, backEnd.viewParms.viewportHeight );
 }
 
 /*
@@ -437,14 +454,17 @@ Any mirrored or portaled views have already been drawn, so prepare
 to actually render the visible surfaces for this view
 =================
 */
-static void RB_BeginDrawingView (void) {
+static void RB_BeginDrawingView (void)
+{
 	int clearBits = GL_DEPTH_BUFFER_BIT;
 
 	// sync with gl if needed
-	if ( r_finish->integer == 1 && !glState.finishCalled ) {
+	if ( r_finish->integer == 1 && !glState.finishCalled )
+	{
 		qglFinish ();
 		glState.finishCalled = qtrue;
 	}
+
 	if ( r_finish->integer == 0 ) {
 		glState.finishCalled = qtrue;
 	}
@@ -462,23 +482,28 @@ static void RB_BeginDrawingView (void) {
 	GL_State( GLS_DEFAULT );
 
 	// clear relevant buffers
+	#if !defined(AMIGAOS)
 	if ( r_measureOverdraw->integer || r_shadows->integer == 2 || tr_stencilled )
 	{
 		clearBits |= GL_STENCIL_BUFFER_BIT;
 		tr_stencilled = false;
 	}
+	#endif
 
 	if (skyboxportal)
 	{
 		if ( backEnd.refdef.rdflags & RDF_SKYBOXPORTAL )
-		{	// portal scene, clear whatever is necessary
+		{
+			// portal scene, clear whatever is necessary
 			if (r_fastsky->integer || (backEnd.refdef.rdflags & RDF_NOWORLDMODEL) )
-			{	// fastsky: clear color
+			{
+				// fastsky: clear color
 				// try clearing first with the portal sky fog color, then the world fog color, then finally a default
 				clearBits |= GL_COLOR_BUFFER_BIT;
+
 				if (tr.world && tr.world->globalFog != -1)
 				{
-					const fog_t		*fog = &tr.world->fogs[tr.world->globalFog];
+					const fog_t	*fog = &tr.world->fogs[tr.world->globalFog];
 					qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
 				}
 				else
@@ -488,19 +513,21 @@ static void RB_BeginDrawingView (void) {
 			}			
 		}
 	}
+
 	else
 	{
 		if ( r_fastsky->integer && !( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) && !g_bRenderGlowingObjects )
 		{
 			if (tr.world && tr.world->globalFog != -1)
 			{
-				const fog_t		*fog = &tr.world->fogs[tr.world->globalFog];
+				const fog_t	*fog = &tr.world->fogs[tr.world->globalFog];
 				qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
 			}
 			else
 			{
 				qglClearColor( 0.3f, 0.3f, 0.3f, 1 );	// FIXME: get color of sky
 			}
+
 			clearBits |= GL_COLOR_BUFFER_BIT;	// FIXME: only if sky shaders have been used
 		}
 	}
@@ -508,13 +535,15 @@ static void RB_BeginDrawingView (void) {
 	if ( !( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) && ( r_DynamicGlow->integer && !g_bRenderGlowingObjects ) )
 	{
 		if (tr.world && tr.world->globalFog != -1)
-		{ //this is because of a bug in multiple scenes I think, it needs to clear for the second scene but it doesn't normally.
-			const fog_t		*fog = &tr.world->fogs[tr.world->globalFog];
+		{
+			//this is because of a bug in multiple scenes I think, it needs to clear for the second scene but it doesn't normally.
+			const fog_t	*fog = &tr.world->fogs[tr.world->globalFog];
 
 			qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
 			clearBits |= GL_COLOR_BUFFER_BIT;
 		}
 	}
+
 	// If this pass is to just render the glowing objects, don't clear the depth buffer since
 	// we're sharing it with the main scene (since the main scene has already been rendered). -AReis
 	if ( g_bRenderGlowingObjects )
@@ -532,6 +561,7 @@ static void RB_BeginDrawingView (void) {
 		RB_Hyperspace();
 		return;
 	}
+
 	else
 	{
 		backEnd.isHyperspace = qfalse;
@@ -542,6 +572,7 @@ static void RB_BeginDrawingView (void) {
 	// we will only draw a sun if there was sky rendered in this view
 	backEnd.skyRenderedThisView = qfalse;
 
+	#if !defined(AMIGAOS)
 	// clip to the plane of the portal
 	if ( backEnd.viewParms.isPortal ) {
 		float	plane[4];
@@ -563,6 +594,7 @@ static void RB_BeginDrawingView (void) {
 	} else {
 		qglDisable (GL_CLIP_PLANE0);
 	}
+	#endif
 }
 
 #define	MAC_EVENT_PUMP_MSEC		5
@@ -629,10 +661,10 @@ RB_RenderDrawSurfList
 
 typedef struct
 {
-	int			fogNum;
-	int			entNum;
-	int			dlighted;
-	int			depthRange;
+	int		fogNum;
+	int		entNum;
+	int		dlighted;
+	int		depthRange;
 	drawSurf_t	*drawSurf;
 	shader_t	*shader;
 } postRender_t;
@@ -640,22 +672,24 @@ typedef struct
 static postRender_t g_postRenders[MAX_POST_RENDERS];
 static int g_numPostRenders = 0;
 
-void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
+void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs )
+{
 	shader_t		*shader, *oldShader;
-	int				fogNum, oldFogNum;
-	int				entityNum, oldEntityNum;
-	int				dlighted, oldDlighted;
-	int				depthRange, oldDepthRange;
-	int				i;
+	int			fogNum, oldFogNum;
+	int			entityNum, oldEntityNum;
+	int			dlighted, oldDlighted;
+	int			depthRange, oldDepthRange;
+	int			i;
 	drawSurf_t		*drawSurf;
-	unsigned int	oldSort;
+	unsigned int		oldSort;
 	float			originalTime;
-	trRefEntity_t	*curEnt;
-	postRender_t	*pRender;
+	trRefEntity_t		*curEnt;
+	postRender_t		*pRender;
 	bool			didShadowPass = false;
 
 	if (g_bRenderGlowingObjects)
-	{ //only shadow on initial passes
+	{
+		//only shadow on initial passes
 		didShadowPass = true;
 	}
 
@@ -677,12 +711,15 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 	backEnd.pc.c_surfaces += numDrawSurfs;
 
-	for (i = 0, drawSurf = drawSurfs ; i < numDrawSurfs ; i++, drawSurf++) {
-		if ( drawSurf->sort == oldSort ) {
+	for (i = 0, drawSurf = drawSurfs ; i < numDrawSurfs ; i++, drawSurf++)
+	{
+		if ( drawSurf->sort == oldSort )
+		{
 			// fast path, same as previous sort
 			rb_surfaceTable[ *drawSurf->surface ]( drawSurf->surface );
 			continue;
 		}
+
 		R_DecomposeSort( drawSurf->sort, &entityNum, &shader, &fogNum, &dlighted );
 
 		// If we're rendering glowing objects, but this shader has no stages with glow, skip it!
@@ -701,28 +738,31 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 		// change the tess parameters if needed
 		// a "entityMergable" shader is a shader that can have surfaces from seperate
 		// entities merged into a single batch, like smoke and blood puff sprites
-		if (entityNum != REFENTITYNUM_WORLD &&
-			g_numPostRenders < MAX_POST_RENDERS)
+		if (entityNum != REFENTITYNUM_WORLD && g_numPostRenders < MAX_POST_RENDERS)
 		{
 			if ( (backEnd.refdef.entities[entityNum].e.renderfx & RF_DISTORTION)/* ||
 				(backEnd.refdef.entities[entityNum].e.renderfx & RF_FORCE_ENT_ALPHA)*/)
 				//not sure if we need this alpha fix for sp or not, leaving it out for now -rww
-			{ //must render last
+			{
+				//must render last
 				curEnt = &backEnd.refdef.entities[entityNum];
 				pRender = &g_postRenders[g_numPostRenders];
 
 				g_numPostRenders++;
 
 				depthRange = 0;
+
 				//figure this stuff out now and store it
 				if ( curEnt->e.renderfx & RF_NODEPTH )
 				{
 					depthRange = 2;
 				}
+
 				else if ( curEnt->e.renderfx & RF_DEPTHHACK )
 				{
 					depthRange = 1;
 				}
+
 				pRender->depthRange = depthRange;
 
 				//It is not necessary to update the old* values because
@@ -751,10 +791,10 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 			}
 		}
 
-		if (shader != oldShader || fogNum != oldFogNum || dlighted != oldDlighted 
-			|| ( entityNum != oldEntityNum && !shader->entityMergable ) )
+		if (shader != oldShader || fogNum != oldFogNum || dlighted != oldDlighted || ( entityNum != oldEntityNum && !shader->entityMergable ) )
 		{
-			if (oldShader != NULL) {
+			if (oldShader != NULL)
+			{
 				RB_EndSurface();
 
 				if (!didShadowPass && shader && shader->sort > SS_BANNER)
@@ -763,6 +803,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 					didShadowPass = true;
 				}
 			}
+
 			RB_BeginSurface( shader, fogNum );
 			oldShader = shader;
 			oldFogNum = fogNum;
@@ -772,10 +813,12 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 		//
 		// change the modelview matrix if needed
 		//
-		if ( entityNum != oldEntityNum ) {
+		if ( entityNum != oldEntityNum )
+		{
 			depthRange = qfalse;
 
-			if ( entityNum != REFENTITYNUM_WORLD ) {
+			if ( entityNum != REFENTITYNUM_WORLD )
+			{
 				backEnd.currentEntity = &backEnd.refdef.entities[entityNum];
 				backEnd.refdef.floatTime = originalTime - backEnd.currentEntity->e.shaderTime;
 
@@ -783,19 +826,25 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 				R_RotateForEntity( backEnd.currentEntity, &backEnd.viewParms, &backEnd.ori );
 
 				// set up the dynamic lighting if needed
-				if ( backEnd.currentEntity->needDlights ) {
+				if ( backEnd.currentEntity->needDlights )
+				{
 					R_TransformDlights( backEnd.refdef.num_dlights, backEnd.refdef.dlights, &backEnd.ori );
 				}
 
-				if ( backEnd.currentEntity->e.renderfx & RF_NODEPTH ) {
+				if ( backEnd.currentEntity->e.renderfx & RF_NODEPTH )
+				{
 					// No depth at all, very rare but some things for seeing through walls
 					depthRange = 2;
 				}
+
 				else if ( backEnd.currentEntity->e.renderfx & RF_DEPTHHACK ) {
 					// hack the depth range to prevent view model from poking into walls
 					depthRange = qtrue;
 				}
-			} else {
+			}
+
+			else
+			{
 				backEnd.currentEntity = &tr.worldEntity;
 				backEnd.refdef.floatTime = originalTime;
 				backEnd.ori = backEnd.viewParms.world;
@@ -807,8 +856,10 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 			//
 			// change depthrange if needed
 			//
-			if ( oldDepthRange != depthRange ) {
-				switch ( depthRange ) {
+			if ( oldDepthRange != depthRange )
+			{
+				switch ( depthRange )
+				{
 					default:
 					case 0:
 						qglDepthRange (0, 1);	
@@ -838,11 +889,13 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 		RB_EndSurface();
 	}
 
+	#if !defined(AMIGAOS)
 	if (tr_stencilled && tr_distortionPrePost)
 	{ //ok, cap it now
 		RB_CaptureScreenImage();
 		RB_DistortionFill();
 	}
+	#endif
 
 	//render distortion surfs (or anything else that needs to be post-rendered)
 	if (g_numPostRenders > 0)
@@ -872,6 +925,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 			qglLoadMatrixf( backEnd.ori.modelMatrix );
 
 			depthRange = pRender->depthRange;
+
 			switch ( depthRange )
 			{
 				default:
@@ -888,11 +942,14 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 					break;
 			}
 
-			if ((backEnd.currentEntity->e.renderfx & RF_DISTORTION) &&
-				lastPostEnt != pRender->entNum)
-			{ //do the capture now, we only need to do it once per ent
+			if ((backEnd.currentEntity->e.renderfx & RF_DISTORTION) && lastPostEnt != pRender->entNum)
+			{
+				#if !defined(AMIGAOS)
+
+				//do the capture now, we only need to do it once per ent
 				int x, y;
 				int rad = backEnd.currentEntity->e.radius;
+
 				//We are going to just bind this, and then the CopyTexImage is going to
 				//stomp over this texture num in texture memory.
 				GL_Bind( tr.screenImage );
@@ -926,6 +983,8 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 					lastPostEnt = pRender->entNum;
 				}
+
+				#endif
 			}
 
 			rb_surfaceTable[ *pRender->drawSurf->surface ]( pRender->drawSurf->surface );
@@ -935,6 +994,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 
 	// go back to the world modelview matrix
 	qglLoadMatrixf( backEnd.viewParms.world.modelMatrix );
+
 	if ( depthRange ) {
 		qglDepthRange (0, 1);
 	}
@@ -942,10 +1002,13 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs ) {
 #if 0
 	RB_DrawSun();
 #endif
+	#if !defined(AMIGAOS)
 	if (tr_stencilled && !tr_distortionPrePost)
 	{ //draw in the stencil buffer's cutout
 		RB_DistortionFill();
 	}
+	#endif
+
 	if (!didShadowPass)
 	{
 		// darken down any stencil shadows
@@ -972,24 +1035,26 @@ RB_SetGL2D
 
 ================
 */
-void	RB_SetGL2D (void) {
+void RB_SetGL2D (void)
+{
 	backEnd.projection2D = qtrue;
 
 	// set 2D virtual screen size
 	qglViewport( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglMatrixMode(GL_PROJECTION);
-    qglLoadIdentity ();
+    	qglLoadIdentity ();
 	qglOrtho (0, 640, 480, 0, 0, 1);
 	qglMatrixMode(GL_MODELVIEW);
-    qglLoadIdentity ();
+    	qglLoadIdentity ();
 
-	GL_State( GLS_DEPTHTEST_DISABLE |
-			  GLS_SRCBLEND_SRC_ALPHA |
-			  GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
+	GL_State( GLS_DEPTHTEST_DISABLE | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
 
 	qglDisable( GL_CULL_FACE );
+
+	#if !defined(AMIGAOS)
 	qglDisable( GL_CLIP_PLANE0 );
+	#endif
 
 	// set time for 2D shaders
 	backEnd.refdef.time = ri.Milliseconds();
@@ -1003,7 +1068,8 @@ RB_SetColor
 
 =============
 */
-const void	*RB_SetColor( const void *data ) {
+const void *RB_SetColor( const void *data )
+{
 	const setColorCommand_t	*cmd;
 
 	cmd = (const setColorCommand_t *)data;
@@ -1021,7 +1087,8 @@ const void	*RB_SetColor( const void *data ) {
 RB_StretchPic
 =============
 */
-const void *RB_StretchPic ( const void *data ) {
+const void *RB_StretchPic ( const void *data )
+{
 	const stretchPicCommand_t	*cmd;
 	shader_t *shader;
 	int		numVerts, numIndexes;
@@ -1029,10 +1096,13 @@ const void *RB_StretchPic ( const void *data ) {
 	cmd = (const stretchPicCommand_t *)data;
 
 	shader = cmd->shader;
-	if ( shader != tess.shader ) {
+
+	if ( shader != tess.shader )
+	{
 		if ( tess.numIndexes ) {
 			RB_EndSurface();	//this might change culling and other states
 		}
+
 		backEnd.currentEntity = &backEnd.entity2D;
 		RB_BeginSurface( shader, 0 );
 	}
@@ -1108,7 +1178,8 @@ const void *RB_RotatePic ( const void *data )
 	shader = cmd->shader;
 	image = &shader->stages[0].bundle[0].image[0];
 
-	if ( image ) {
+	if ( image )
+	{
 		if ( !backEnd.projection2D ) {
 			RB_SetGL2D();
 		}
@@ -1174,6 +1245,7 @@ const void *RB_RotatePic2 ( const void *data )
 			qglRotatef( cmd->a, 0.0, 0.0, 1.0 );
 			
 			GL_Bind( image );
+
 			qglBegin( GL_QUADS );
 				qglTexCoord2f( cmd->s1, cmd->t1);
 				qglVertex2f( -cmd->w * 0.5f, -cmd->h * 0.5f );
@@ -1191,9 +1263,7 @@ const void *RB_RotatePic2 ( const void *data )
 			qglPopMatrix();
 
 			// Hmmm, this is not too cool
-			GL_State( GLS_DEPTHTEST_DISABLE |
-				  GLS_SRCBLEND_SRC_ALPHA |
-				  GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
+			GL_State( GLS_DEPTHTEST_DISABLE | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
 		}
 	}
 
@@ -1220,6 +1290,7 @@ const void *RB_Scissor ( const void *data )
 	{
 		qglScissor( cmd->x,(glConfig.vidHeight - cmd->y - cmd->h),cmd->w,cmd->h);
 	}
+
 	else
 	{
 		qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight);
@@ -1234,7 +1305,8 @@ RB_DrawSurfs
 
 =============
 */
-const void	*RB_DrawSurfs( const void *data ) {
+const void *RB_DrawSurfs( const void *data )
+{
 	const drawSurfsCommand_t	*cmd;
 
 	// finish any 2D drawing if needed
@@ -1261,6 +1333,8 @@ const void	*RB_DrawSurfs( const void *data ) {
 	// Render dynamic glowing/flaring objects.
 	if ( !(backEnd.refdef.rdflags & RDF_NOWORLDMODEL) && g_bDynamicGlowSupported && r_DynamicGlow->integer )
 	{
+		#if !defined(AMIGAOS) && !defined(MORPHOS)
+
 		// Copy the normal scene to texture.
 		qglDisable( GL_TEXTURE_2D );
 		qglEnable( GL_TEXTURE_RECTANGLE_EXT ); 
@@ -1312,7 +1386,9 @@ const void	*RB_DrawSurfs( const void *data ) {
 		qglClear( GL_COLOR_BUFFER_BIT ); 
 
 		// Draw the glow additively over the screen.
-		RB_DrawGlowOverlay(); 
+		RB_DrawGlowOverlay();
+
+		#endif
 	}
 
 	return (const void *)(cmd + 1);
@@ -1325,30 +1401,36 @@ RB_DrawBuffer
 
 =============
 */
-const void	*RB_DrawBuffer( const void *data ) {
+const void *RB_DrawBuffer( const void *data )
+{
 	const drawBufferCommand_t	*cmd;
 
 	cmd = (const drawBufferCommand_t *)data;
 
+	#if !defined(AMIGAOS)
 	qglDrawBuffer( cmd->buffer );
+	#endif
 
-		// clear screen for debugging
+	// clear screen for debugging
 	if (!( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) && tr.world && tr.refdef.rdflags & RDF_doLAGoggles)
 	{
-		const fog_t		*fog = &tr.world->fogs[tr.world->numfogs];
+		const fog_t	*fog = &tr.world->fogs[tr.world->numfogs];
 
 		qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
 		qglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	}
-	else if (!( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) && tr.world && tr.world->globalFog != -1 && tr.sceneCount)//don't clear during menus, wait for real scene
+
+	else if (!( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) && tr.world && tr.world->globalFog != -1 && tr.sceneCount) //don't clear during menus, wait for real scene
 	{
 		const fog_t		*fog = &tr.world->fogs[tr.world->globalFog];
 
 		qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
 		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 	}
+
 	else if ( r_clear->integer ) 
-	{	// clear screen for debugging
+	{
+		// clear screen for debugging
 		int i = r_clear->integer;
 		if (i == 42) {
 			i = Q_irand(0,8);
@@ -1399,7 +1481,8 @@ was there.  This is used to test for texture thrashing.
 Also called by RE_EndRegistration
 ===============
 */
-void RB_ShowImages( void ) {	
+void RB_ShowImages( void )
+{	
 	image_t	*image;
 	float	x, y, w, h;
 	//int		start, end;
@@ -1414,7 +1497,8 @@ void RB_ShowImages( void ) {
 
 	int i=0;
 //	int iNumImages = 
-	   				 R_Images_StartIteration();
+	   		R_Images_StartIteration();
+
 	while ( (image = R_Images_GetNextIteration()) != NULL)
 	{
 		w = glConfig.vidWidth / 20;
@@ -1456,7 +1540,9 @@ RB_SwapBuffers
 =============
 */
 extern void RB_RenderWorldEffects( void );
-const void	*RB_SwapBuffers( const void *data ) {
+
+const void *RB_SwapBuffers( const void *data )
+{
 	const swapBuffersCommand_t	*cmd;
 
 	// finish any 2D drawing if needed
@@ -1473,7 +1559,10 @@ const void	*RB_SwapBuffers( const void *data ) {
 
 	// we measure overdraw by reading back the stencil buffer and
 	// counting up the number of increments that have happened
-	if ( r_measureOverdraw->integer ) {
+	#if !defined(AMIGAOS)
+
+	if ( r_measureOverdraw->integer )
+	{
 		int i;
 		long sum = 0;
 		unsigned char *stencilReadback;
@@ -1488,12 +1577,13 @@ const void	*RB_SwapBuffers( const void *data ) {
 		backEnd.pc.c_overDraw += sum;
 		Z_Free( stencilReadback );
 	}
+	#endif
 
-    if ( !glState.finishCalled ) {
-        qglFinish();
+    	if ( !glState.finishCalled ) {
+        	qglFinish();
 	}
 
-    GLimp_LogComment( "***************** RB_SwapBuffers *****************\n\n\n" );
+    	//GLimp_LogComment( "***************** RB_SwapBuffers *****************\n\n\n" );
 
 	GLimp_EndFrame();
 
@@ -1502,7 +1592,7 @@ const void	*RB_SwapBuffers( const void *data ) {
 	return (const void *)(cmd + 1);
 }
 
-const void	*RB_WorldEffects( const void *data ) 
+const void *RB_WorldEffects( const void *data ) 
 {
 	const setModeCommand_t	*cmd;
 
@@ -1513,6 +1603,7 @@ const void	*RB_WorldEffects( const void *data )
 	{
 		RB_EndSurface();
 	}
+
 	RB_RenderWorldEffects();
 
 	if(tess.shader)
@@ -1531,13 +1622,16 @@ This function will be called syncronously if running without
 smp extensions, or asyncronously by another thread.
 ====================
 */
-void RB_ExecuteRenderCommands( const void *data ) {
-	int		t1, t2;
+void RB_ExecuteRenderCommands( const void *data )
+{
+	int	t1, t2;
 
 	t1 = ri.Milliseconds ();
 
-	while ( 1 ) {
+	while ( 1 )
+	{
 		switch ( *(const int *)data ) {
+
 		case RC_SET_COLOR:
 			data = RB_SetColor( data );
 			break;
@@ -1575,6 +1669,8 @@ void RB_ExecuteRenderCommands( const void *data ) {
 	}
 
 }
+
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 
 // What Pixel Shader type is currently active (regcoms or fragment programs).
 GLuint g_uiCurrentPixelShaderType = 0x0;
@@ -1614,6 +1710,7 @@ void BeginPixelShader( GLuint uiType, GLuint uiID )
 		return;
 	}
 }
+
 
 // Stop using a Pixel Shader and return states to normal.
 void EndPixelShader()
@@ -1879,3 +1976,5 @@ static inline void RB_DrawGlowOverlay()
 	qglMatrixMode(GL_MODELVIEW);
 	qglPopMatrix();
 }
+
+#endif

@@ -20,17 +20,24 @@ This file is part of Jedi Academy.
 
 #include "cm_local.h"
 
+#undef LittleLong
+#define LittleLong(x) (((uint32_t)(x) << 24 ) | (((uint32_t)(x) & 0xff00) << 8 ) | (((uint32_t)(x) & 0x00ff0000) >> 8 ) | ((uint32_t)(x) >> 24))
+
 #ifdef BSPC
-void SetPlaneSignbits (cplane_t *out) {
+void SetPlaneSignbits (cplane_t *out)
+{
 	int	bits, j;
 
 	// for fast box on planeside test
 	bits = 0;
-	for (j=0 ; j<3 ; j++) {
+
+	for (j=0 ; j<3 ; j++)
+	{
 		if (out->normal[j] < 0) {
 			bits |= 1<<j;
 		}
 	}
+
 	out->signbits = bits;
 }
 #endif //BSPC
@@ -46,8 +53,8 @@ void SetPlaneSignbits (cplane_t *out) {
 
 
 clipMap_t	cmg;
-int			c_pointcontents;
-int			c_traces, c_brush_traces, c_patch_traces;
+int		c_pointcontents;
+int		c_traces, c_brush_traces, c_patch_traces;
 
 
 byte		*cmod_base;
@@ -62,14 +69,14 @@ cmodel_t	box_model;
 cplane_t	*box_planes;
 cbrush_t	*box_brush;
 
-int			CM_OrOfAllContentsFlagsInMap;
+int		CM_OrOfAllContentsFlagsInMap;
 
 
 void	CM_InitBoxHull (void);
 void	CM_FloodAreaConnections (clipMap_t &cm);
 
 clipMap_t	SubBSP[MAX_SUB_BSP];
-int			NumSubBSP = 0, TotalSubModels = 0;
+int		NumSubBSP = 0, TotalSubModels = 0;
 
 /*
 ===============================================================================
@@ -87,22 +94,26 @@ CMod_LoadShaders
 void CMod_LoadShaders( lump_t *l, clipMap_t	&cm ) 
 {
 	dshader_t	*in;
-	int			i, count;
+	int		i, count;
 	CCMShader	*out;
 
 	in = (dshader_t *)(cmod_base + l->fileofs);
+
 	if (l->filelen % sizeof(*in)) {
 		Com_Error (ERR_DROP, "CMod_LoadShaders: funny lump size");
 	}
+
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1) {
 		Com_Error (ERR_DROP, "Map with no shaders");
 	}
+
 	cm.shaders = (CCMShader *)Z_Malloc( (1 + count) * sizeof( *cm.shaders ), TAG_BSP, qtrue );	//+1 for the BOX_SIDES to point at
 	cm.numShaders = count;
 
 	out = cm.shaders;
+
 	for ( i = 0; i < count; i++, in++, out++ ) 
 	{
 		Q_strncpyz(out->shader, in->shader, MAX_QPATH);
@@ -117,15 +128,18 @@ void CMod_LoadShaders( lump_t *l, clipMap_t	&cm )
 CMod_LoadSubmodels
 =================
 */
-void CMod_LoadSubmodels( lump_t *l, clipMap_t	&cm ) {
+void CMod_LoadSubmodels( lump_t *l, clipMap_t &cm )
+{
 	dmodel_t	*in;
 	cmodel_t	*out;
-	int			i, j, count;
-	int			*indexes;
+	int		i, j, count;
+	int		*indexes;
 
 	in = (dmodel_t *)(cmod_base + l->fileofs);
+
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "CMod_LoadSubmodels: funny lump size");
+
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1) {
@@ -183,19 +197,23 @@ CMod_LoadNodes
 
 =================
 */
-void CMod_LoadNodes( lump_t *l, clipMap_t &cm ) {
+void CMod_LoadNodes( lump_t *l, clipMap_t &cm )
+{
 	dnode_t		*in;
-	int			child;
+	int		child;
 	cNode_t		*out;
-	int			i, j, count;
+	int		i, j, count;
 	
 	in = (dnode_t *)(cmod_base + l->fileofs);
+
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1)
 		Com_Error (ERR_DROP, "Map has no nodes");
+
 	cm.nodes = (cNode_t *) Z_Malloc( count * sizeof( *cm.nodes ), TAG_BSP, qfalse);
 	cm.numNodes = count;
 
@@ -204,6 +222,7 @@ void CMod_LoadNodes( lump_t *l, clipMap_t &cm ) {
 	for (i=0 ; i<count ; i++, out++, in++)
 	{
 		out->plane = cm.planes + LittleLong( in->planeNum );
+
 		for (j=0 ; j<2 ; j++)
 		{
 			child = LittleLong (in->children[j]);
@@ -219,7 +238,8 @@ CM_BoundBrush
 
 =================
 */
-void CM_BoundBrush( cbrush_t *b ) {
+void CM_BoundBrush( cbrush_t *b )
+{
 	b->bounds[0][0] = -b->sides[0].plane->dist;
 	b->bounds[1][0] = b->sides[1].plane->dist;
 
@@ -237,15 +257,18 @@ CMod_LoadBrushes
 
 =================
 */
-void CMod_LoadBrushes( lump_t *l, clipMap_t &cm ) {
+void CMod_LoadBrushes( lump_t *l, clipMap_t &cm )
+{
 	dbrush_t	*in;
 	cbrush_t	*out;
-	int			i, count;
+	int		i, count;
 
 	in = (dbrush_t *)(cmod_base + l->fileofs);
+
 	if (l->filelen % sizeof(*in)) {
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
 	}
+
 	count = l->filelen / sizeof(*in);
 
 	cm.brushes = (cbrush_t *) Z_Malloc( ( BOX_BRUSHES + count ) * sizeof( *cm.brushes ), TAG_BSP, qfalse);
@@ -253,14 +276,17 @@ void CMod_LoadBrushes( lump_t *l, clipMap_t &cm ) {
 
 	out = cm.brushes;
 
-	for ( i=0 ; i<count ; i++, out++, in++ ) {
+	for ( i=0 ; i<count ; i++, out++, in++ )
+	{
 		out->sides = cm.brushsides + LittleLong(in->firstSide);
 		out->numsides = LittleLong(in->numSides);
 
 		out->shaderNum = LittleLong( in->shaderNum );
+
 		if ( out->shaderNum < 0 || out->shaderNum >= cm.numShaders ) {
 			Com_Error( ERR_DROP, "CMod_LoadBrushes: bad shaderNum: %i", out->shaderNum );
 		}
+
 		out->contents = cm.shaders[out->shaderNum].contentFlags;
 #ifdef JK2_MODE
 		//JK2 HACK: for water that cuts vis but is not solid!!! (used on yavin swamp)
@@ -284,14 +310,16 @@ CMod_LoadLeafs
 */
 void CMod_LoadLeafs (lump_t *l, clipMap_t &cm)
 {
-	int			i;
+	int		i;
 	cLeaf_t		*out;
 	dleaf_t 	*in;
-	int			count;
+	int		count;
 	
 	in = (dleaf_t *)(cmod_base + l->fileofs);
+
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1)
@@ -312,6 +340,7 @@ void CMod_LoadLeafs (lump_t *l, clipMap_t &cm)
 
 		if (out->cluster >= cm.numClusters)
 			cm.numClusters = out->cluster + 1;
+
 		if (out->area >= cm.numAreas)
 			cm.numAreas = out->area + 1;
 	}
@@ -327,19 +356,22 @@ CMod_LoadPlanes
 */
 void CMod_LoadPlanes (lump_t *l, clipMap_t &cm)
 {
-	int			i, j;
+	int		i, j;
 	cplane_t	*out;
 	dplane_t 	*in;
-	int			count;
-	int			bits;
+	int		count;
+	int		bits;
 	
 	in = (dplane_t *)(cmod_base + l->fileofs);
+
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+
 	count = l->filelen / sizeof(*in);
 
 	if (count < 1)
 		Com_Error (ERR_DROP, "Map with no planes");
+
 	cm.planes = (struct cplane_s *) Z_Malloc( ( BOX_PLANES + count ) * sizeof( *cm.planes ), TAG_BSP, qfalse);
 	cm.numPlanes = count;
 
@@ -348,9 +380,11 @@ void CMod_LoadPlanes (lump_t *l, clipMap_t &cm)
 	for ( i=0 ; i<count ; i++, in++, out++)
 	{
 		bits = 0;
+
 		for (j=0 ; j<3 ; j++)
 		{
 			out->normal[j] = LittleFloat (in->normal[j]);
+
 			if (out->normal[j] < 0)
 				bits |= 1<<j;
 		}
@@ -368,14 +402,16 @@ CMod_LoadLeafBrushes
 */
 void CMod_LoadLeafBrushes (lump_t *l, clipMap_t &cm)
 {
-	int			i;
-	int			*out;
-	int		 	*in;
-	int			count;
+	int	i;
+	int	*out;
+	int	*in;
+	int	count;
 	
 	in = (int *)(cmod_base + l->fileofs);
+
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+
 	count = l->filelen / sizeof(*in);
 
 	cm.leafbrushes = (int *) Z_Malloc( ( BOX_BRUSHES + count ) * sizeof( *cm.leafbrushes ), TAG_BSP, qfalse);
@@ -395,14 +431,16 @@ CMod_LoadLeafSurfaces
 */
 void CMod_LoadLeafSurfaces( lump_t *l, clipMap_t &cm )
 {
-	int			i;
-	int			*out;
-	int		 	*in;
-	int			count;
+	int	i;
+	int	*out;
+	int	*in;
+	int	count;
 	
 	in = (int *)(cmod_base + l->fileofs);
+
 	if (l->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+
 	count = l->filelen / sizeof(*in);
 
 	cm.leafsurfaces = (int *) Z_Malloc( count * sizeof( *cm.leafsurfaces ), TAG_BSP, qfalse);
@@ -422,16 +460,18 @@ CMod_LoadBrushSides
 */
 void CMod_LoadBrushSides (lump_t *l, clipMap_t &cm)
 {
-	int				i;
+	int		i;
 	cbrushside_t	*out;
 	dbrushside_t 	*in;
-	int				count;
-	int				num;
+	int		count;
+	int		num;
 
 	in = (dbrushside_t *)(cmod_base + l->fileofs);
+
 	if ( l->filelen % sizeof(*in) ) {
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
 	}
+
 	count = l->filelen / sizeof(*in);
 
 	cm.brushsides = (cbrushside_t *) Z_Malloc( ( BOX_SIDES + count ) * sizeof( *cm.brushsides ), TAG_BSP, qfalse);
@@ -439,13 +479,16 @@ void CMod_LoadBrushSides (lump_t *l, clipMap_t &cm)
 
 	out = cm.brushsides;	
 
-	for ( i=0 ; i<count ; i++, in++, out++) {
+	for ( i=0 ; i<count ; i++, in++, out++)
+	{
 		num = LittleLong( in->planeNum );
 		out->plane = &cm.planes[num];
 		out->shaderNum = LittleLong( in->shaderNum );
+
 		if ( out->shaderNum < 0 || out->shaderNum >= cm.numShaders ) {
 			Com_Error( ERR_DROP, "CMod_LoadBrushSides: bad shaderNum: %i", out->shaderNum );
 		}
+
 //		out->surfaceFlags = cm.shaders[out->shaderNum].surfaceFlags;
 	}
 }
@@ -456,7 +499,8 @@ void CMod_LoadBrushSides (lump_t *l, clipMap_t &cm)
 CMod_LoadEntityString
 =================
 */
-void CMod_LoadEntityString( lump_t *l, clipMap_t &cm ) {
+void CMod_LoadEntityString( lump_t *l, clipMap_t &cm )
+{
 	cm.entityString = (char *) Z_Malloc( l->filelen, TAG_BSP, qfalse);
 	cm.numEntityChars = l->filelen;
 	memcpy (cm.entityString, cmod_base + l->fileofs, l->filelen);
@@ -468,17 +512,22 @@ CMod_LoadVisibility
 =================
 */
 #define	VIS_HEADER	8
-void CMod_LoadVisibility( lump_t *l, clipMap_t &cm ) {
-	int		len;
+
+void CMod_LoadVisibility( lump_t *l, clipMap_t &cm )
+{
+	int	len;
 	byte	*buf;
 
-    len = l->filelen;
-	if ( !len ) {
+	len = l->filelen;
+
+	if ( !len )
+	{
 		cm.clusterBytes = ( cm.numClusters + 31 ) & ~31;
 		cm.visibility = (unsigned char *) Z_Malloc( cm.clusterBytes, TAG_BSP, qfalse);
 		memset( cm.visibility, 255, cm.clusterBytes );
 		return;
 	}
+
 	buf = cmod_base + l->fileofs;
 
 	cm.vised = qtrue;
@@ -497,33 +546,40 @@ CMod_LoadPatches
 =================
 */
 #define	MAX_PATCH_VERTS		1024
-void CMod_LoadPatches( lump_t *surfs, lump_t *verts, clipMap_t &cm ) {
+
+void CMod_LoadPatches( lump_t *surfs, lump_t *verts, clipMap_t &cm )
+{
 	mapVert_t	*dv, *dv_p;
 	dsurface_t	*in;
-	int			count;
-	int			i, j;
-	int			c;
+	int		count;
+	int		i, j;
+	int		c;
 	cPatch_t	*patch;
 	vec3_t		points[MAX_PATCH_VERTS];
-	int			width, height;
-	int			shaderNum;
+	int		width, height;
+	int		shaderNum;
 
 	in = (dsurface_t *)(cmod_base + surfs->fileofs);
+
 	if (surfs->filelen % sizeof(*in))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
+
 	cm.numSurfaces = count = surfs->filelen / sizeof(*in);
 	cm.surfaces = (cPatch_t **) Z_Malloc( cm.numSurfaces * sizeof( cm.surfaces[0] ), TAG_BSP, qtrue );
 
 	dv = (mapVert_t *)(cmod_base + verts->fileofs);
+
 	if (verts->filelen % sizeof(*dv))
 		Com_Error (ERR_DROP, "MOD_LoadBmodel: funny lump size");
 
 	// scan through all the surfaces, but only load patches,
 	// not planar faces
-	for ( i = 0 ; i < count ; i++, in++ ) {
+	for ( i = 0 ; i < count ; i++, in++ )
+	{
 		if ( LittleLong( in->surfaceType ) != MST_PATCH ) {
 			continue;		// ignore other surfaces
 		}
+
 		// FIXME: check for non-colliding patches
 
 		cm.surfaces[ i ] = patch = (cPatch_t *) Z_Malloc( sizeof( *patch ), TAG_BSP, qtrue );
@@ -532,12 +588,15 @@ void CMod_LoadPatches( lump_t *surfs, lump_t *verts, clipMap_t &cm ) {
 		width = LittleLong( in->patchWidth );
 		height = LittleLong( in->patchHeight );
 		c = width * height;
+
 		if ( c > MAX_PATCH_VERTS ) {
 			Com_Error( ERR_DROP, "ParseMesh: MAX_PATCH_VERTS" );
 		}
 
 		dv_p = dv + LittleLong( in->firstVert );
-		for ( j = 0 ; j < c ; j++, dv_p++ ) {
+
+		for ( j = 0 ; j < c ; j++, dv_p++ )
+		{
 			points[j][0] = LittleFloat( dv_p->xyz[0] );
 			points[j][1] = LittleFloat( dv_p->xyz[1] );
 			points[j][2] = LittleFloat( dv_p->xyz[2] );
@@ -564,7 +623,8 @@ CM_FreeMap
 Free any loaded map and all submodels
 ==================
 */
-void CM_FreeMap(void) {
+void CM_FreeMap(void)
+{
 	memset( &cm, 0, sizeof( cm ) );
 	Hunk_ClearHigh();
 	CM_ClearLevelPatches();
@@ -597,10 +657,11 @@ qboolean CM_DeleteCachedMap(qboolean bGuaranteedOkToDelete)
 		if (gpvCachedMapDiskImage)
 		{
 			Z_Free(	gpvCachedMapDiskImage );
-					gpvCachedMapDiskImage = NULL;
+			gpvCachedMapDiskImage = NULL;
 
 			bActuallyFreedSomething = qtrue;
 		}
+
 		gsCachedMapDiskImage[0] = '\0';
 		
 		// force map loader to ignore cached internal BSP structures for next level CM_LoadMap() call...
@@ -611,11 +672,12 @@ qboolean CM_DeleteCachedMap(qboolean bGuaranteedOkToDelete)
 	return bActuallyFreedSomething;
 }
 
-static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *checksum, clipMap_t &cm ) {
+static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *checksum, clipMap_t &cm )
+{
 	const int		*buf;
 	size_t			i;
 	dheader_t		header;
-	static unsigned	last_checksum;
+	static unsigned		last_checksum;
 	void			*subBSPData = NULL;
 
 	if ( !name || !name[0] ) {
@@ -629,7 +691,8 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 #endif
 	Com_DPrintf( "CM_LoadMap( %s, %i )\n", name, clientload );
 
-	if ( !strcmp( cm.name, name ) && clientload ) {
+	if ( !strcmp( cm.name, name ) && clientload )
+	{
 		*checksum = last_checksum;
 		return;
 	}
@@ -639,15 +702,13 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 		// if there was a cached disk image but the name was empty (ie ERR_DROP happened) or just doesn't match
 		//	the current name, then ditch it...
 		//	
-		if (gpvCachedMapDiskImage && 
-			(gsCachedMapDiskImage[0] == '\0' || strcmp( gsCachedMapDiskImage, name ))
-			)
+		if (gpvCachedMapDiskImage && (gsCachedMapDiskImage[0] == '\0' || strcmp( gsCachedMapDiskImage, name )))
 		{
 			Z_Free(gpvCachedMapDiskImage);
-				   gpvCachedMapDiskImage = NULL;
-		   gsCachedMapDiskImage[0] = '\0';
+			gpvCachedMapDiskImage = NULL;
+		   	gsCachedMapDiskImage[0] = '\0';
 
-		   CM_ClearMap();
+		   	CM_ClearMap();
 		}
 	}
 
@@ -667,6 +728,7 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 		memset(cm.areas,		0, cm.numAreas * sizeof( *cm.areas ));
 		memset(cm.areaPortals,	0, cm.numAreas * cm.numAreas * sizeof( *cm.areaPortals ));		
 	}
+
 	else
 	{
 		// ... else load map from scratch...
@@ -680,7 +742,8 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 			CM_ClearLevelPatches();
 			Z_TagFree(TAG_BSP);
 
-			if ( !name[0] ) {
+			if ( !name[0] )
+			{
 				cm.numLeafs = 1;
 				cm.numClusters = 1;
 				cm.numAreas = 1;
@@ -695,19 +758,23 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 		//
 		fileHandle_t h;
 		const int iBSPLen = FS_FOpenFileRead( name, &h, qfalse );
+
 		if(!h)
 		{
 			Com_Error (ERR_DROP, "Couldn't load %s", name);
 			return;
 		}
+
 		//rww - only do this when not loading a sub-bsp!
 		if (&cm == &cmg)
 		{
 			if (gpvCachedMapDiskImage && gsCachedMapDiskImage[0])
-			{ //didn't get cleared elsewhere so free it before we allocate the pointer again
-			  //Maps with terrain will allow this to happen because they want everything to be cleared out (going between terrain and no-terrain is messy)
+			{
+				//didn't get cleared elsewhere so free it before we allocate the pointer again
+			  	//Maps with terrain will allow this to happen because they want everything to be cleared out (going between terrain and no-terrain is messy)
 				Z_Free(gpvCachedMapDiskImage);
 			}
+
 			gsCachedMapDiskImage[0]	= '\0';		// flag that map isn't valid, until name is filled in
 			gpvCachedMapDiskImage	= Z_Malloc( iBSPLen, TAG_BSP_DISKIMAGE, qfalse);
 			FS_Read(gpvCachedMapDiskImage, iBSPLen, h);
@@ -715,8 +782,10 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 			
 			buf = (int*) gpvCachedMapDiskImage;	// so the rest of the code works as normal
 		}
+
 		else
-		{ //otherwise, read straight in..
+		{
+			//otherwise, read straight in..
 			subBSPData = Z_Malloc( iBSPLen, TAG_BSP_DISKIMAGE, qfalse);
 			FS_Read(subBSPData, iBSPLen, h);
 			FS_FCloseFile( h );
@@ -729,17 +798,18 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 		last_checksum = LittleLong (Com_BlockChecksum (buf, iBSPLen));		
 
 		header = *(dheader_t *)buf;
-		for (i=0 ; i<sizeof(dheader_t)/4 ; i++) {
+
+		for (i=0 ; i<sizeof(dheader_t)/4 ; i++)
+		{
 			((int *)&header)[i] = LittleLong ( ((int *)&header)[i]);
 		}
 
 		if ( header.version != BSP_VERSION )
 		{
 			Z_Free(	gpvCachedMapDiskImage);
-					gpvCachedMapDiskImage = NULL;
+			gpvCachedMapDiskImage = NULL;
 
-			Com_Error (ERR_DROP, "CM_LoadMap: %s has wrong version number (%i should be %i)"
-			, name, header.version, BSP_VERSION );
+			Com_Error (ERR_DROP, "CM_LoadMap: %s has wrong version number (%i should be %i)", name, header.version, BSP_VERSION );
 		}
 
 		cmod_base = (byte *)buf;
@@ -765,12 +835,14 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 		// actually we DON'T now <g>, if we've got enough ram to keep it for the renderer's disk-load...
 		//
 		extern qboolean Sys_LowPhysicalMemory();
+
 		if (Sys_LowPhysicalMemory() //|| com_dedicated->integer	// no need to check for dedicated in single-player codebase
 			)
 		{
 			Z_Free(	gpvCachedMapDiskImage );
-					gpvCachedMapDiskImage = NULL;
+			gpvCachedMapDiskImage = NULL;
 		}
+
 		else
 		{
 			// ... do nothing, and let the renderer free it after it's finished playing with it...
@@ -800,6 +872,7 @@ static void CM_LoadMap_Actual( const char *name, qboolean clientload, int *check
 	if ( !clientload ) {
 		Q_strncpyz( cm.name, name, sizeof( cm.name ) );
 	}
+
 	CM_CleanLeafCache();
 }
 
@@ -813,6 +886,7 @@ void CM_LoadMap( const char *name, qboolean clientload, int *checksum, qboolean 
 		CM_LoadSubBSP(va("maps/%s.bsp", ((const char *)name) + 1), qfalse);
 		//CM_LoadMap_Actual( name, clientload, checksum, cmg );
 	}
+
 	else
 	{
 		gbUsingCachedMapDataRightNow = qtrue;	// !!!!!!!!!!!!!!!!!!
@@ -824,7 +898,7 @@ void CM_LoadMap( const char *name, qboolean clientload, int *checksum, qboolean 
 	/*
 	gbUsingCachedMapDataRightNow = qtrue;	// !!!!!!!!!!!!!!!!!!
 
-		CM_LoadMap_Actual( name, clientload, checksum, cmg );
+	CM_LoadMap_Actual( name, clientload, checksum, cmg );
 
 	gbUsingCachedMapDataRightNow = qfalse;	// !!!!!!!!!!!!!!!!!!
 	*/
@@ -852,7 +926,7 @@ CM_ClearMap
 */
 void CM_ClearMap( void ) 
 {
-	int		i;
+	int	i;
 
 	CM_OrOfAllContentsFlagsInMap = CONTENTS_BODY;
 
@@ -863,6 +937,7 @@ void CM_ClearMap( void )
 	{
 		memset(&SubBSP[i], 0, sizeof(SubBSP[0]));
 	}
+
 	NumSubBSP = 0;
 	TotalSubModels = 0;
 }
@@ -877,15 +952,16 @@ int CM_TotalMapContents()
 CM_ClipHandleToModel
 ==================
 */
-cmodel_t	*CM_ClipHandleToModel( clipHandle_t handle, clipMap_t **clipMap )
+cmodel_t *CM_ClipHandleToModel( clipHandle_t handle, clipMap_t **clipMap )
 {
-	int		i;
-	int		count;
+	int	i;
+	int	count;
 
 	if ( handle < 0 ) 
 	{
 		Com_Error( ERR_DROP, "CM_ClipHandleToModel: bad handle %i", handle );
 	}
+
 	if ( handle < cmg.numSubModels ) 
 	{
 		if (clipMap)
@@ -894,6 +970,7 @@ cmodel_t	*CM_ClipHandleToModel( clipHandle_t handle, clipMap_t **clipMap )
 		}
 		return &cmg.cmodels[handle];
 	}
+
 	if ( handle == BOX_MODEL_HANDLE ) 
 	{
 		if (clipMap)
@@ -904,6 +981,7 @@ cmodel_t	*CM_ClipHandleToModel( clipHandle_t handle, clipMap_t **clipMap )
 	}
 
 	count = cmg.numSubModels;
+
 	for(i = 0; i < NumSubBSP; i++)
 	{
 		if (handle < count + SubBSP[i].numSubModels)
@@ -912,16 +990,18 @@ cmodel_t	*CM_ClipHandleToModel( clipHandle_t handle, clipMap_t **clipMap )
 			{
 				*clipMap = &SubBSP[i];
 			}
+
 			return &SubBSP[i].cmodels[handle - count];
 		}
+
 		count += SubBSP[i].numSubModels;
 	}
 
 	if ( handle < MAX_SUBMODELS ) 
 	{
-		Com_Error( ERR_DROP, "CM_ClipHandleToModel: bad handle %i < %i < %i", 
-			cmg.numSubModels, handle, MAX_SUBMODELS );
+		Com_Error( ERR_DROP, "CM_ClipHandleToModel: bad handle %i < %i < %i", cmg.numSubModels, handle, MAX_SUBMODELS );
 	}
+
 	Com_Error( ERR_DROP, "CM_ClipHandleToModel: bad handle %i", handle + MAX_SUBMODELS );
 
 	return NULL;
@@ -932,18 +1012,23 @@ cmodel_t	*CM_ClipHandleToModel( clipHandle_t handle, clipMap_t **clipMap )
 CM_InlineModel
 ==================
 */
-clipHandle_t	CM_InlineModel( int index ) {
-	if ( index < 0 || index >= TotalSubModels ) {
+clipHandle_t CM_InlineModel( int index )
+{
+	if ( index < 0 || index >= TotalSubModels )
+	{
 		Com_Error( ERR_DROP, "CM_InlineModel: bad number: %d >= %d (may need to re-BSP map?)", index, TotalSubModels );
 	}
+
 	return index;
 }
 
-int		CM_NumInlineModels( void ) {
+int CM_NumInlineModels( void )
+{
 	return cmg.numSubModels;
 }
 
-char	*CM_EntityString( void ) {
+char *CM_EntityString( void )
+{
 	return cmg.entityString;
 }
 
@@ -952,17 +1037,21 @@ char *CM_SubBSPEntityString( int index )
 	return SubBSP[index].entityString;
 }
 
-int		CM_LeafCluster( int leafnum ) {
+int CM_LeafCluster( int leafnum )
+{
 	if (leafnum < 0 || leafnum >= cmg.numLeafs) {
 		Com_Error (ERR_DROP, "CM_LeafCluster: bad number");
 	}
+
 	return cmg.leafs[leafnum].cluster;
 }
 
-int		CM_LeafArea( int leafnum ) {
+int CM_LeafArea( int leafnum )
+{
 	if ( leafnum < 0 || leafnum >= cmg.numLeafs ) {
 		Com_Error (ERR_DROP, "CM_LeafArea: bad number");
 	}
+
 	return cmg.leafs[leafnum].area;
 }
 
@@ -979,8 +1068,8 @@ can just be stored out and get a proper clipping hull structure.
 */
 void CM_InitBoxHull (void)
 {
-	int			i;
-	int			side;
+	int		i;
+	int		side;
 	cplane_t	*p;
 	cbrushside_t	*s;
 
@@ -1002,7 +1091,7 @@ void CM_InitBoxHull (void)
 
 		// brush sides
 		s = &cmg.brushsides[cmg.numBrushSides+i];
-		s->plane = 	cmg.planes + (cmg.numPlanes+i*2+side);
+		s->plane = cmg.planes + (cmg.numPlanes+i*2+side);
 		s->shaderNum = cmg.numShaders;	//not storing flags directly anymore, so be sure to point @ a valid shader 
 
 		// planes
@@ -1072,11 +1161,12 @@ void CM_ModelBounds( clipMap_t &cm, clipHandle_t model, vec3_t mins, vec3_t maxs
 
 int CM_LoadSubBSP(const char *name, qboolean clientload)
 {
-	int		i;
-	int		checksum;
-	int		count;
+	int	i;
+	int	checksum;
+	int	count;
 
 	count = cmg.numSubModels;
+
 	for(i = 0; i < NumSubBSP; i++)
 	{
 		if (!Q_stricmp(name, SubBSP[i].name))
@@ -1101,10 +1191,11 @@ int CM_LoadSubBSP(const char *name, qboolean clientload)
 
 int CM_FindSubBSP(int modelIndex)
 {
-	int		i;
-	int		count;
+	int	i;
+	int	count;
 
 	count = cmg.numSubModels;
+
 	if (modelIndex < count)
 	{	// belongs to the main bsp
 		return -1;
@@ -1113,11 +1204,13 @@ int CM_FindSubBSP(int modelIndex)
 	for(i = 0; i < NumSubBSP; i++)
 	{
 		count += SubBSP[i].numSubModels;
+
 		if (modelIndex < count)
 		{
 			return i;
 		}
 	}
+
 	return -1;
 }
 
@@ -1130,8 +1223,8 @@ void CM_GetWorldBounds ( vec3_t mins, vec3_t maxs )
 int CM_ModelContents_Actual( clipHandle_t model, clipMap_t *cm ) 
 {
 	cmodel_t	*cmod;
-	int			contents = 0;
-	int			i;
+	int		contents = 0;
+	int		i;
 
 	if (!cm)
 	{
@@ -1144,24 +1237,30 @@ int CM_ModelContents_Actual( clipHandle_t model, clipMap_t *cm )
 	if( cmod->leaf.numLeafBrushes )		// check for brush
 	{
 		int brushNum;
+
 		for ( i = cmod->leaf.firstLeafBrush; i < cmod->leaf.firstLeafBrush+cmod->leaf.numLeafBrushes; i++ )
 		{
 			brushNum = cm->leafbrushes[i];
 			contents |= cm->brushes[brushNum].contents;
 		}
 	}
+
 	if( cmod->leaf.numLeafSurfaces )	// if not brush, check for patch
 	{	
 		int surfaceNum;
+
 		for ( i = cmod->leaf.firstLeafSurface; i < cmod->leaf.firstLeafSurface+cmod->leaf.numLeafSurfaces; i++ )
 		{
 			surfaceNum = cm->leafsurfaces[i];
+
 			if ( cm->surfaces[surfaceNum] != NULL )
-			{//HERNH?  How could we have a null surf within our cmod->leaf.numLeafSurfaces?
+			{
+				//HERNH?  How could we have a null surf within our cmod->leaf.numLeafSurfaces?
 				contents |= cm->surfaces[surfaceNum]->contents;
 			}
 		}
 	}
+
 	return contents;
 }
 
@@ -1200,7 +1299,7 @@ Reads the portal state from a savegame file
 and recalculates the area connections
 ===================
 */
-void	CM_ReadPortalState ()
+void CM_ReadPortalState ()
 {
 	SG_Read(INT_ID('P','R','T','S'), (void *)cmg.areaPortals, cmg.numAreas * cmg.numAreas * sizeof( *cmg.areaPortals ));
 	CM_FloodAreaConnections (cmg);

@@ -221,8 +221,10 @@ void RB_ShadowTessEnd( void )
 
 void RB_DoShadowTessEnd( vec3_t lightPos )
 {
-	int		i;
-	int		numTris;
+	#if !defined(AMIGAOS)
+
+	int	i;
+	int	numTris;
 	vec3_t	lightDir;
 
 	// we can only do this if we have enough space in the vertex buffers
@@ -410,6 +412,8 @@ void RB_DoShadowTessEnd( vec3_t lightPos )
 #ifdef _DEBUG_STENCIL_SHADOWS
 	qglPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 #endif
+
+	#endif
 }
 
 
@@ -423,7 +427,10 @@ because otherwise shadows from different body parts would
 overlap and double darken.
 =================
 */
-void RB_ShadowFinish( void ) {
+void RB_ShadowFinish( void )
+{
+	#if !defined(AMIGAOS)
+
 	if ( r_shadows->integer != 2 ) {
 		return;
 	}
@@ -478,6 +485,8 @@ void RB_ShadowFinish( void ) {
 		qglEnable (GL_CLIP_PLANE0);
 	}
 	qglPopMatrix();
+
+	#endif
 }
 
 
@@ -487,7 +496,8 @@ RB_ProjectionShadowDeform
 
 =================
 */
-void RB_ProjectionShadowDeform( void ) {
+void RB_ProjectionShadowDeform( void )
+{
 	float	*xyz;
 	int		i;
 	float	h;
@@ -530,6 +540,8 @@ void RB_ProjectionShadowDeform( void ) {
 //update tr.screenImage
 void RB_CaptureScreenImage(void)
 {
+	#if !defined(AMIGAOS)
+
 	int radX = 2048;
 	int radY = 2048;
 	int x = glConfig.vidWidth/2;
@@ -589,6 +601,8 @@ void RB_CaptureScreenImage(void)
 	}
 
 	qglCopyTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA16, cX, cY, radX, radY, 0);
+
+	#endif
 }
 
 
@@ -597,8 +611,11 @@ float tr_distortionAlpha = 1.0f; //opaque
 float tr_distortionStretch = 0.0f; //no stretch override
 qboolean tr_distortionPrePost = qfalse; //capture before postrender phase?
 qboolean tr_distortionNegate = qfalse; //negative blend mode
+
 void RB_DistortionFill(void)
 {
+	#if !defined(AMIGAOS)
+
 	float alpha = tr_distortionAlpha;
 	float spost = 0.0f;
 	float spost2 = 0.0f;
@@ -726,4 +743,6 @@ void RB_DistortionFill(void)
 	qglPopMatrix();
 
 	qglDisable( GL_STENCIL_TEST );
+
+	#endif
 }

@@ -143,6 +143,28 @@ void S_TransferPaintBuffer(int endtime)
 		}
 		else if (dma.samplebits == 8)
 		{
+			#if defined(AMIGAOS) && defined(MORPHOS) // Cowcat
+
+			// Amiga needs signed 8 bit data
+			char *out = (char *) pbuf;
+
+			while (count-- > 0)
+			{
+				val = *p >> 8;
+				p+= step;
+
+				if (val > 0x7fff)
+					val = 0x7fff;
+
+				else if (val < (short)0x8000)
+					val = (short)0x8000;
+
+				out[out_idx] = (val/256);
+				out_idx = (out_idx + 1) & out_mask;
+			}
+
+			#else
+
 			unsigned char *out = (unsigned char *) pbuf;
 			while (count--)
 			{
@@ -155,6 +177,8 @@ void S_TransferPaintBuffer(int endtime)
 				out[out_idx] = (short)((val>>8) + 128);
 				out_idx = (out_idx + 1) & out_mask;
 			}
+
+			#endif
 		}
 	}
 }

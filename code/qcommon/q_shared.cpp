@@ -233,11 +233,15 @@ int	LongNoSwap (int l)
 	return l;
 }
 
-float FloatSwap (const float *f) {
+#define __LittleLong(x) (((uint32_t)(x) << 24 ) | (((uint32_t)(x) & 0xff00) << 8 ) | (((uint32_t)(x) & 0x00ff0000) >> 8 ) | ((uint32_t)(x) >> 24))
+
+float FloatSwap (const float *f)
+{
 	byteAlias_t out;
 
 	out.f = *f;
-	out.ui = LongSwap(out.ui);
+	//out.ui = LongSwap(out.ui);
+	out.ui = __LittleLong(out.ui); // Cowcat
 
 	return out.f;
 }

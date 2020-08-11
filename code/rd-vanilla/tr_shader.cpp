@@ -64,6 +64,7 @@ const byte stylesDefault[MAXLIGHTMAPS] =
 	LS_NONE
 };
 
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 // Vertex and Pixel Shader definitions.	- AReis
@@ -150,6 +151,8 @@ const unsigned char g_strGlowPShaderARB[] =
 };
 /***********************************************************************************************************/
 
+#endif
+
 // tr_shader.c -- this file deals with the parsing and definition of shaders
 
 static char *s_shaderText;
@@ -157,11 +160,11 @@ static char *s_shaderText;
 // the shader is parsed into these global variables, then copied into
 // dynamically allocated memory if it is valid.
 static	shaderStage_t	stages[MAX_SHADER_STAGES];		
-static	shader_t		shader;
+static	shader_t	shader;
 static	texModInfo_t	texMods[MAX_SHADER_STAGES][TR_MAX_TEXMODS];
 
-#define FILE_HASH_SIZE		1024
-static	shader_t*		sh_hashTable[FILE_HASH_SIZE];
+#define FILE_HASH_SIZE	1024
+static	shader_t*	sh_hashTable[FILE_HASH_SIZE];
 
 static void ClearGlobalShader(void)
 {
@@ -169,10 +172,13 @@ static void ClearGlobalShader(void)
 
 	memset( &shader, 0, sizeof( shader ) );
 	memset( &stages, 0, sizeof( stages ) );
-	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
+
+	for ( i = 0 ; i < MAX_SHADER_STAGES ; i++ )
+	{
 		stages[i].bundle[0].texMods = texMods[i];
 		stages[i].mGLFogColorOverride = GLFOGOVERRIDE_NONE;
 	}
+
 	shader.contentFlags = CONTENTS_SOLID | CONTENTS_OPAQUE;
 }
 
@@ -219,9 +225,10 @@ Will always return a valid shader, but it might be the
 default shader if the real one can't be found.
 ==================
 */
-shader_t *R_FindShaderByName( const char *name ) {
+shader_t *R_FindShaderByName( const char *name )
+{
 	char		strippedName[MAX_QPATH];
-	int			hash;
+	int		hash;
 	shader_t	*sh;
 
 	if ( (name==NULL) || (name[0] == 0) ) {  // bk001205
@@ -235,7 +242,8 @@ shader_t *R_FindShaderByName( const char *name ) {
 	//
 	// see if the shader is already loaded
 	//
-	for (sh=sh_hashTable[hash]; sh; sh=sh->next) {
+	for (sh=sh_hashTable[hash]; sh; sh=sh->next)
+	{
 		// NOTE: if there was no shader or image available with the name strippedName
 		// then a default shader is created with lightmapIndex == LIGHTMAP_NONE, so we
 		// have to check all default shaders otherwise for every call to R_FindShader
@@ -301,12 +309,14 @@ void R_RemapShader(const char *shaderName, const char *newShaderName, const char
 ParseVector
 ===============
 */
-qboolean ParseVector( const char **text, int count, float *v ) {
+qboolean ParseVector( const char **text, int count, float *v )
+{
 	char	*token;
-	int		i;
+	int	i;
 
 	// FIXME: spaces are currently required after parens, should change parseext...
 	token = COM_ParseExt( text, qfalse );
+
 	if ( strcmp( token, "(" ) ) {
 		ri.Printf( PRINT_WARNING, "WARNING: missing parenthesis in shader '%s'\n", shader.name );
 		return qfalse;
@@ -2507,11 +2517,20 @@ static collapse_t	collapse[] = {
 	{ GLS_DSTBLEND_SRC_COLOR | GLS_SRCBLEND_ZERO, GLS_DSTBLEND_SRC_COLOR | GLS_SRCBLEND_ZERO,
 		GL_MODULATE, GLS_DSTBLEND_ZERO | GLS_SRCBLEND_DST_COLOR },
 
-	{ 0, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE,
-		GL_ADD, 0 },
+	#if !defined(AMIGAOS)
 
-	{ GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE,
-		GL_ADD, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE },
+	{ 0, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE, GL_ADD, 0 },
+
+	{ GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE, GL_ADD, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE },
+
+	#else
+
+	{ 0, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE, 0, 0 },
+
+	{ GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE, 0, GLS_DSTBLEND_ONE | GLS_SRCBLEND_ONE },
+
+	#endif
+
 #if 0
 	{ 0, GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA | GLS_SRCBLEND_SRC_ALPHA,
 		GL_DECAL, 0 },
@@ -2567,9 +2586,11 @@ static qboolean CollapseMultitexture( void ) {
 	}
 
 	// GL_ADD is a separate extension
+	#if !defined(AMIGAOS)
 	if ( collapse[i].multitextureEnv == GL_ADD && !glConfig.textureEnvAddAvailable ) {
 		return qfalse;
 	}
+	#endif
 
 	// make sure waveforms have identical parameters
 	if (( stages[0].rgbGen != stages[1].rgbGen ) ||
@@ -2577,10 +2598,12 @@ static qboolean CollapseMultitexture( void ) {
 		return qfalse;
 	}
 
+	#if !defined(AMIGAOS)
 	// an add collapse can only have identity colors
 	if ( collapse[i].multitextureEnv == GL_ADD && stages[0].rgbGen != CGEN_IDENTITY ) {
 		return qfalse;
 	}
+	#endif
 
 	if ( stages[0].rgbGen == CGEN_WAVEFORM )
 	{
@@ -3627,7 +3650,8 @@ Dump information on all valid shaders to the console
 A second parameter will cause it to print in sorted order
 ===============
 */
-void	R_ShaderList_f (void) {
+void R_ShaderList_f (void)
+{
 	int			i;
 	int			count;
 	shader_t	*shader;
@@ -3635,6 +3659,7 @@ void	R_ShaderList_f (void) {
 	ri.Printf (PRINT_ALL, "-----------------------\n");
 
 	count = 0;
+
 	for ( i = 0 ; i < tr.numShaders ; i++ ) {
 		if ( ri.Cmd_Argc() > 1 ) {
 			shader = tr.sortedShaders[i];
@@ -3649,9 +3674,13 @@ void	R_ShaderList_f (void) {
 		} else {
 			ri.Printf (PRINT_ALL, "  ");
 		}
+
+		#if !defined(AMIGAOS)
 		if ( shader->multitextureEnv == GL_ADD ) {
 			ri.Printf( PRINT_ALL, "MT(a) " );
-		} else if ( shader->multitextureEnv == GL_MODULATE ) {
+		} else 
+		#endif
+			if ( shader->multitextureEnv == GL_MODULATE ) {
 			ri.Printf( PRINT_ALL, "MT(m) " );
 		} else if ( shader->multitextureEnv == GL_DECAL ) {
 			ri.Printf( PRINT_ALL, "MT(d) " );
@@ -3736,7 +3765,8 @@ Finds and loads all .shader files, combining them into
 a single large text block that can be scanned for shader names
 =====================
 */
-#define	MAX_SHADER_FILES	1024
+#define	MAX_SHADER_FILES	1024 // future 4096 - Cowcat
+
 static void ScanAndLoadShaderFiles( void )
 {
 	char **shaderFiles;
@@ -3798,7 +3828,8 @@ static void ScanAndLoadShaderFiles( void )
 CreateInternalShaders
 ====================
 */
-static void CreateInternalShaders( void ) {
+static void CreateInternalShaders( void )
+{
 	tr.numShaders = 0;
 	tr.iNumDeniedShaders = 0;
 
@@ -3810,9 +3841,11 @@ static void CreateInternalShaders( void ) {
 
 	memcpy(shader.lightmapIndex, lightmapsNone, sizeof(shader.lightmapIndex));
 	memcpy(shader.styles, stylesDefault, sizeof(shader.styles));
+
 	for ( int i = 0 ; i < MAX_SHADER_STAGES ; i++ ) {
 		stages[i].bundle[0].texMods = texMods[i];
 	}
+
 	stages[0].bundle[0].image = tr.defaultImage;
 	stages[0].active = true;
 	stages[0].stateBits = GLS_DEFAULT;
@@ -3830,9 +3863,10 @@ static void CreateInternalShaders( void ) {
 	tr.distortionShader = FinishShader();
 	shader.defaultShader = true;
 
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
 
-	#define GL_PROGRAM_ERROR_STRING_ARB						0x8874
-	#define GL_PROGRAM_ERROR_POSITION_ARB					0x864B
+	#define GL_PROGRAM_ERROR_STRING_ARB		0x8874
+	#define GL_PROGRAM_ERROR_POSITION_ARB		0x864B
 
 	// Allocate and Load the global 'Glow' Vertex Program. - AReis
 	if ( qglGenProgramsARB )
@@ -3852,6 +3886,7 @@ static void CreateInternalShaders( void ) {
 	// if you always ask for regcoms before fragment shaders, you'll always just use regcoms (problem solved... for now). - AReis
 
 	// Load Pixel Shaders (either regcoms or fragprogs).
+
 	if ( qglCombinerParameteriNV )
 	{
 		// The purpose of this regcom is to blend all the pixels together from the 4 texture units, but with their
@@ -3899,6 +3934,7 @@ static void CreateInternalShaders( void ) {
 			qglFinalCombinerInputNV( GL_VARIABLE_D_NV, GL_SPARE1_NV,	GL_UNSIGNED_IDENTITY_NV, GL_RGB );
 		qglEndList();
 	}
+
 	else if ( qglGenProgramsARB )
 	{
 		qglGenProgramsARB( 1, &tr.glowPShader );
@@ -3910,9 +3946,12 @@ static void CreateInternalShaders( void ) {
 		qglGetIntegerv( GL_PROGRAM_ERROR_POSITION_ARB, &iErrPos );
 		assert( iErrPos == -1 );
 	}
+
+	#endif
 }
 
-static void CreateExternalShaders( void ) {
+static void CreateExternalShaders( void )
+{
 	tr.projectionShadowShader = R_FindShader( "projectionShadow", lightmapsNone, stylesDefault, qtrue );
 	tr.projectionShadowShader->sort = SS_STENCIL_SHADOW;
 	tr.sunShader = R_FindShader( "sun", lightmapsVertex, stylesDefault, qtrue );
@@ -3923,7 +3962,8 @@ static void CreateExternalShaders( void ) {
 R_InitShaders
 ==================
 */
-void R_InitShaders( void ) {
+void R_InitShaders( void )
+{
 	//ri.Printf( PRINT_ALL, "Initializing Shaders\n" );
 
 	memset(sh_hashTable, 0, sizeof(sh_hashTable));
@@ -3935,7 +3975,6 @@ Ghoul2 Insert Start
 /*
 Ghoul2 Insert End
 */
-
 
 	CreateInternalShaders();
 

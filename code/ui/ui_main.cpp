@@ -511,7 +511,11 @@ This is the only way control passes into the module.
 This must be the very first function compiled into the .qvm file
 ================
 */
+#if !defined(AMIGAOS) && !defined(MORPHOS) // needed ? Cowcat
 extern "C" Q_EXPORT intptr_t QDECL vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  )
+#else
+intptr_t QDECL vmMain( int command, int arg0, int arg1, int arg2, int arg3, int arg4, int arg5, int arg6, int arg7, int arg8, int arg9, int arg10, int arg11  )
+#endif
 {
 	return 0;
 }

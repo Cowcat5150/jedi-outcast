@@ -22,6 +22,7 @@ This file is part of Jedi Academy.
 #include "qcommon.h"
 #include "sstring.h"	// to get Gil's string class, because MS's doesn't compile properly in here
 #include "stv_version.h"
+#include "../sys/sys_local.h" // Cowcat new
 
 // Because renderer.
 #include "../rd-common/tr_public.h"
@@ -1129,7 +1130,7 @@ void Com_Init( char *commandLine ) {
 		Cmd_AddCommand ("quit", Com_Quit_f);
 		Cmd_AddCommand ("writeconfig", Com_WriteConfig_f );
 		
-		com_maxfps = Cvar_Get ("com_maxfps", "125", CVAR_ARCHIVE);
+		com_maxfps = Cvar_Get ("com_maxfps", "60", CVAR_ARCHIVE); // was 125 Cowcat
 		
 		com_developer = Cvar_Get ("developer", "0", CVAR_TEMP );
 		com_logfile = Cvar_Get ("logfile", "0", CVAR_TEMP );
@@ -1363,7 +1364,9 @@ void G2Time_ReportTimers(void);
 #ifdef _MSC_VER
 #pragma warning (disable: 4701)	//local may have been used without init (timing info vars)
 #endif
-void Com_Frame( void ) {
+
+void Com_Frame( void )
+{
 	try 
 	{
 		int		timeBeforeFirstEvents = 0, timeBeforeServer = 0, timeBeforeEvents = 0, timeBeforeClient = 0, timeAfter = 0;
@@ -1371,7 +1374,10 @@ void Com_Frame( void ) {
 		static int	lastTime = 0;
 
 		// write config file if anything changed
-		Com_WriteConfiguration(); 
+		
+		#ifndef DELAY_WRITECONFIG // ec-/Quake3e - Cowcat added
+		Com_WriteConfiguration();
+		#endif
 
 		// if "viewlog" has been modified, show or hide the log console
 		if ( com_viewlog->modified ) {
@@ -1392,13 +1398,21 @@ void Com_Frame( void ) {
 		} else {
 			minMsec = 1;
 		}
-		do {
+
+		do
+		{
 			com_frameTime = Com_EventLoop();
+
 			if ( lastTime > com_frameTime ) {
 				lastTime = com_frameTime;		// possible on first frame
 			}
+
 			msec = com_frameTime - lastTime;
+
 		} while ( msec < minMsec );
+
+		//IN_Frame(); // new Cowcat - was in amiga_main()
+
 		Cbuf_Execute ();
 
 		lastTime = com_frameTime;

@@ -768,7 +768,8 @@ and global variables
 =================
 */
 extern int PM_ValidateAnimRange( int startFrame, int endFrame, float animSpeed );
-extern "C" Q_EXPORT game_export_t* QDECL GetGameAPI( game_import_t *import ) {
+//extern "C" Q_EXPORT 
+game_export_t* QDECL GetGameAPI( game_import_t *import ) {
 	gameinfo_import_t	gameinfo_import;
 
 	gi = *import;

@@ -133,6 +133,9 @@ mdxaCompBone_t
 #endif
 ;
 */
+
+#undef _X // Cowcat
+
 #ifdef __cplusplus
 struct mdxaCompQuatBone_t
 #else

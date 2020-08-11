@@ -21,7 +21,7 @@ This file is part of Jedi Academy.
 
 #include "../game/ghoul2_shared.h"
 
-#define	MAX_DLIGHTS		32			// can't be increased, because bit flags are used on surfaces
+#define	MAX_DLIGHTS		32		// can't be increased, because bit flags are used on surfaces
 #define	REFENTITYNUM_BITS	11		// can't be increased without changing drawsurf bit packing
 #define	REFENTITYNUM_MASK	((1<<REFENTITYNUM_BITS) - 1)
 // the last N-bit number (2^REFENTITYNUM_BITS - 1) is reserved for the special world refentity,
@@ -34,11 +34,11 @@ This file is part of Jedi Academy.
 #define	RF_THIRD_PERSON		0x00002	// don't draw through eyes, only mirrors (player bodies, chat sprites)
 #define	RF_FIRST_PERSON		0x00004	// only draw through eyes (view weapon, damage blood blob)
 #define	RF_DEPTHHACK		0x00008	// for view weapon Z crunching
-#define RF_NODEPTH			0x00010	// No depth at all (seeing through walls)
+#define RF_NODEPTH		0x00010	// No depth at all (seeing through walls)
 
 #define RF_VOLUMETRIC		0x00020	// fake volumetric shading
 
-#define	RF_NOSHADOW			0x00040	// don't add stencil shadows
+#define	RF_NOSHADOW		0x00040	// don't add stencil shadows
 
 #define RF_LIGHTING_ORIGIN	0x00080	// use refEntity->lightingOrigin instead of refEntity->origin
 									// for lighting.  This allows entities to sink into the floor
@@ -50,23 +50,23 @@ This file is part of Jedi Academy.
 #define	RF_CAP_FRAMES		0x00400	// cap the model frames by the maxframes for one shot anims
 
 #define RF_ALPHA_FADE		0x00800	// hacks blend mode and uses whatever the set alpha is.
-#define RF_PULSATE			0x01000	// for things like a dropped saber, where we want to add an extra visual clue
-#define RF_RGB_TINT			0x02000	// overrides ent RGB color to the specified color
+#define RF_PULSATE		0x01000	// for things like a dropped saber, where we want to add an extra visual clue
+#define RF_RGB_TINT		0x02000	// overrides ent RGB color to the specified color
 
-#define RF_FORKED			0x04000	// override lightning to have forks
-#define RF_TAPERED			0x08000	// lightning tapers
-#define RF_GROW				0x10000	// lightning grows from start to end during its life
+#define RF_FORKED		0x04000	// override lightning to have forks
+#define RF_TAPERED		0x08000	// lightning tapers
+#define RF_GROW			0x10000	// lightning grows from start to end during its life
 
 #define RF_SETANIMINDEX		0x20000	//use backEnd.currentEntity->e.skinNum for R_BindAnimatedImage
 
 #define RF_DISINTEGRATE1	0x40000	// does a procedural hole-ripping thing.
 #define RF_DISINTEGRATE2	0x80000	// does a procedural hole-ripping thing with scaling at the ripping point
 
-#define RF_G2MINLOD		   0x100000	// force Lowest lod on g2
+#define RF_G2MINLOD		0x100000	// force Lowest lod on g2
 
-#define RF_SHADOW_ONLY	   0x200000 //add surfs for shadowing but don't draw them normally -rww
+#define RF_SHADOW_ONLY	   	0x200000 //add surfs for shadowing but don't draw them normally -rww
 
-#define	RF_DISTORTION	   0x400000	//area distortion effect -rww
+#define	RF_DISTORTION	   	0x400000	//area distortion effect -rww
 
 // refdef flags
 #define RDF_NOWORLDMODEL	1		// used for player configuration screen
@@ -89,12 +89,14 @@ typedef struct {
 	vec3_t		xyz;
 	float		st[2];
 	byte		modulate[4];
+
 } polyVert_t;
 
 typedef struct poly_s {
-	qhandle_t			hShader;
-	int					numVerts;
-	polyVert_t			*verts;
+	qhandle_t	hShader;
+	int		numVerts;
+	polyVert_t	*verts;
+
 } poly_t;
 
 typedef enum 
@@ -113,38 +115,39 @@ typedef enum
 	RT_CLOUDS,
 
 	RT_MAX_REF_ENTITY_TYPE
+
 } refEntityType_t;
 
 typedef struct {
 	refEntityType_t	reType;
-	int			renderfx;
+	int		renderfx;
 
-	qhandle_t	hModel;				// opaque type outside refresh
+	qhandle_t	hModel;			// opaque type outside refresh
 
 	// most recent data
 	vec3_t		lightingOrigin;		// so multi-part models can be lit identically (RF_LIGHTING_ORIGIN)
 	float		shadowPlane;		// projection shadows go here, stencils go slightly lower
 
-	vec3_t		axis[3];			// rotation vectors
+	vec3_t		axis[3];		// rotation vectors
 	qboolean	nonNormalizedAxes;	// axis are not normalized, i.e. they have scale
-	float		origin[3];			// also used as MODEL_BEAM's "from"
-	int			frame;				// also used as MODEL_BEAM's diameter
+	float		origin[3];		// also used as MODEL_BEAM's "from"
+	int		frame;			// also used as MODEL_BEAM's diameter
 
 	// previous data for frame interpolation
 	float		oldorigin[3];		// also used as MODEL_BEAM's "to"
-	int			oldframe;
-	float		backlerp;			// 0.0 = current, 1.0 = old
+	int		oldframe;
+	float		backlerp;		// 0.0 = current, 1.0 = old
 
 	// texturing
-	int			skinNum;			// inline skin index
+	int		skinNum;		// inline skin index
 
-	qhandle_t	customSkin;			// NULL for default skin
+	qhandle_t	customSkin;		// NULL for default skin
 	qhandle_t	customShader;		// use one image for the entire thing
 
 	// misc
 	byte		shaderRGBA[4];		// colors used by colorSrc=vertex shaders
 	float		shaderTexCoord[2];	// texture coordinates used by tcMod=vertex modifiers
-	float		shaderTime;			// subtracted from refdef time to control effect start times
+	float		shaderTime;		// subtracted from refdef time to control effect start times
 
 	// extra sprite information
 	float		radius;
@@ -160,9 +163,9 @@ typedef struct {
 /*
 Ghoul2 Insert Start
 */
-	vec3_t		angles;				// rotation angles - used for Ghoul2
+	vec3_t		angles;			// rotation angles - used for Ghoul2
 
-	vec3_t		modelScale;			// axis scale for models
+	vec3_t		modelScale;		// axis scale for models
 	CGhoul2Info_v	*ghoul2;  		// has to be at the end of the ref-ent in order for it to be created properly
 /*
 Ghoul2 Insert End
@@ -171,26 +174,27 @@ Ghoul2 Insert End
 } refEntity_t;
 
 
-#define	MAX_RENDER_STRINGS			8
+#define	MAX_RENDER_STRINGS		8
 #define	MAX_RENDER_STRING_LENGTH	32
 
 typedef struct {
-	int			x, y, width, height;
+	int		x, y, width, height;
 	float		fov_x, fov_y;
 	vec3_t		vieworg;
 	vec3_t		viewaxis[3];		// transformation matrix
-	int			viewContents;		// world contents at vieworg
+	int		viewContents;		// world contents at vieworg
 
 	// time in milliseconds for shader effects and other time dependent rendering issues
-	int			time;
+	int		time;
 
-	int			rdflags;			// RDF_NOWORLDMODEL, etc
+	int		rdflags;		// RDF_NOWORLDMODEL, etc
 
 	// 1 bits will prevent the associated area from rendering at all
 	byte		areamask[MAX_MAP_AREA_BYTES];
 
 	// text messages for deform text shaders
 //	char		text[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
+
 } refdef_t;
 
 
@@ -198,6 +202,7 @@ typedef enum {
 	STEREO_CENTER,
 	STEREO_LEFT,
 	STEREO_RIGHT
+
 } stereoFrame_t;
 
 
@@ -212,34 +217,36 @@ typedef enum {
 	TC_NONE,
 	TC_S3TC,
 	TC_S3TC_DXT
+
 } textureCompression_t;
 
 typedef struct {
-	const char				*renderer_string;
-	const char				*vendor_string;
-	const char				*version_string;
-	const char				*extensions_string;
-	int						maxTextureSize;			// queried from GL
-	int						maxActiveTextures;		// multitexture ability
-	float					maxTextureFilterAnisotropy;
+	const char		*renderer_string;
+	const char		*vendor_string;
+	const char		*version_string;
+	const char		*extensions_string;
+	int			maxTextureSize;			// queried from GL
+	int			maxActiveTextures;		// multitexture ability
+	float			maxTextureFilterAnisotropy;
 
-	int						colorBits, depthBits, stencilBits;
+	int			colorBits, depthBits, stencilBits;
 
-	qboolean				deviceSupportsGamma;
+	qboolean		deviceSupportsGamma;
 	textureCompression_t	textureCompression;
-	qboolean				textureEnvAddAvailable;
-	qboolean				textureFilterAnisotropicAvailable;
-	qboolean				clampToEdgeAvailable;
+	qboolean		textureEnvAddAvailable;
+	qboolean		textureFilterAnisotropicAvailable;
+	qboolean		clampToEdgeAvailable;
 
-	int						vidWidth, vidHeight;
+	int			vidWidth, vidHeight;
 
-	int						displayFrequency;
+	int			displayFrequency;
 
 	// synonymous with "does rendering consume the entire screen?", therefore
 	// a Voodoo or Voodoo2 will have this set to TRUE, as will a Win32 ICD that
 	// used CDS.
-	qboolean				isFullscreen;
-	qboolean				stereoEnabled;
+	qboolean		isFullscreen;
+	qboolean		stereoEnabled;
+
 } glconfig_t;
 
 #endif	// __TR_TYPES_H

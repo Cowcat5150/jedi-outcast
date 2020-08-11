@@ -46,8 +46,8 @@ Suite 120, Rockville, Maryland 20850 USA.
 #		define Sys_LibraryError() dlerror()
 #	endif
 #else
-#	include <SDL.h>
-#	include <SDL_loadso.h>
+#	//include <SDL.h> // Cowcat
+#	//include <SDL_loadso.h>
 #	define Sys_LoadLibrary(f) SDL_LoadObject(f)
 #	define Sys_UnloadLibrary(h) SDL_UnloadObject(h)
 #	define Sys_LoadFunction(h,fn) SDL_LoadFunction(h,fn)

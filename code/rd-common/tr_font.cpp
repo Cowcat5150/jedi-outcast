@@ -25,7 +25,13 @@ This file is part of Jedi Academy.
 #include <string>
 #endif
 #include "../qcommon/sstring.h"	// stl string class won't compile in here (MS shite), so use Gil's.
+
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 #include "tr_local.h"
+#else
+#include "../rd-vanilla/tr_local.h"
+#endif
+
 #include "tr_font.h"
 
 #include "../qcommon/stringed_ingame.h"

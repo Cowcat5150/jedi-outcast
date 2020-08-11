@@ -77,7 +77,7 @@ This file is part of Jedi Knight 2.
 #define	VALIDATEB( a )	if ( a == NULL ) {	assert(0);	return qfalse;	}
 #define VALIDATEP( a )	if ( a == NULL ) {	assert(0);	return NULL;	}
 
-#define VALIDSTRING( a )	( ( a != NULL ) && ( a[0] != '\0' ) )
+#define VALIDSTRING( a )	( ( a != NULL ) && ( a[0] != NULL ) )
 
 //Interest points
 

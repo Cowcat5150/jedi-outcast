@@ -29,7 +29,12 @@ This file is part of Jedi Academy.
 	#include "tr_local.h"
 #endif
 
+#if !defined(AMIGAOS) && !defined(MORPHOS) 
 #include "qcommon/matcomp.h"
+#else
+#include "../qcommon/matcomp.h"
+#endif
+
 #if !defined(_QCOMMON_H_)
 	#include "../qcommon/qcommon.h"
 #endif
@@ -3468,21 +3473,22 @@ Bone  52:   "face_always_":
 
 */
 
-qboolean R_LoadMDXM( model_t *mod, void *buffer, const char *mod_name, qboolean &bAlreadyCached ) {
-	int					i, l, j;
+qboolean R_LoadMDXM( model_t *mod, void *buffer, const char *mod_name, qboolean &bAlreadyCached )
+{
+	int			i, l, j;
 	mdxmHeader_t		*pinmodel, *mdxm;
-	mdxmLOD_t			*lod;
+	mdxmLOD_t		*lod;
 	mdxmSurface_t		*surf;
-	int					version;
-	int					size;
-	shader_t			*sh;
+	int			version;
+	int			size;
+	shader_t		*sh;
 	mdxmSurfHierarchy_t	*surfInfo;
 
 #ifdef Q3_BIG_ENDIAN
-	int					k;
+	int			k;
 	mdxmTriangle_t		*tri;
 	mdxmVertex_t		*v;
-	int					*boneRef;
+	int			*boneRef;
 	mdxmLODSurfOffset_t	*indexes;
 	mdxmVertexTexCoord_t	*pTexCoords;
 	mdxmHierarchyOffsets_t	*surfIndexes;
@@ -3510,12 +3516,12 @@ qboolean R_LoadMDXM( model_t *mod, void *buffer, const char *mod_name, qboolean 
 		return qfalse;
 	}
 
-	mod->type	   = MOD_MDXM;
-	mod->dataSize += size;	
+	mod->type	= MOD_MDXM;
+	mod->dataSize	+= size;	
 	
 	qboolean bAlreadyFound = qfalse;
 	mdxm = mod->mdxm = (mdxmHeader_t*) //Hunk_Alloc( size );
-										RE_RegisterModels_Malloc(size, buffer, mod_name, &bAlreadyFound, TAG_MODEL_GLM);
+	RE_RegisterModels_Malloc(size, buffer, mod_name, &bAlreadyFound, TAG_MODEL_GLM);
 
 	assert(bAlreadyCached == bAlreadyFound);
 
@@ -3608,6 +3614,7 @@ qboolean R_LoadMDXM( model_t *mod, void *buffer, const char *mod_name, qboolean 
 #endif
  	for ( i = 0 ; i < mdxm->numSurfaces ; i++) 
 	{
+		LL(surfInfo->flags); // swap surface flag big endian - last BSzili fix - Cowcat new
 		LL(surfInfo->numChildren);
 		LL(surfInfo->parentIndex);
 

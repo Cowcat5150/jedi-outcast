@@ -28,14 +28,21 @@ This file is part of Jedi Academy.
 #include "glext.h"
 #else
 #include "qgl.h"
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 #include "../sdl/sdl_qgl.h"
 #endif
+#endif
 
-#define GL_INDEX_TYPE		GL_UNSIGNED_INT
-typedef unsigned int glIndex_t;
+//#define GL_INDEX_TYPE		GL_UNSIGNED_INT
+//typedef unsigned int glIndex_t;
 
-extern refimport_t ri;
+// Cowcat
+#define GL_INDEX_TYPE		GL_UNSIGNED_SHORT
+typedef unsigned short glIndex_t;
 
+#if !defined(AMIGAOS) && !defined(MORPHOS)
+extern refimport_t ri; // Cowcat
+#endif
 
 // 13 bits
 // can't be increased without changing bit packing for drawsurfs
@@ -46,10 +53,10 @@ extern refimport_t ri;
 
 typedef struct dlight_s {
 	vec3_t	origin;
-	vec3_t	color;				// range from 0.0 to 1.0, should be color normalized
+	vec3_t	color;			// range from 0.0 to 1.0, should be color normalized
 	float	radius;
-
 	vec3_t	transformed;		// origin in local coordinate system
+
 } dlight_t;
 
 
@@ -60,13 +67,14 @@ typedef struct {
 
 	float		axisLength;		// compensate for non-normalized axis
 
-	qboolean	needDlights;	// true for bmodels that touch a dlight
+	qboolean	needDlights;		// true for bmodels that touch a dlight
 	qboolean	lightingCalculated;
 	vec3_t		lightDir;		// normalized direction towards light
-	vec3_t		ambientLight;	// color normalized to 0-255
-	int			ambientLightInt;	// 32 bit rgba packed
+	vec3_t		ambientLight;		// color normalized to 0-255
+	int		ambientLightInt;	// 32 bit rgba packed
 	vec3_t		directedLight;
-	int			dlightBits;
+	int		dlightBits;
+
 } trRefEntity_t;
 
 
@@ -74,28 +82,28 @@ typedef struct {
 // as well as the locally generated scene information
 typedef struct {
 	int			x, y, width, height;
-	float		fov_x, fov_y;
-	vec3_t		vieworg;
-	vec3_t		viewaxis[3];		// transformation matrix
+	float			fov_x, fov_y;
+	vec3_t			vieworg;
+	vec3_t			viewaxis[3];		// transformation matrix
 
-	int			time;				// time in milliseconds for shader effects and other time dependent rendering issues
+	int			time;			// time in milliseconds for shader effects and other time dependent rendering issues
 	int			frametime;
-	int			rdflags;			// RDF_NOWORLDMODEL, etc
+	int			rdflags;		// RDF_NOWORLDMODEL, etc
 
 	// 1 bits will prevent the associated area from rendering at all
-	byte		areamask[MAX_MAP_AREA_BYTES];
-	qboolean	areamaskModified;	// qtrue if areamask changed since last scene
+	byte			areamask[MAX_MAP_AREA_BYTES];
+	qboolean		areamaskModified;	// qtrue if areamask changed since last scene
 
-	float		floatTime;			// tr.refdef.time / 1000.0
+	float			floatTime;		// tr.refdef.time / 1000.0
 	
 	// text messages for deform text shaders
-//	char		text[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
+//	char			text[MAX_RENDER_STRINGS][MAX_RENDER_STRING_LENGTH];
 
 	int			num_entities;
-	trRefEntity_t	*entities;
+	trRefEntity_t		*entities;
 
 	int			num_dlights;
-	struct dlight_s	*dlights;
+	struct dlight_s		*dlights;
 
 	int			numPolys;
 	struct srfPoly_s	*polys;
@@ -103,7 +111,7 @@ typedef struct {
 	int			numDrawSurfs;
 	struct drawSurf_s	*drawSurfs;
 
-	qboolean	doLAGoggles;
+	qboolean		doLAGoggles;
 
 	int			fogIndex;	//what fog brush the vieworg is in
 
@@ -114,22 +122,24 @@ typedef struct {
 	vec3_t		axis[3];		// orientation in world
 	vec3_t		viewOrigin;		// viewParms->or.origin in local coordinates
 	float		modelMatrix[16];
+
 } orientationr_t;
 
 typedef struct image_s {
-	char		imgName[MAX_QPATH];		// game path, including extension
-	int			frameUsed;			// for texture usage in frame statistics
-	word		width, height;				// source image
-//	int			imgfileSize;
+	char		imgName[MAX_QPATH];	// game path, including extension
+	int		frameUsed;		// for texture usage in frame statistics
+	word		width, height;		// source image
+//	int		imgfileSize;
 
-	GLuint		texnum;					// gl texture binding
-	int			internalFormat;
-	int			wrapClampMode;		// GL_CLAMP or GL_REPEAT
+	GLuint		texnum;			// gl texture binding
+	int		internalFormat;
+	int		wrapClampMode;		// GL_CLAMP or GL_REPEAT
 
 	bool		mipmap;
 
 	bool		allowPicmip;
 	short		iLastLevelUsedOn;
+
 } image_t;
 
 
@@ -137,27 +147,27 @@ typedef struct image_s {
 
 typedef enum {
 	SS_BAD,
-	SS_PORTAL,			// mirrors, portals, viewscreens
+	SS_PORTAL,		// mirrors, portals, viewscreens
 	SS_ENVIRONMENT,		// sky box
-	SS_OPAQUE,			// opaque
+	SS_OPAQUE,		// opaque
 
-	SS_DECAL,			// scorch marks, etc.
+	SS_DECAL,		// scorch marks, etc.
 	SS_SEE_THROUGH,		// ladders, grates, grills that may have small blended edges
-						// in addition to alpha test
+				// in addition to alpha test
 	SS_BANNER,
 
-	SS_INSIDE,			// inside body parts (i.e. heart)
+	SS_INSIDE,		// inside body parts (i.e. heart)
 	SS_MID_INSIDE,
 	SS_MIDDLE,
 	SS_MID_OUTSIDE,
-	SS_OUTSIDE,			// outside body parts (i.e. ribs)
+	SS_OUTSIDE,		// outside body parts (i.e. ribs)
 	
 	SS_FOG,
 	
 	SS_UNDERWATER,		// for items that should be drawn in front of the water plane
 
-	SS_BLEND0,			// regular transparency and filters
-	SS_BLEND1,			// generally only used for additive type effects
+	SS_BLEND0,		// regular transparency and filters
+	SS_BLEND1,		// generally only used for additive type effects
 	SS_BLEND2,
 	SS_BLEND3,
 
@@ -165,7 +175,8 @@ typedef enum {
 	SS_STENCIL_SHADOW,
 	SS_ALMOST_NEAREST,	// gun smoke puffs
 
-	SS_NEAREST			// blood blobs
+	SS_NEAREST		// blood blobs
+
 } shaderSort_t;
 
 
@@ -203,6 +214,7 @@ typedef enum {
 	DEFORM_TEXT5,
 	DEFORM_TEXT6,
 	DEFORM_TEXT7
+
 } deform_t;
 
 typedef enum {
@@ -219,24 +231,26 @@ typedef enum {
 	AGEN_CONST,
 	AGEN_DOT,
 	AGEN_ONE_MINUS_DOT
+
 } alphaGen_t;
 
 typedef enum {
 	CGEN_BAD,
-	CGEN_IDENTITY_LIGHTING,	// tr.identityLight
+	CGEN_IDENTITY_LIGHTING,		// tr.identityLight
 	CGEN_IDENTITY,			// always (1,1,1,1)
 	CGEN_SKIP,
 	CGEN_ENTITY,			// grabbed from entity's modulate field
-	CGEN_ONE_MINUS_ENTITY,	// grabbed from 1 - entity.modulate
+	CGEN_ONE_MINUS_ENTITY,		// grabbed from 1 - entity.modulate
 	CGEN_EXACT_VERTEX,		// tess.vertexColors
 	CGEN_VERTEX,			// tess.vertexColors * tr.identityLight
 	CGEN_ONE_MINUS_VERTEX,
 	CGEN_WAVEFORM,			// programmatically generated
 	CGEN_LIGHTING_DIFFUSE,
-	CGEN_LIGHTING_DIFFUSE_ENTITY, //diffuse lighting * entity
-	CGEN_FOG,				// standard fog
-	CGEN_CONST,				// fixed color
+	CGEN_LIGHTING_DIFFUSE_ENTITY, 	//diffuse lighting * entity
+	CGEN_FOG,			// standard fog
+	CGEN_CONST,			// fixed color
 	CGEN_LIGHTMAPSTYLE,
+
 } colorGen_t;
 
 typedef enum {
@@ -250,6 +264,7 @@ typedef enum {
 	TCGEN_ENVIRONMENT_MAPPED,
 	TCGEN_FOG,
 	TCGEN_VECTOR			// S and T from world coordinates
+
 } texCoordGen_t;
 
 typedef enum {
@@ -257,6 +272,7 @@ typedef enum {
 	ACFF_MODULATE_RGB,
 	ACFF_MODULATE_RGBA,
 	ACFF_MODULATE_ALPHA
+
 } acff_t;
 
 typedef enum {
@@ -265,15 +281,17 @@ typedef enum {
 	GLFOGOVERRIDE_WHITE,
 
 	GLFOGOVERRIDE_MAX
+
 } EGLFogOverride;
 
 typedef struct {
 	genFunc_t	func;
 
-	float base;
-	float amplitude;
-	float phase;
-	float frequency;
+	float		base;
+	float		amplitude;
+	float		phase;
+	float		frequency;
+
 } waveForm_t;
 
 #define TR_MAX_TEXMODS 4
@@ -287,11 +305,13 @@ typedef enum {
 	TMOD_STRETCH,
 	TMOD_ROTATE,
 	TMOD_ENTITY_TRANSLATE
+
 } texMod_t;
 
 #define	MAX_SHADER_DEFORMS	3
+
 typedef struct {
-	deform_t	deformation;			// vertex coordinate modification type
+	deform_t	deformation;		// vertex coordinate modification type
 
 	vec3_t		moveVector;
 	waveForm_t	deformationWave;
@@ -300,6 +320,7 @@ typedef struct {
 	float		bulgeWidth;
 	float		bulgeHeight;
 	float		bulgeSpeed;
+
 } deformStage_t;
 
 
@@ -314,12 +335,12 @@ typedef struct {
 	float			translate[2];		// t' = s * m[0][1] + t * m[0][1] + trans[1]
 
 	// used for TMOD_SCALE
-//	float			scale[2];			// s *= scale[0]
-	                                    // t *= scale[1]
+//	float			scale[2];		// s *= scale[0]
+	                                    		// t *= scale[1]
 
 	// used for TMOD_SCROLL
-//	float			scroll[2];			// s' = s + scroll[0] * time
-										// t' = t + scroll[1] * time
+//	float			scroll[2];		// s' = s + scroll[0] * time
+							// t' = t + scroll[1] * time
 
 	// used for TMOD_ROTATE
 	// + = clockwise
@@ -333,8 +354,8 @@ typedef struct {
 #define SURFSPRITE_VERTICAL		1
 #define SURFSPRITE_ORIENTED		2
 #define SURFSPRITE_EFFECT		3
-#define SURFSPRITE_WEATHERFX	4
-#define SURFSPRITE_FLATTENED	5
+#define SURFSPRITE_WEATHERFX		4
+#define SURFSPRITE_FLATTENED		5
 
 #define SURFSPRITE_FACING_NORMAL	0
 #define SURFSPRITE_FACING_UP		1
@@ -343,20 +364,21 @@ typedef struct {
 
 typedef struct surfaceSprite_s
 {
-	int				surfaceSpriteType;
+	int			surfaceSpriteType;
 	float			width, height, density, wind, windIdle, fadeDist, fadeMax, fadeScale;
 	float			fxAlphaStart, fxAlphaEnd, fxDuration, vertSkew;
 	vec2_t			variance, fxGrow;
-	int				facing;		// Hangdown on vertical sprites, faceup on others.
+	int			facing;		// Hangdown on vertical sprites, faceup on others.
+
 } surfaceSprite_t;
 
 typedef struct {
 	image_t			*image;
 
-	texCoordGen_t	tcGen;
+	texCoordGen_t		tcGen;
 	vec3_t			*tcGenVectors;
 
-	texModInfo_t	*texMods;
+	texModInfo_t		*texMods;
 	short			numTexMods;
 	short			numImageAnimations;
 	float			imageAnimationSpeed;
@@ -366,7 +388,8 @@ typedef struct {
 	bool			vertexLightmap;
 	bool			isVideoMap;
 
-	int				videoMapHandle;
+	int			videoMapHandle;
+
 } textureBundle_t;
 
 #define NUM_TEXTURE_BUNDLES 2
@@ -374,7 +397,7 @@ typedef struct {
 typedef struct {
 	bool			active;
 	bool			isDetail;
-	byte			index;						// index of stage
+	byte			index;				// index of stage
 	byte			lightmapStyle;
 	
 	textureBundle_t	bundle[NUM_TEXTURE_BUNDLES];
@@ -385,9 +408,9 @@ typedef struct {
 	waveForm_t		alphaWave;
 	alphaGen_t		alphaGen;
 
-	byte			constantColor[4];			// for CGEN_CONST and AGEN_CONST
+	byte			constantColor[4];		// for CGEN_CONST and AGEN_CONST
 
-	uint32_t		stateBits;					// GLS_xxxx mask
+	uint32_t		stateBits;			// GLS_xxxx mask
 
 	acff_t			adjustColorsForFog;
 
@@ -397,11 +420,12 @@ typedef struct {
 
 	// Whether this object emits a glow or not.
 	bool			glow;
+
 } shaderStage_t;
 
 struct shaderCommands_s;
 
-#define LIGHTMAP_2D			-4		// shader is for 2D rendering
+#define LIGHTMAP_2D		-4		// shader is for 2D rendering
 #define LIGHTMAP_BY_VERTEX	-3		// pre-lit triangle models
 #define LIGHTMAP_WHITEIMAGE	-2
 #define	LIGHTMAP_NONE		-1
@@ -410,38 +434,41 @@ typedef enum {
 	CT_FRONT_SIDED,
 	CT_BACK_SIDED,
 	CT_TWO_SIDED
+
 } cullType_t;
 
 typedef enum {
 	FP_NONE,		// surface is translucent and will just be adjusted properly
 	FP_EQUAL,		// surface is opaque but possibly alpha tested
 	FP_LE			// surface is trnaslucent, but still needs a fog pass (fog surface)
+
 } fogPass_t;
 
 typedef struct {
 	float		cloudHeight;
 //	image_t		*outerbox[6], *innerbox[6];
 	image_t		*outerbox[6];
+
 } skyParms_t;
 
 typedef struct {
-	vec3_t	color;
-	float	depthForOpaque;
+	vec3_t		color;
+	float		depthForOpaque;
 } fogParms_t;
 
 
 typedef struct shader_s {
 	char		name[MAX_QPATH];		// game path, including extension
-	int			lightmapIndex[MAXLIGHTMAPS];	// for a shader to match, both name and lightmapIndex must match
+	int		lightmapIndex[MAXLIGHTMAPS];	// for a shader to match, both name and lightmapIndex must match
 	byte		styles[MAXLIGHTMAPS];
 
-	int			index;					// this shader == tr.shaders[index]
-	int			sortedIndex;			// this shader == tr.sortedShaders[sortedIndex]
+	int		index;				// this shader == tr.shaders[index]
+	int		sortedIndex;			// this shader == tr.sortedShaders[sortedIndex]
 
-	float		sort;					// lower numbered shaders draw before higher numbered
+	float		sort;				// lower numbered shaders draw before higher numbered
 
-	int			surfaceFlags;			// if explicitlyDefined, this will have SURF_* flags
-	int			contentFlags;
+	int		surfaceFlags;			// if explicitlyDefined, this will have SURF_* flags
+	int		contentFlags;
 
 	bool		defaultShader;			// we want to return index 0 if the shader failed to
 										// load for some reason, but R_FindShader should
@@ -456,15 +483,15 @@ typedef struct shader_s {
 
 	float		portalRange;			// distance to fog out at
 
-	int			multitextureEnv;		// 0, GL_MODULATE, GL_ADD (FIXME: put in stage)
+	int		multitextureEnv;		// 0, GL_MODULATE, GL_ADD (FIXME: put in stage)
 
-	cullType_t	cullType;				// CT_FRONT_SIDED, CT_BACK_SIDED, or CT_TWO_SIDED
+	cullType_t	cullType;			// CT_FRONT_SIDED, CT_BACK_SIDED, or CT_TWO_SIDED
 	bool		polygonOffset;			// set for decals and other items that must be offset 
-	bool		noMipMaps;				// for console fonts, 2D elements, etc.
-	bool		noPicMip;				// for images that must always be full resolution
-	bool		noTC;					// for images that don't want to be texture compressed (namely skies)
+	bool		noMipMaps;			// for console fonts, 2D elements, etc.
+	bool		noPicMip;			// for images that must always be full resolution
+	bool		noTC;				// for images that don't want to be texture compressed (namely skies)
 
-	fogPass_t	fogPass;				// draw a blended pass, possibly with depth test equals
+	fogPass_t	fogPass;			// draw a blended pass, possibly with depth test equals
 
 	deformStage_t	*deforms[MAX_SHADER_DEFORMS];
 	short		numDeforms;
@@ -472,13 +499,14 @@ typedef struct shader_s {
 	short		numUnfoggedPasses;
 	shaderStage_t	*stages;		
 
-	float			timeOffset;                                 // current time offset for this shader
+	float		timeOffset;			// current time offset for this shader
 
 	// True if this shader has a stage with glow in it (just an optimization).
 	bool hasGlow;
 
 //	struct shader_s		*remappedShader;                  // current shader this one is remapped too
 	struct	shader_s	*next;
+
 } shader_t;
 
 
@@ -490,15 +518,17 @@ Ghoul2 Insert Start
 typedef struct
 {
 	byte	*loc;
-	int		width;
-	int		height;
+	int	width;
+	int	height;
 	char	name[MAX_QPATH];
+
 } hitMatReg_t;
 
 #define MAX_HITMAT_ENTRIES 1000
 
-extern hitMatReg_t		hitMatReg[MAX_HITMAT_ENTRIES];
+extern hitMatReg_t	hitMatReg[MAX_HITMAT_ENTRIES];
 */
+
 /*
 Ghoul2 Insert End
 */
@@ -509,17 +539,19 @@ Ghoul2 Insert End
 typedef struct {
 	char		name[MAX_QPATH];
 	shader_t	*shader;
+
 } skinSurface_t;
 
 typedef struct skin_s {
 	char		name[MAX_QPATH];		// game path, including extension
-	int			numSurfaces;
+	int		numSurfaces;
 	skinSurface_t	*surfaces[128];
+
 } skin_t;
 
 
 typedef struct {
-	int			originalBrushNumber;
+	int		originalBrushNumber;
 	vec3_t		bounds[2];
 
 	unsigned	colorInt;				// in packed byte format
@@ -529,6 +561,7 @@ typedef struct {
 	// for clipping distance in fog when outside
 	qboolean	hasSurface;
 	float		surface[4];
+
 } fog_t;
 
 typedef struct {
@@ -546,6 +579,7 @@ typedef struct {
 	cplane_t	frustum[5];
 	vec3_t		visBounds[2];
 	float		zFar;
+
 } viewParms_t;
 
 

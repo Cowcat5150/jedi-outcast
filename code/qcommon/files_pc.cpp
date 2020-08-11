@@ -340,16 +340,17 @@ Used for streaming data out of either a
 separate file or a ZIP file.
 ===========
 */
-int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueFILE ) {
+int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueFILE )
+{
 	searchpath_t	*search;
-	char			*netpath;
-	pack_t			*pak;
+	char		*netpath;
+	pack_t		*pak;
 	fileInPack_t	*pakFile;
-	directory_t		*dir;
-	long			hash=0;
-	unz_s			*zfi;
+	directory_t	*dir;
+	long		hash=0;
+	unz_s		*zfi;
 	void		*temp;
-//	int				i;
+//	int		i;
 
 	if ( !fs_searchpaths ) {
 		Com_Error( ERR_FATAL, "Filesystem call made without initialization\n" );
@@ -491,10 +492,12 @@ int FS_FOpenFileRead( const char *filename, fileHandle_t *file, qboolean uniqueF
 				
 				Q_strncpyz( fsh[*file].name, filename, sizeof( fsh[*file].name ) );
 				fsh[*file].zipFile = qfalse;
+
 				if ( fs_debug->integer ) {
-					Com_Printf( "FS_FOpenFileRead: %s (found in '%s/%s')\n", filename,
-						dir->path, dir->gamedir );
+					Com_Printf( "FS_FOpenFileRead: %s (found in '%s/%s')\n", filename, dir->path, dir->gamedir );
 				}
+	
+				//printf( "FS_FOpenFileRead: %s (found in '%s/%s')\n", filename, dir->path, dir->gamedir ); // Cowcat
 
 #ifdef _WIN32
 				// if we are getting it from the cdpath, optionally copy it

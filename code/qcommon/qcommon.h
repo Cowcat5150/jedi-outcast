@@ -578,6 +578,8 @@ void		Com_StartupVariable( const char *match );
 // if match is NULL, all set commands will be executed, otherwise
 // only a set with the exact name.  Only used during startup.
 
+#define DELAY_WRITECONFIG // ec-/Quake3e
+void		Com_WriteConfiguration( void ); // ec-/Quake3e
 
 extern	cvar_t	*com_developer;
 extern	cvar_t	*com_speeds;

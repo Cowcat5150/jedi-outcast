@@ -191,6 +191,9 @@ cvar_t	*broadsword_ragtobase=0;
 cvar_t	*broadsword_dircap=0;
 
 // More bullshit needed for the proper modular renderer --eez
+
+#if !defined(AMIGAOS) && !defined(MORPHOS)
+
 cvar_t	*sv_mapname;
 cvar_t	*sv_mapChecksum;
 cvar_t	*se_language;			// JKA
@@ -198,6 +201,8 @@ cvar_t	*se_language;			// JKA
 cvar_t	*sp_language;			// JK2
 #endif
 cvar_t	*com_buildScript;
+
+#endif
 
 cvar_t	*r_environmentMapping;
 cvar_t *r_screenshotJpegQuality;
@@ -217,6 +222,7 @@ void ( APIENTRY * qglUnlockArraysEXT) ( void );
 #endif
 
 #ifdef _WIN32	// GLOWXXX
+
 // Declare Register Combiners function pointers.
 PFNGLCOMBINERPARAMETERFVNV				qglCombinerParameterfvNV = NULL;
 PFNGLCOMBINERPARAMETERIVNV				qglCombinerParameterivNV = NULL;
@@ -269,6 +275,7 @@ PFNGLGETPROGRAMLOCALPARAMETERFVARBPROC qglGetProgramLocalParameterfvARB = NULL;
 PFNGLGETPROGRAMIVARBPROC qglGetProgramivARB = NULL;
 PFNGLGETPROGRAMSTRINGARBPROC qglGetProgramStringARB = NULL;
 PFNGLISPROGRAMARBPROC qglIsProgramARB = NULL;
+
 #endif
 
 void RE_SetLightStyle(int style, int color);
@@ -919,6 +926,7 @@ void GfxInfo_f( void )
 	ri.Printf( PRINT_ALL, "GL_MAX_ACTIVE_TEXTURES_ARB: %d\n", glConfig.maxActiveTextures );
 	ri.Printf( PRINT_ALL, "\nPIXELFORMAT: color(%d-bits) Z(%d-bit) stencil(%d-bits)\n", glConfig.colorBits, glConfig.depthBits, glConfig.stencilBits );
 	ri.Printf( PRINT_ALL, "MODE: %d, %d x %d %s%s hz:", r_mode->integer, glConfig.vidWidth, glConfig.vidHeight, r_fullscreen->integer == 0 ? noborderstrings[r_noborder->integer == 1] : noborderstrings[0] ,fsstrings[r_fullscreen->integer == 1] );
+
 	if ( glConfig.displayFrequency )
 	{
 		ri.Printf( PRINT_ALL, "%d\n", glConfig.displayFrequency );
@@ -938,11 +946,14 @@ void GfxInfo_f( void )
 
 	// rendering primitives
 	{
-		int		primitives;
+		#if !defined(AMIGAOS)
+
+		int	primitives;
 
 		// default is to use triangles if compiled vertex arrays are present
 		ri.Printf( PRINT_ALL, "rendering primitives: " );
 		primitives = r_primitives->integer;
+
 		if ( primitives == 0 ) {
 			if ( qglLockArraysEXT ) {
 				primitives = 2;
@@ -959,6 +970,24 @@ void GfxInfo_f( void )
 		} else if ( primitives == 3 ) {
 			ri.Printf( PRINT_ALL, "multiple glColor4ubv + glTexCoord2fv + glVertex3fv\n" );
 		}
+	
+		#else
+
+		int	primitives;
+		
+		ri.Printf( PRINT_ALL, "rendering primitives: " );
+		primitives = r_primitives->integer;
+
+		if ( primitives == 0 )
+			ri.Printf( PRINT_ALL, "single glDrawElements\n" );
+
+		else if ( primitives == 1 )
+			ri.Printf( PRINT_ALL, "multiple glArrayElement\n" );
+
+		else if ( primitives == 3 )
+			ri.Printf( PRINT_ALL, "multiple glColor4ubv + glTexCoord2fv + glVertex3fv\n" );
+
+		#endif
 	}
 
 	ri.Printf( PRINT_ALL, "texturemode: %s\n", r_textureMode->string );
@@ -966,12 +995,16 @@ void GfxInfo_f( void )
 	ri.Printf( PRINT_ALL, "texture bits: %d\n", r_texturebits->integer );
 	ri.Printf( PRINT_ALL, "lightmap texture bits: %d\n", r_texturebitslm->integer );
 	ri.Printf( PRINT_ALL, "multitexture: %s\n", enablestrings[qglActiveTextureARB != 0] );
+
+	#if !defined(AMIGAOS)
 	ri.Printf( PRINT_ALL, "compiled vertex arrays: %s\n", enablestrings[qglLockArraysEXT != 0 ] );
+	#endif
 	ri.Printf( PRINT_ALL, "texenv add: %s\n", enablestrings[glConfig.textureEnvAddAvailable != 0] );
 	ri.Printf( PRINT_ALL, "compressed textures: %s\n", enablestrings[glConfig.textureCompression != TC_NONE] );
 	ri.Printf( PRINT_ALL, "compressed lightmaps: %s\n", enablestrings[(r_ext_compressed_lightmaps->integer != 0 && glConfig.textureCompression != TC_NONE)] );
 	ri.Printf( PRINT_ALL, "texture compression method: %s\n", tc_table[glConfig.textureCompression] );
 	ri.Printf( PRINT_ALL, "anisotropic filtering: %s  ", enablestrings[(r_ext_texture_filter_anisotropic->integer != 0) && glConfig.maxTextureFilterAnisotropy] );
+
 	if (r_ext_texture_filter_anisotropic->integer != 0 && glConfig.maxTextureFilterAnisotropy)
 	{
 		if (Q_isintegral(r_ext_texture_filter_anisotropic->value))
@@ -984,15 +1017,21 @@ void GfxInfo_f( void )
 		else
 			ri.Printf( PRINT_ALL, "%f)\n", glConfig.maxTextureFilterAnisotropy);
 	}
+
 	ri.Printf( PRINT_ALL, "Dynamic Glow: %s\n", enablestrings[r_DynamicGlow->integer] );
+
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
 	if (g_bTextureRectangleHack) Com_Printf ("Dynamic Glow ATI BAD DRIVER HACK %s\n", enablestrings[g_bTextureRectangleHack] );
+	#endif
 
 	if ( r_finish->integer ) {
 		ri.Printf( PRINT_ALL, "Forcing glFinish\n" );
 	}
+
 	if ( r_displayRefresh ->integer ) {
 		ri.Printf( PRINT_ALL, "Display refresh set to %d\n", r_displayRefresh->integer );
 	}
+
 	if (tr.world)
 	{
 		ri.Printf( PRINT_ALL, "Light Grid size set to (%.2f %.2f %.2f)\n", tr.world->lightGridSize[0], tr.world->lightGridSize[1], tr.world->lightGridSize[2] );
@@ -1001,7 +1040,9 @@ void GfxInfo_f( void )
 
 void R_AtiHackToggle_f(void)
 {
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
 	g_bTextureRectangleHack = !g_bTextureRectangleHack;
+	#endif
 }
 
 /************************************************************************************************
@@ -1142,20 +1183,20 @@ void R_Register( void )
 	//
 
 	r_allowExtensions = ri.Cvar_Get( "r_allowExtensions", "1", CVAR_ARCHIVE | CVAR_LATCH );
-	r_ext_compressed_textures = ri.Cvar_Get( "r_ext_compress_textures", "1", CVAR_ARCHIVE | CVAR_LATCH );
+	r_ext_compressed_textures = ri.Cvar_Get( "r_ext_compress_textures", "0", CVAR_ARCHIVE | CVAR_LATCH ); // was 1 Cowcat
 	r_ext_compressed_lightmaps = ri.Cvar_Get( "r_ext_compress_lightmaps", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_ext_preferred_tc_method = ri.Cvar_Get( "r_ext_preferred_tc_method", "0", CVAR_ARCHIVE | CVAR_LATCH );
-	r_ext_gamma_control = ri.Cvar_Get( "r_ext_gamma_control", "1", CVAR_ARCHIVE | CVAR_LATCH );
-	r_ext_multitexture = ri.Cvar_Get( "r_ext_multitexture", "1", CVAR_ARCHIVE | CVAR_LATCH );
-	r_ext_compiled_vertex_array = ri.Cvar_Get( "r_ext_compiled_vertex_array", "1", CVAR_ARCHIVE | CVAR_LATCH);
-	r_ext_texture_env_add = ri.Cvar_Get( "r_ext_texture_env_add", "1", CVAR_ARCHIVE | CVAR_LATCH);
+	r_ext_gamma_control = ri.Cvar_Get( "r_ext_gamma_control", "0", CVAR_ARCHIVE | CVAR_LATCH );  // was 1 Cowcat
+	r_ext_multitexture = ri.Cvar_Get( "r_ext_multitexture", "0", CVAR_ARCHIVE | CVAR_LATCH );  // was 1 Cowcat
+	r_ext_compiled_vertex_array = ri.Cvar_Get( "r_ext_compiled_vertex_array", "0", CVAR_ARCHIVE | CVAR_LATCH); // was 1 Cowcat
+	r_ext_texture_env_add = ri.Cvar_Get( "r_ext_texture_env_add", "0", CVAR_ARCHIVE | CVAR_LATCH); // was 1 Cowcat
 	r_ext_texture_filter_anisotropic = ri.Cvar_Get( "r_ext_texture_filter_anisotropic", "16", CVAR_ARCHIVE );
  
 	r_DynamicGlow = ri.Cvar_Get( "r_DynamicGlow", "0", CVAR_ARCHIVE );
 	r_DynamicGlowPasses = ri.Cvar_Get( "r_DynamicGlowPasses", "5", CVAR_ARCHIVE );
 	r_DynamicGlowDelta  = ri.Cvar_Get( "r_DynamicGlowDelta", "0.8f", CVAR_ARCHIVE );
 	r_DynamicGlowIntensity = ri.Cvar_Get( "r_DynamicGlowIntensity", "1.13f", CVAR_ARCHIVE );
-	r_DynamicGlowSoft = ri.Cvar_Get( "r_DynamicGlowSoft", "1", CVAR_ARCHIVE );
+	r_DynamicGlowSoft = ri.Cvar_Get( "r_DynamicGlowSoft", "0", CVAR_ARCHIVE );  // was 1 Cowcat
 	r_DynamicGlowWidth = ri.Cvar_Get( "r_DynamicGlowWidth", "320", CVAR_ARCHIVE | CVAR_LATCH );
 	r_DynamicGlowHeight = ri.Cvar_Get( "r_DynamicGlowHeight", "240", CVAR_ARCHIVE | CVAR_LATCH );
 
@@ -1177,7 +1218,7 @@ void R_Register( void )
 	r_customwidth = ri.Cvar_Get( "r_customwidth", "1600", CVAR_ARCHIVE | CVAR_LATCH );
 	r_customheight = ri.Cvar_Get( "r_customheight", "1024", CVAR_ARCHIVE | CVAR_LATCH );
 	r_noborder = ri.Cvar_Get( "r_noborder", "0", CVAR_ARCHIVE | CVAR_LATCH );
-    r_centerWindow = ri.Cvar_Get( "r_centerWindow", "0", CVAR_ARCHIVE | CVAR_LATCH );
+        r_centerWindow = ri.Cvar_Get( "r_centerWindow", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_simpleMipMaps = ri.Cvar_Get( "r_simpleMipMaps", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_vertexLight = ri.Cvar_Get( "r_vertexLight", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_subdivisions = ri.Cvar_Get ("r_subdivisions", "4", CVAR_ARCHIVE | CVAR_LATCH);
@@ -1214,7 +1255,7 @@ void R_Register( void )
 	r_facePlaneCull = ri.Cvar_Get ("r_facePlaneCull", "1", CVAR_ARCHIVE );
 
 	r_dlightStyle = ri.Cvar_Get ("r_dlightStyle", "1", CVAR_ARCHIVE);
-	r_surfaceSprites = ri.Cvar_Get ("r_surfaceSprites", "1", CVAR_ARCHIVE);
+	r_surfaceSprites = ri.Cvar_Get ("r_surfaceSprites", "0", CVAR_ARCHIVE); // was 1 Cowcat
 	r_surfaceWeather = ri.Cvar_Get ("r_surfaceWeather", "0", CVAR_TEMP);
 
 	r_windSpeed = ri.Cvar_Get ("r_windSpeed", "0", 0);
@@ -1225,7 +1266,7 @@ void R_Register( void )
 	r_windPointX = ri.Cvar_Get ("r_windPointX", "0", 0);
 	r_windPointY = ri.Cvar_Get ("r_windPointY", "0", 0);
 
-	r_primitives = ri.Cvar_Get( "r_primitives", "0", CVAR_ARCHIVE );
+	r_primitives = ri.Cvar_Get( "r_primitives", "1", CVAR_ARCHIVE ); // was 0 Cowcat
 	ri.Cvar_CheckRange( r_primitives, MIN_PRIMITIVES, MAX_PRIMITIVES, qtrue );
 
 	r_ambientScale = ri.Cvar_Get( "r_ambientScale", "0.5", CVAR_CHEAT );
@@ -1305,6 +1346,8 @@ Ghoul2 Insert Start
 Ghoul2 Insert End
 */
 
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
+
 	sv_mapname = ri.Cvar_Get ( "mapname", "nomap", CVAR_SERVERINFO | CVAR_ROM );
 	sv_mapChecksum = ri.Cvar_Get ( "sv_mapChecksum", "", CVAR_ROM );
 	se_language = ri.Cvar_Get ( "se_language", "english", CVAR_ARCHIVE | CVAR_NORESTART );
@@ -1313,7 +1356,10 @@ Ghoul2 Insert End
 #endif
 	com_buildScript = ri.Cvar_Get ( "com_buildScript", "0", 0 );
 
+	#endif
+
 	r_modelpoolmegs = ri.Cvar_Get("r_modelpoolmegs", "20", CVAR_ARCHIVE);
+
 	if (ri.LowPhysicalMemory() )
 	{
 		ri.Cvar_Set("r_modelpoolmegs", "0");
@@ -1321,7 +1367,7 @@ Ghoul2 Insert End
 
 	r_environmentMapping = ri.Cvar_Get( "r_environmentMapping", "1", CVAR_ARCHIVE );
 
-	r_screenshotJpegQuality				= ri.Cvar_Get( "r_screenshotJpegQuality",			"95",						CVAR_ARCHIVE );
+	r_screenshotJpegQuality	= ri.Cvar_Get( "r_screenshotJpegQuality", "95",	CVAR_ARCHIVE );
 
 	ri.Cvar_CheckRange( r_screenshotJpegQuality, 10, 100, qtrue );
 
@@ -1346,7 +1392,9 @@ extern void R_WorldEffect_f(void);	//TR_WORLDEFFECTS.CPP
 	ri.Cmd_AddCommand( "r_we", R_WorldEffect_f );
 extern void R_ReloadFonts_f(void);
 	ri.Cmd_AddCommand( "r_reloadfonts", R_ReloadFonts_f );
-	ri.Cmd_AddCommand( "minimize", GLimp_Minimize );
+	
+	//ri.Cmd_AddCommand( "minimize", GLimp_Minimize ); // Cowcat
+
 	// make sure all the commands added above are also
 	// removed in R_Shutdown
 }
@@ -1364,7 +1412,9 @@ R_Init
 ===============
 */
 extern void R_InitWorldEffects();
-void R_Init( void ) {	
+
+void R_Init( void )
+{	
 	int	err;
 	int i;
 
@@ -1426,6 +1476,7 @@ void R_Init( void ) {
 	R_InitNextFrame();
 
 	const color4ub_t	color = {0xff, 0xff, 0xff, 0xff};
+
 	for(i=0;i<MAX_LIGHT_STYLES;i++)
 	{
 		RE_SetLightStyle(i, *(int*)color);
@@ -1441,6 +1492,7 @@ void R_Init( void ) {
 	R_InitFonts();
 
 	err = qglGetError();
+
 	if ( err != GL_NO_ERROR )
 		ri.Printf (PRINT_ALL, "glGetError() = 0x%x\n", err);
 
@@ -1455,7 +1507,9 @@ RE_Shutdown
 ===============
 */
 extern void R_ShutdownWorldEffects(void);
-void RE_Shutdown( qboolean destroyWindow, qboolean restarting ) {	
+
+void RE_Shutdown( qboolean destroyWindow, qboolean restarting )
+{	
 
 	// Need this temporarily.
 #ifdef _WIN32
@@ -1479,12 +1533,16 @@ void RE_Shutdown( qboolean destroyWindow, qboolean restarting ) {
 	ri.Cmd_RemoveCommand ("imagecacheinfo");
 	ri.Cmd_RemoveCommand ("r_we");
 	ri.Cmd_RemoveCommand ("r_reloadfonts");
-	ri.Cmd_RemoveCommand ("minimize");
+
+	//ri.Cmd_RemoveCommand ("minimize"); // Cowcat
 
 	R_ShutdownWorldEffects();
 	R_ShutdownFonts();
 
-	if ( tr.registered ) {
+	if ( tr.registered )
+	{
+		#if !defined(AMIGAOS) && !defined(MORPHOS)
+
 		if ( r_DynamicGlow && r_DynamicGlow->integer )
 		{
 			// Release the Glow Vertex Shader.
@@ -1517,8 +1575,12 @@ void RE_Shutdown( qboolean destroyWindow, qboolean restarting ) {
 			// Release the blur texture.
 			qglDeleteTextures( 1, &tr.blurImage );
 		}
+
+		#endif
+
 //		R_SyncRenderThread();
 		R_ShutdownCommandBuffers();
+
 		if (destroyWindow)
 		{
 			R_DeleteTextures();	// only do this for vid_restart now, not during things like map load
@@ -1534,6 +1596,7 @@ void RE_Shutdown( qboolean destroyWindow, qboolean restarting ) {
 	if ( destroyWindow ) {
 		GLimp_Shutdown();
 	}
+
 	tr.registered = qfalse;
 }
 
@@ -1662,12 +1725,16 @@ extern void G2Time_ReportTimers(void);
 extern IGhoul2InfoArray &TheGhoul2InfoArray();
 
 #ifdef JK2_MODE
-unsigned int AnyLanguage_ReadCharFromString_JK2 ( char **text, qboolean *pbIsTrailingPunctuation ) {
+unsigned int AnyLanguage_ReadCharFromString_JK2 ( char **text, qboolean *pbIsTrailingPunctuation )
+{
 	return AnyLanguage_ReadCharFromString (text, pbIsTrailingPunctuation);
 }
 #endif
 
-extern "C" Q_EXPORT refexport_t* QDECL GetRefAPI ( int apiVersion, refimport_t *refimp ) {
+#if !defined (AMIGAOS) && !defined(MORPHOS)
+
+extern "C" Q_EXPORT refexport_t* QDECL GetRefAPI ( int apiVersion, refimport_t *refimp )
+{
 	static refexport_t	re;
 
 	ri = *refimp;
@@ -1867,3 +1934,209 @@ extern "C" Q_EXPORT refexport_t* QDECL GetRefAPI ( int apiVersion, refimport_t *
 
 	return &re;
 }
+
+#else
+
+refexport_t *QDECL GetRefAPI( int apiVersion, refimport_t *refimp )
+{
+	static refexport_t	re;
+
+	ri = *refimp;
+
+	memset( &re, 0, sizeof( re ) );
+
+	if ( apiVersion != REF_API_VERSION )
+	{
+		ri.Printf(PRINT_ALL, "Mismatched REF_API_VERSION: expected %i, got %i\n",  REF_API_VERSION, apiVersion );
+		return NULL;
+	}
+
+	// the RE_ functions are Renderer Entry points
+
+#define REX(x)	re.x = RE_##x
+
+	REX(Shutdown);
+
+	REX(BeginRegistration);
+	REX(RegisterModel);
+	REX(RegisterSkin);
+	REX(GetAnimationCFG);
+	REX(RegisterShader);
+	REX(RegisterShaderNoMip);
+	re.LoadWorld = RE_LoadWorldMap;
+	re.R_LoadImage = R_LoadImage;
+
+	REX(RegisterMedia_LevelLoadBegin);
+	REX(RegisterMedia_LevelLoadEnd);
+	REX(RegisterMedia_GetLevel);
+	REX(RegisterImages_LevelLoadEnd);
+	REX(RegisterModels_LevelLoadEnd);
+
+	REX(SetWorldVisData);
+
+	REX(EndRegistration);
+
+	REX(ClearScene);
+	REX(AddRefEntityToScene);
+	REX(GetLighting);
+	REX(AddPolyToScene);
+	REX(AddLightToScene);
+	REX(RenderScene);
+	REX(GetLighting);
+
+	REX(SetColor);
+	re.DrawStretchPic = RE_StretchPic;
+	re.DrawRotatePic = RE_RotatePic;
+	re.DrawRotatePic2 = RE_RotatePic2;
+	REX(LAGoggles);
+	REX(Scissor);
+
+	re.DrawStretchRaw = RE_StretchRaw;
+	REX(UploadCinematic);
+
+	REX(BeginFrame);
+	REX(EndFrame);
+
+	REX(ProcessDissolve);
+	REX(InitDissolve);
+
+	REX(GetScreenShot);
+	REX(TempRawImage_ReadFromFile);
+	REX(TempRawImage_CleanUp);
+
+	re.MarkFragments = R_MarkFragments;
+	re.LerpTag = R_LerpTag;
+	re.ModelBounds = R_ModelBounds;
+	REX(GetLightStyle);
+	REX(SetLightStyle);
+	REX(GetBModelVerts);
+	re.WorldEffectCommand = R_WorldEffectCommand;
+	REX(GetModelBounds);
+
+	REX(SVModelInit);
+
+	REX(RegisterFont);
+	REX(Font_HeightPixels);
+	REX(Font_StrLenPixels);
+	REX(Font_DrawString);
+	REX(Font_StrLenChars);
+	re.Language_IsAsian = Language_IsAsian;
+	re.Language_UsesSpaces = Language_UsesSpaces;
+	re.AnyLanguage_ReadCharFromString = AnyLanguage_ReadCharFromString;
+#ifdef JK2_MODE
+	re.AnyLanguage_ReadCharFromString2 = AnyLanguage_ReadCharFromString_JK2;
+#endif
+
+	re.R_InitWorldEffects = R_InitWorldEffects;
+	re.R_ClearStuffToStopGhoul2CrashingThings = R_ClearStuffToStopGhoul2CrashingThings;
+	re.R_inPVS = R_inPVS;
+
+	re.tr_distortionAlpha = get_tr_distortionAlpha;
+	re.tr_distortionStretch = get_tr_distortionStretch;
+	re.tr_distortionPrePost = get_tr_distortionPrePost;
+	re.tr_distortionNegate = get_tr_distortionNegate;
+
+	re.GetWindVector = R_GetWindVector;
+	re.GetWindGusting = R_GetWindGusting;
+	re.IsOutside = R_IsOutside;
+	re.IsOutsideCausingPain = R_IsOutsideCausingPain;
+	re.GetChanceOfSaberFizz = R_GetChanceOfSaberFizz;
+	re.IsShaking = R_IsShaking;
+	re.AddWeatherZone = R_AddWeatherZone;
+	re.SetTempGlobalFogColor = R_SetTempGlobalFogColor;
+
+	REX(SetRangedFog);
+
+	re.TheGhoul2InfoArray = TheGhoul2InfoArray;
+
+#define G2EX(x)	re.G2API_##x = G2API_##x
+
+	G2EX(AddBolt);
+	G2EX(AddBoltSurfNum);
+	G2EX(AddSurface);
+	G2EX(AnimateG2Models);
+	G2EX(AttachEnt);
+	G2EX(AttachG2Model);
+	G2EX(CollisionDetect);
+	G2EX(CleanGhoul2Models);
+	G2EX(CopyGhoul2Instance);
+	G2EX(DetachEnt);
+	G2EX(DetachG2Model);
+	G2EX(GetAnimFileName);
+	G2EX(GetAnimFileNameIndex);
+	G2EX(GetAnimFileInternalNameIndex);
+	G2EX(GetAnimIndex);
+	G2EX(GetAnimRange);
+	G2EX(GetAnimRangeIndex);
+	G2EX(GetBoneAnim);
+	G2EX(GetBoneAnimIndex);
+	G2EX(GetBoneIndex);
+	G2EX(GetBoltMatrix);
+	G2EX(GetGhoul2ModelFlags);
+	G2EX(GetGLAName);
+	G2EX(GetParentSurface);
+	G2EX(GetRagBonePos);
+	G2EX(GetSurfaceIndex);
+	G2EX(GetSurfaceName);
+	G2EX(GetSurfaceRenderStatus);
+	G2EX(GetTime);
+	G2EX(GiveMeVectorFromMatrix);
+	G2EX(HaveWeGhoul2Models);
+	G2EX(IKMove);
+	G2EX(InitGhoul2Model);
+	G2EX(IsPaused);
+	G2EX(ListBones);
+	G2EX(ListSurfaces);
+	G2EX(LoadGhoul2Models);
+	G2EX(LoadSaveCodeDestructGhoul2Info);
+	G2EX(PauseBoneAnim);
+	G2EX(PauseBoneAnimIndex);
+	G2EX(PrecacheGhoul2Model);
+	G2EX(RagEffectorGoal);
+	G2EX(RagEffectorKick);
+	G2EX(RagForceSolve);
+	G2EX(RagPCJConstraint);
+	G2EX(RagPCJGradientSpeed);
+	G2EX(RemoveBolt);
+	G2EX(RemoveBone);
+	G2EX(RemoveGhoul2Model);
+	G2EX(RemoveSurface);
+	G2EX(SaveGhoul2Models);
+	G2EX(SetAnimIndex);
+	G2EX(SetBoneAnim);
+	G2EX(SetBoneAnimIndex);
+	G2EX(SetBoneAngles);
+	G2EX(SetBoneAnglesIndex);
+	G2EX(SetBoneAnglesMatrix);
+	G2EX(SetBoneIKState);
+	G2EX(SetGhoul2ModelFlags);
+	G2EX(SetGhoul2ModelIndexes);
+	G2EX(SetLodBias);
+	//G2EX(SetModelIndexes);
+	G2EX(SetNewOrigin);
+	G2EX(SetRagDoll);
+	G2EX(SetRootSurface);
+	G2EX(SetShader);
+	G2EX(SetSkin);
+	G2EX(SetSurfaceOnOff);
+	G2EX(SetTime);
+	G2EX(StopBoneAnim);
+	G2EX(StopBoneAnimIndex);
+	G2EX(StopBoneAngles);
+	G2EX(StopBoneAnglesIndex);
+#ifdef _G2_GORE
+	G2EX(AddSkinGore);
+	G2EX(ClearSkinGore);
+#endif
+
+#ifdef G2_PERFORMANCE_ANALYSIS
+	re.G2Time_ReportTimers = G2Time_ReportTimers;
+	re.G2Time_ResetTimers = G2Time_ResetTimers;
+#endif
+
+	//Swap_Init();
+
+	return &re;
+}
+
+#endif

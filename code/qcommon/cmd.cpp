@@ -288,6 +288,15 @@ void Cmd_Exec_f( void ) {
 	
 	Cbuf_InsertText (f.c);
 
+	#ifdef DELAY_WRITECONFIG // ec-/Quake3e - Cowcat added
+
+	if ( !Q_stricmp( filename, Q3CONFIG_NAME ) )
+	{	
+		Com_WriteConfiguration(); // to avoid loading outdated values
+	}
+
+	#endif
+	
 	FS_FreeFile (f.v);
 }
 

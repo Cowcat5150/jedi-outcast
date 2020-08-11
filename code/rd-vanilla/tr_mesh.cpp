@@ -23,7 +23,12 @@ This file is part of Jedi Academy.
 #include "../server/exe_headers.h"
 
 #include "tr_local.h"
+
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 #include "qcommon/matcomp.h"
+#else
+#include "../qcommon/matcomp.h"
+#endif
 
 float ProjectRadius( float r, vec3_t location )
 {

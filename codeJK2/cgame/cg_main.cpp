@@ -96,7 +96,8 @@ This is the only way control passes into the cgame module.
 This must be the very first function compiled into the .q3vm file
 ================
 */
-extern "C" Q_EXPORT intptr_t vmMain( intptr_t command, intptr_t arg0, intptr_t arg1, intptr_t arg2, intptr_t arg3, intptr_t arg4, intptr_t arg5, intptr_t arg6, intptr_t arg7 ) {
+//extern "C" Q_EXPORT 
+intptr_t vmMain( intptr_t command, intptr_t arg0, intptr_t arg1, intptr_t arg2, intptr_t arg3, intptr_t arg4, intptr_t arg5, intptr_t arg6, intptr_t arg7 ) {
 	centity_t		*cent;
 
 	switch ( command ) {
@@ -2917,6 +2918,7 @@ void CG_DrawInventorySelect( void )
 
 int cgi_UI_GetItemText(char *menuFile,char *itemName, char *text);
 
+
 char *inventoryDesc[15] = 
 {
 "NEURO_SAAV_DESC",
@@ -3148,6 +3150,7 @@ int showPowers[MAX_SHOWPOWERS] =
 	FP_GRIP,
 	FP_LIGHTNING
 };
+
 char *showPowersName[MAX_SHOWPOWERS] = 
 {
 	"HEAL2",
@@ -3557,7 +3560,7 @@ char *forcepowerDesc[NUM_FORCE_POWERS] =
 "FORCE_SABER_OFFENSE_DESC",
 };
 
-char *forcepowerLvl1Desc[NUM_FORCE_POWERS] = 
+const char *forcepowerLvl1Desc[NUM_FORCE_POWERS] = 
 {
 "FORCE_HEAL_LVL1_DESC",
 "FORCE_JUMP_LVL1_DESC",
@@ -3572,7 +3575,7 @@ char *forcepowerLvl1Desc[NUM_FORCE_POWERS] =
 "FORCE_SABER_OFFENSE_LVL1_DESC",
 };
 
-char *forcepowerLvl2Desc[NUM_FORCE_POWERS] = 
+const char *forcepowerLvl2Desc[NUM_FORCE_POWERS] = 
 {
 "FORCE_HEAL_LVL2_DESC",
 "FORCE_JUMP_LVL2_DESC",
@@ -3587,7 +3590,7 @@ char *forcepowerLvl2Desc[NUM_FORCE_POWERS] =
 "FORCE_SABER_OFFENSE_LVL2_DESC",
 };
 
-char *forcepowerLvl3Desc[NUM_FORCE_POWERS] = 
+const char *forcepowerLvl3Desc[NUM_FORCE_POWERS] = 
 {
 "FORCE_HEAL_LVL3_DESC",
 "FORCE_JUMP_LVL3_DESC",
@@ -3601,6 +3604,7 @@ char *forcepowerLvl3Desc[NUM_FORCE_POWERS] =
 "FORCE_SABER_DEFENSE_LVL3_DESC",
 "FORCE_SABER_OFFENSE_LVL3_DESC",
 };
+
 
 /*
 ===================

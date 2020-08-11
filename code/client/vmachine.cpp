@@ -29,24 +29,29 @@ VIRTUAL MACHINE
 
 ==============================================================
 */
-intptr_t	VM_Call( int callnum, ... )
+intptr_t VM_Call( int callnum, ... )
 {
-//	assert (cgvm.entryPoint);
+	// assert (cgvm.entryPoint);
+
 	//Getting crashes here on OSX with debug dlls.
 #if !id386 || defined(MACOS_X)
+
 	intptr_t args[10];
 	va_list ap;
+
 	if (cgvm.entryPoint)
 	{
 		va_start(ap, callnum);
+
 		for (size_t i = 0; i < ARRAY_LEN(args); i++) {
 			args[i] = va_arg(ap, intptr_t);
 		}
+
 		va_end(ap);
 		
 		return cgvm.entryPoint( callnum,  args[0],  args[1],  args[2], args[3],
 							   args[4],  args[5],  args[6], args[7],
-							   args[8],  args[9]);
+							   args[8],  args[9] );
 	}
 #else
 	if (cgvm.entryPoint)
@@ -108,9 +113,12 @@ we pass this to the cgame dll to call back into the client
 
 extern intptr_t CL_CgameSystemCalls( intptr_t *args );
 
-intptr_t VM_DllSyscall( intptr_t arg, ... ) {
+intptr_t VM_DllSyscall( intptr_t arg, ... )
+{
 //	return cgvm->systemCall( &arg );
-#if !id386 || defined __clang__ || defined MACOS_X
+
+	#if !id386 || defined __clang__ || defined MACOS_X
+
 	// rcg010206 - see commentary above
 	intptr_t args[16];
 	size_t i;
@@ -119,12 +127,17 @@ intptr_t VM_DllSyscall( intptr_t arg, ... ) {
 	args[0] = arg;
 	
 	va_start(ap, arg);
-	for (i = 1; i < sizeof (args) / sizeof (args[i]); i++)
+
+	//for (i = 1; i < sizeof (args) / sizeof (args[i]); i++)
+	for (i = 1; i < ARRAY_LEN (args); i++)
 		args[i] = va_arg(ap, intptr_t);
+
 	va_end(ap);
 	
 	return CL_CgameSystemCalls( args );
+
 #else // original id code
 	return CL_CgameSystemCalls( &arg );
 #endif
+
 }

@@ -37,8 +37,12 @@ ____________________________________________________________________________*/
 
 #include "config.h"
 
+#include "../qcommon/q_platform.h"
+
 #define GLOBAL_GAIN_SCALE (4*15)
 /* #define GLOBAL_GAIN_SCALE 0 */
+
+#if 0 ///
 
 #ifdef _WIN32
 #if (defined _M_IX86 || defined __i386__)
@@ -68,10 +72,16 @@ ____________________________________________________________________________*/
 #error Layer III LITTLE_ENDIAN must be defined 0 or 1
 #endif
 
+#endif
+
+
 /*-----------------------------------------------------------*/
 /*---- huffman lookup tables ---*/
 /* endian dependent !!! */
-#if LITTLE_ENDIAN
+
+//#if LITTLE_ENDIAN
+#ifdef Q3_LITTLE_ENDIAN
+
 typedef union
 {
    int ptr;
@@ -88,6 +98,7 @@ typedef union
 HUFF_ELEMENT;
 
 #else /* big endian machines */
+
 typedef union
 {
    int ptr;			/* int must be 32 bits or more */

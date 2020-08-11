@@ -25,10 +25,10 @@ This file is part of Jedi Academy.
 
 // alter these to suit your own game...
 //
-#define SE_BOOL					qboolean
-#define SE_TRUE					qtrue
-#define SE_FALSE				qfalse
-#define	iSE_MAX_FILENAME_LENGTH	MAX_QPATH
+#define SE_BOOL				qboolean
+#define SE_TRUE				qtrue
+#define SE_FALSE			qfalse
+#define	iSE_MAX_FILENAME_LENGTH		MAX_QPATH
 #define sSE_STRINGS_DIR			"strings"
 #define sSE_DEBUGSTR_PREFIX		"["		// any string you want prefixing onto the debug versions of strings (to spot hardwired english etc)
 #define sSE_DEBUGSTR_SUFFIX		"]"		// ""
@@ -37,48 +37,48 @@ extern cvar_t	*se_language;
 
 // some needed text-equates, do not alter these under any circumstances !!!! (unless you're me. Which you're not)
 //
-#define iSE_VERSION					1
-#define sSE_KEYWORD_VERSION			"VERSION"
-#define sSE_KEYWORD_CONFIG			"CONFIG"
+#define iSE_VERSION			1
+#define sSE_KEYWORD_VERSION		"VERSION"
+#define sSE_KEYWORD_CONFIG		"CONFIG"
 #define sSE_KEYWORD_FILENOTES		"FILENOTES"
 #define sSE_KEYWORD_REFERENCE		"REFERENCE"
-#define sSE_KEYWORD_FLAGS 			"FLAGS"
-#define sSE_KEYWORD_NOTES			"NOTES"
-#define sSE_KEYWORD_LANG			"LANG_"
+#define sSE_KEYWORD_FLAGS 		"FLAGS"
+#define sSE_KEYWORD_NOTES		"NOTES"
+#define sSE_KEYWORD_LANG		"LANG_"
 #define sSE_KEYWORD_ENDMARKER		"ENDMARKER"
-#define sSE_FILE_EXTENSION			".st"	// editor-only NEVER used ingame, but I wanted all extensions together
+#define sSE_FILE_EXTENSION		".st"	// editor-only NEVER used ingame, but I wanted all extensions together
 #define sSE_EXPORT_FILE_EXTENSION	".ste"
 #define sSE_INGAME_FILE_EXTENSION	".str"
-#define sSE_EXPORT_SAME				"#same"
+#define sSE_EXPORT_SAME			"#same"
 
 
 
 // available API calls...
 //
-void	SE_Init				( void );
-void	SE_ShutDown			( void );
+void	SE_Init			( void );
+void	SE_ShutDown		( void );
 void	SE_CheckForLanguageUpdates(void);
-int		SE_GetNumLanguages	( void );
+int	SE_GetNumLanguages	( void );
 const char *SE_GetLanguageName	( int iLangIndex );	// eg "german"
 const char *SE_GetLanguageDir	( int iLangIndex );	// eg "strings/german"
-const char *SE_LoadLanguage		( const char *psLanguage, SE_BOOL bLoadDebug = SE_TRUE );
+const char *SE_LoadLanguage	( const char *psLanguage, SE_BOOL bLoadDebug = SE_TRUE );
 void	SE_NewLanguage		( void );
 //
 // for convenience, two ways of getting at the same data...
 //
-const char *SE_GetString		( const char *psPackageReference, const char *psStringReference);
-const char *SE_GetString		( const char *psPackageAndStringReference);
+const char *SE_GetString	( const char *psPackageReference, const char *psStringReference);
+const char *SE_GetString	( const char *psPackageAndStringReference);
 //
 // ditto...
 //
-int		SE_GetFlags			( const char *psPackageReference, const char *psStringReference );
-int		SE_GetFlags			( const char *psPackageAndStringReference );
+int	SE_GetFlags		( const char *psPackageReference, const char *psStringReference );
+int	SE_GetFlags		( const char *psPackageAndStringReference );
 //
 // general flag functions... (SEP_GetFlagMask() return should be used with SEP_GetFlags() return)
 //
-int		SE_GetNumFlags		( void );
-const char *SE_GetFlagName		( int iFlagIndex );
-int		SE_GetFlagMask		( const char *psFlagName );
+int	SE_GetNumFlags		( void );
+const char *SE_GetFlagName	( int iFlagIndex );
+int	SE_GetFlagMask		( const char *psFlagName );
 
 
 // note that so far the only place in the game that needs to know these is the font system so it can know how to

@@ -75,7 +75,7 @@ This file is part of Jedi Academy.
 
 #define Q3CONFIG_NAME PRODUCT_NAME ".cfg"
 
-#define VALIDSTRING( a )	( ( a != NULL ) && ( a[0] != '\0' ) )
+#define VALIDSTRING( a )	( ( a != NULL ) && ( a[0] != NULL ) )
 
 //JAC: Added
 #define ARRAY_LEN( x ) ( sizeof( x ) / sizeof( *(x) ) )

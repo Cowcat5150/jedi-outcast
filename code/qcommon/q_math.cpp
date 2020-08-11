@@ -84,8 +84,8 @@ vec4_t colorTable[CT_MAX] =
 {0.953f, 0.378f, 0.250f, 1},	// CT_LTRED1
 {0.593f, 0.121f, 0.109f, 1},	// CT_DKRED1
 {0.429f, 0.171f, 0.113f, 1},	// CT_VDKRED1
-{.25f, 0, 0, 1},					// CT_VDKRED
-{.70f, 0, 0, 1},					// CT_DKRED
+{.25f, 0, 0, 1},		// CT_VDKRED
+{.70f, 0, 0, 1},		// CT_DKRED
 
 {0.717f, 0.902f, 1.0f,   1},	// CT_VLTAQUA
 {0.574f, 0.722f, 0.804f, 1},	// CT_LTAQUA
@@ -94,19 +94,19 @@ vec4_t colorTable[CT_MAX] =
 
 {0.871f, 0.386f, 0.375f, 1},	// CT_LTPINK
 {0.435f, 0.193f, 0.187f, 1},	// CT_DKPINK
-{	  0,    .5f,    .5f, 1},	// CT_LTCYAN
-{	  0,   .25f,   .25f, 1},	// CT_DKCYAN
-{   .179f, .51f,   .92f, 1},	// CT_LTBLUE3
-{   .199f, .71f,   .92f, 1},	// CT_LTBLUE3
-{   .5f,   .05f,    .4f, 1},	// CT_DKBLUE3
+{0,    .5f,    .5f, 1},	// CT_LTCYAN
+{0,   .25f,   .25f, 1},	// CT_DKCYAN
+{.179f, .51f,   .92f, 1},	// CT_LTBLUE3
+{.199f, .71f,   .92f, 1},	// CT_LTBLUE3
+{.5f,   .05f,    .4f, 1},	// CT_DKBLUE3
 
-{   0.0f,   .613f,  .097f, 1},	// CT_HUD_GREEN
-{   0.835f, .015f,  .015f, 1},	// CT_HUD_RED
-{	.567f,	.685f,	1.0f,	.75f},	// CT_ICON_BLUE
-{	.515f,	.406f,	.507f,	1},	// CT_NO_AMMO_RED
+{0.0f,   .613f,  .097f, 1},	// CT_HUD_GREEN
+{0.835f, .015f,  .015f, 1},	// CT_HUD_RED
+{.567f,	.685f,	1.0f,	.75f},	// CT_ICON_BLUE
+{.515f,	.406f,	.507f,	1},	// CT_NO_AMMO_RED
 
-{   1.0f,   .658f,  .062f, 1},	// CT_HUD_ORANGE
-{	0.549f, .854f,  1.0f,  1.0f},	//	CT_TITLE
+{1.0f,   .658f,  .062f, 1},	// CT_HUD_ORANGE
+{0.549f, .854f,  1.0f,  1.0f},	//	CT_TITLE
 };
 
 vec4_t g_color_table[Q_COLOR_BITS+1] = {
@@ -225,7 +225,8 @@ erandom
 This function produces a random number with a exponential
 distribution and the specified mean value.
 */
-float erandom( float mean ) {
+float erandom( float mean )
+{
 	float	r;
 
 	do {
@@ -245,20 +246,24 @@ signed char ClampChar( int i ) {
 	return i;
 }
 
-signed short ClampShort( int i ) {
+signed short ClampShort( int i )
+{
 	if ( i < (short)0x8000 ) {
 		return (short)0x8000;
 	}
+
 	if ( i > 0x7fff ) {
 		return 0x7fff;
 	}
+
 	return i;
 }
 
 
 // this isn't a real cheap function to call!
-int DirToByte( vec3_t dir ) {
-	int		i, best;
+int DirToByte( vec3_t dir )
+{
+	int	i, best;
 	float	d, bestd;
 
 	if ( !dir ) {
@@ -267,9 +272,11 @@ int DirToByte( vec3_t dir ) {
 
 	bestd = 0;
 	best = 0;
+
 	for (i=0 ; i<NUMVERTEXNORMALS ; i++)
 	{
 		d = DotProduct (dir, bytedirs[i]);
+
 		if (d > bestd)
 		{
 			bestd = d;
@@ -280,16 +287,20 @@ int DirToByte( vec3_t dir ) {
 	return best;
 }
 
-void ByteToDir( int b, vec3_t dir ) {
-	if ( b < 0 || b >= NUMVERTEXNORMALS ) {
+void ByteToDir( int b, vec3_t dir )
+{
+	if ( b < 0 || b >= NUMVERTEXNORMALS )
+	{
 		VectorCopy( vec3_origin, dir );
 		return;
 	}
+
 	VectorCopy (bytedirs[b], dir);
 }
 
 
-unsigned ColorBytes3 (float r, float g, float b) {
+unsigned ColorBytes3 (float r, float g, float b)
+{
 	unsigned	i;
 
 	( (byte *)&i )[0] = r * 255;
@@ -299,7 +310,8 @@ unsigned ColorBytes3 (float r, float g, float b) {
 	return i;
 }
 
-unsigned ColorBytes4 (float r, float g, float b, float a) {
+unsigned ColorBytes4 (float r, float g, float b, float a)
+{
 	unsigned	i;
 
 	( (byte *)&i )[0] = r * 255;
@@ -310,24 +322,30 @@ unsigned ColorBytes4 (float r, float g, float b, float a) {
 	return i;
 }
 
-float NormalizeColor( const vec3_t in, vec3_t out ) {
+float NormalizeColor( const vec3_t in, vec3_t out )
+{
 	float	max;
 	
 	max = in[0];
+
 	if ( in[1] > max ) {
 		max = in[1];
 	}
+
 	if ( in[2] > max ) {
 		max = in[2];
 	}
 
 	if ( !max ) {
 		VectorClear( out );
-	} else {
+	}
+
+	else {
 		out[0] = in[0] / max;
 		out[1] = in[1] / max;
 		out[2] = in[2] / max;
 	}
+
 	return max;
 }
 
@@ -348,12 +366,14 @@ Returns false if the triangle is degenrate.
 The normal will point out of the clock for clockwise ordered points
 =====================
 */
-qboolean PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const vec3_t c ) {
+qboolean PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const vec3_t c )
+{
 	vec3_t	d1, d2;
 
 	VectorSubtract( b, a, d1 );
 	VectorSubtract( c, a, d2 );
 	CrossProduct( d2, d1, plane );
+
 	if ( VectorNormalize( plane ) == 0 ) {
 		return qfalse;
 	}
@@ -369,8 +389,11 @@ RotatePointAroundVector
 This is not implemented very well...
 ===============
 */
-void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point,
-							 float degrees ) {
+
+#if 0
+
+void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
+{
 	float	m[3][3];
 	float	im[3][3];
 	float	zrot[3][3];
@@ -425,18 +448,53 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point,
 	}
 }
 
+#else // Cowcat
+
+void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
+{
+	float	m[3][3];
+	float	c, s, t;
+
+	degrees = -DEG2RAD( degrees );
+	s = sin (degrees);
+	c = cos (degrees);
+	t = 1 - c;
+
+	m[0][0] = t * dir[0] * dir[0] + c;
+	m[0][1] = t * dir[0] * dir[1] + s * dir[2];
+	m[0][2] = t * dir[0] * dir[2] - s * dir[1];
+
+	m[1][0] = t * dir[0] * dir[1] - s * dir[2];
+	m[1][1] = t * dir[1] * dir[1] + c;
+	m[1][2] = t * dir[1] * dir[2] + s * dir[0];
+
+	m[2][0] = t * dir[0] * dir[2] + s * dir[1];
+	m[2][1] = t * dir[1] * dir[2] - s * dir[0];
+	m[2][2] = t * dir[2] * dir[2] + c;
+
+	//VectorRotate( point, m, dst );
+
+	dst[0] = DotProduct( point, m[0] );
+	dst[1] = DotProduct( point, m[1] );
+	dst[2] = DotProduct( point, m[2] );
+}
+
+#endif
+
+
 /*
 ===============
 RotateAroundDirection
 ===============
 */
-void RotateAroundDirection( vec3_t axis[3], float yaw ) {
-
+void RotateAroundDirection( vec3_t axis[3], float yaw )
+{
 	// create an arbitrary axis[1] 
 	PerpendicularVector( axis[1], axis[0] );
 
 	// rotate it around axis[0] by yaw
-	if ( yaw ) {
+	if ( yaw )
+	{
 		vec3_t	temp;
 
 		VectorCopy( axis[1], temp );
@@ -449,35 +507,45 @@ void RotateAroundDirection( vec3_t axis[3], float yaw ) {
 
 
 
-void vectoangles( const vec3_t value1, vec3_t angles ) {
+void vectoangles( const vec3_t value1, vec3_t angles )
+{
 	float	forward;
 	float	yaw, pitch;
 	
-	if ( value1[1] == 0 && value1[0] == 0 ) {
+	if ( value1[1] == 0 && value1[0] == 0 )
+	{
 		yaw = 0;
+
 		if ( value1[2] > 0 ) {
 			pitch = 90;
 		}
+
 		else {
 			pitch = 270;
 		}
 	}
-	else {
+
+	else
+	{
 		if ( value1[0] ) {
 			yaw = ( atan2 ( value1[1], value1[0] ) * 180 / M_PI );
 		}
+
 		else if ( value1[1] > 0 ) {
 			yaw = 90;
 		}
+
 		else {
 			yaw = 270;
 		}
+
 		if ( yaw < 0 ) {
 			yaw += 360;
 		}
 
 		forward = sqrt ( value1[0]*value1[0] + value1[1]*value1[1] );
 		pitch = ( atan2(value1[2], forward) * 180 / M_PI );
+
 		if ( pitch < 0 ) {
 			pitch += 360;
 		}
@@ -515,8 +583,9 @@ Given a normalized forward vector, create two
 other perpendicular vectors
 ================
 */
-void MakeNormalVectors( const vec3_t forward, vec3_t right, vec3_t up) {
-	float		d;
+void MakeNormalVectors( const vec3_t forward, vec3_t right, vec3_t up)
+{
+	float	d;
 
 	// this rotate and negate guarantees a vector
 	// not colinear with the original
@@ -553,7 +622,8 @@ float Q_rsqrt( float number )
 	return y;
 }
 
-float Q_fabs( float f ) {
+float Q_fabs( float f )
+{
 	byteAlias_t fi;
 	fi.f = f;
 	fi.i &= 0x7FFFFFFF;
@@ -578,16 +648,20 @@ float Q_fabs( float f ) {
 SetPlaneSignbits
 =================
 */
-void SetPlaneSignbits (cplane_t *out) {
+void SetPlaneSignbits (cplane_t *out)
+{
 	int	bits, j;
 
 	// for fast box on planeside test
 	bits = 0;
-	for (j=0 ; j<3 ; j++) {
+
+	for (j=0 ; j<3 ; j++)
+	{
 		if (out->normal[j] < 0) {
 			bits |= 1<<j;
 		}
 	}
+
 	out->signbits = bits;
 }
 
@@ -601,13 +675,14 @@ Returns 1, 2, or 1 + 2
 int BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {
 	float	dist[2];
-	int		sides, b, i;
+	int	sides, b, i;
 
 	// fast axial cases
 	if (p->type < 3)
 	{
 		if (p->dist <= emins[p->type])
 			return 1;
+
 		if (p->dist >= emaxs[p->type])
 			return 2;
 		return 3;
@@ -615,6 +690,7 @@ int BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 
 	// general case
 	dist[0] = dist[1] = 0;
+
 	if (p->signbits < 8) // >= 8: default case is original code (dist[0]=dist[1]=0)
 	{
 		for (i=0 ; i<3 ; i++)
@@ -626,8 +702,10 @@ int BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 	}
 
 	sides = 0;
+
 	if (dist[0] >= p->dist)
 		sides = 1;
+
 	if (dist[1] < p->dist)
 		sides |= 2;
 
@@ -639,14 +717,26 @@ int BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 RadiusFromBounds
 =================
 */
-float RadiusFromBounds( const vec3_t mins, const vec3_t maxs ) {
-	int		i;
+float RadiusFromBounds( const vec3_t mins, const vec3_t maxs )
+{
+	int	i;
 	vec3_t	corner;
 	float	a, b;
 
-	for (i=0 ; i<3 ; i++) {
+	for (i=0 ; i<3 ; i++)
+	{
+		#if 0
+
 		a = Q_fabs( mins[i] );
 		b = Q_fabs( maxs[i] );
+
+		#else // Cowcat
+
+		a = fabs( mins[i] );
+		b = fabs( maxs[i] );
+
+		#endif
+
 		corner[i] = a > b ? a : b;
 	}
 
@@ -654,33 +744,39 @@ float RadiusFromBounds( const vec3_t mins, const vec3_t maxs ) {
 }
 
 
-void ClearBounds( vec3_t mins, vec3_t maxs ) {
+void ClearBounds( vec3_t mins, vec3_t maxs )
+{
 	mins[0] = mins[1] = mins[2] =  WORLD_SIZE;	//99999;	// I used WORLD_SIZE instead of MAX_WORLD_COORD...
 	maxs[0] = maxs[1] = maxs[2] = -WORLD_SIZE;	//-99999;	// ... so it would definately be beyond furthese legal.
 }
 
 
-vec_t DistanceHorizontal( const vec3_t p1, const vec3_t p2 ) {
+vec_t DistanceHorizontal( const vec3_t p1, const vec3_t p2 )
+{
 	vec3_t	v;
 
 	VectorSubtract( p2, p1, v );
 	return sqrt( v[0]*v[0] + v[1]*v[1] );	//Leave off the z component
 }
 
-vec_t DistanceHorizontalSquared( const vec3_t p1, const vec3_t p2 ) {
+vec_t DistanceHorizontalSquared( const vec3_t p1, const vec3_t p2 )
+{
 	vec3_t	v;
 
 	VectorSubtract( p2, p1, v );
 	return v[0]*v[0] + v[1]*v[1];	//Leave off the z component
 }
 
-int Q_log2( int val ) {
+int Q_log2( int val )
+{
 	int answer;
 
 	answer = 0;
+
 	while ( ( val>>=1 ) != 0 ) {
 		answer++;
 	}
+
 	return answer;
 }
 
@@ -689,11 +785,14 @@ int Q_log2( int val ) {
 PlaneTypeForNormal
 =================
 */
-int	PlaneTypeForNormal (vec3_t normal) {
+int PlaneTypeForNormal (vec3_t normal)
+{
 	if ( normal[0] == 1.0 )
 		return PLANE_X;
+
 	if ( normal[1] == 1.0 )
 		return PLANE_Y;
+
 	if ( normal[2] == 1.0 )
 		return PLANE_Z;
 	
@@ -707,7 +806,8 @@ int	PlaneTypeForNormal (vec3_t normal) {
 MatrixMultiply
 ================
 */
-void MatrixMultiply(float in1[3][3], float in2[3][3], float out[3][3]) {
+void MatrixMultiply(float in1[3][3], float in2[3][3], float out[3][3])
+{
 	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] +
 				in1[0][2] * in2[2][0];
 	out[0][1] = in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] +
@@ -729,14 +829,16 @@ void MatrixMultiply(float in1[3][3], float in2[3][3], float out[3][3]) {
 }
 
 
-void AngleVectors( const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up) {
+void AngleVectors( const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
+{
 	float		angle;
-	static float		sr, sp, sy, cr, cp, cy;
+	static float	sr, sp, sy, cr, cp, cy;
 	// static to help MS compiler fp bugs
 
 	angle = angles[YAW] * (M_PI*2 / 360.0);
 	sy = sin(angle);
 	cy = cos(angle);
+
 	angle = angles[PITCH] * (M_PI*2 / 360.0);
 	sp = sin(angle);
 	cp = cos(angle);
@@ -747,17 +849,20 @@ void AngleVectors( const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 		forward[1] = cp*sy;
 		forward[2] = -sp;
 	}
+
 	if (right || up)
 	{
 		angle = angles[ROLL] * (M_PI*2 / 360.0);
 		sr = sin(angle);
 		cr = cos(angle);
+
 		if (right)
 		{
 			right[0] = (-sr*sp*cy + cr*sy);
 			right[1] = (-sr*sp*sy + -cr*cy);
 			right[2] = -sr*cp;
 		}
+
 		if (up)
 		{
 			up[0] = (cr*sp*cy + sr*sy);
@@ -773,9 +878,9 @@ void AngleVectors( const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 void PerpendicularVector( vec3_t dst, const vec3_t src )
 {
 	int	pos;
-	int i;
-	float minelem = 1.0F;
-	vec3_t tempvec;
+	int 	i;
+	float 	minelem = 1.0F;
+	vec3_t	tempvec;
 
 	/*
 	** find the smallest magnitude axially aligned vector
@@ -783,12 +888,15 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 	*/
 	for ( pos = 0, i = 2; i >= 0; i-- )
 	{
-		if ( Q_fabs( src[i] ) < minelem )
+		//if ( Q_fabs( src[i] ) < minelem )
+		if ( fabs( src[i] ) < minelem ) // Cowcat
 		{
 			pos = i;
-			minelem = Q_fabs( src[i] );
+			//minelem = Q_fabs( src[i] );
+			minelem = fabs( src[i] ); // Cowcat
 		}
 	}
+
 	tempvec[0] = tempvec[1] = tempvec[2] = 0.0F;
 	tempvec[pos] = 1.0F;
 
@@ -803,10 +911,13 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 	VectorNormalize( dst );
 }
 
-float Q_powf( float x, int y ) {
+float Q_powf( float x, int y )
+{
 	float r = x;
+
 	for ( y--; y>0; y-- )
 		r *= x;
+
 	return r;
 }
 
@@ -857,10 +968,12 @@ qboolean G_FindClosestPointOnLineSegment( const vec3_t start, const vec3_t end, 
 		{
 			VectorCopy( from, result );
 		}
+
 		else
 		{
 			VectorCopy( end, result );
 		}
+
 		return qfalse;
 	}
 
@@ -871,21 +984,25 @@ qboolean G_FindClosestPointOnLineSegment( const vec3_t start, const vec3_t end, 
 	dot = DotProductNormalize( vecEnd2From, vecEnd2Start );
 
 	if ( dot <= 0 )
-	{//The perpendicular would be beyond or through the start point
+	{
+		//The perpendicular would be beyond or through the start point
 		VectorCopy( end, result );
 		return qfalse;
 	}
 
 	if ( dot == 1 )
-	{//parallel, closer of 2 points will be the target
+	{
+		//parallel, closer of 2 points will be the target
 		if( (VectorLengthSquared( vecEnd2From )) < (VectorLengthSquared( vecEnd2Start )))
 		{
 			VectorCopy( from, result );
 		}
+
 		else
 		{
 			VectorCopy( end, result );
 		}
+
 		return qfalse;
 	}
 
@@ -947,12 +1064,14 @@ float G_PointDistFromLineSegment( const vec3_t start, const vec3_t end, const ve
 	dot = DotProductNormalize( vecEnd2From, vecEnd2Start );
 
 	if ( dot <= 0 )
-	{//The perpendicular would be beyond or through the end point
+	{
+		//The perpendicular would be beyond or through the end point
 		return distEnd2From;
 	}
 
 	if ( dot == 1 )
-	{//parallel, closer of 2 points will be the target
+	{
+		//parallel, closer of 2 points will be the target
 		return ((distStart2From<distEnd2From)?distStart2From:distEnd2From);
 	}
 

@@ -1811,7 +1811,8 @@ bool CBezier::Update( void )
 }
 
 //----------------------------
-inline void CBezier::DrawSegment( vec3_t start, vec3_t end, float texcoord1, float texcoord2 )
+//inline 
+void CBezier::DrawSegment( vec3_t start, vec3_t end, float texcoord1, float texcoord2 ) // could be some problem here reloading ?? - Cowcat (no inline test)
 {
 	vec3_t			lineDir, cross, viewDir;
 	static vec3_t	lastEnd[2];

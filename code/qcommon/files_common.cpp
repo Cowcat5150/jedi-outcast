@@ -360,7 +360,8 @@ FS_SV_FOpenFileRead
 
 ===========
 */
-int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
+int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp )
+{
 	char *ospath;
 	fileHandle_t	f = 0;
 
@@ -377,8 +378,9 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 	S_ClearSoundBuffer();
 
 	ospath = FS_BuildOSPath( fs_homepath->string, filename, "" );
+
 	// remove trailing slash
-  ospath[strlen(ospath)-1] = '\0';
+  	ospath[strlen(ospath)-1] = '\0';
 
 	if ( fs_debug->integer ) {
 		Com_Printf( "FS_SV_FOpenFileRead: %s\n", ospath );
@@ -386,7 +388,9 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 
 	fsh[f].handleFiles.file.o = fopen( ospath, "rb" );
 	fsh[f].handleSync = qfalse;
-	if (!fsh[f].handleFiles.file.o) {
+
+	if (!fsh[f].handleFiles.file.o)
+	{
 		// NOTE TTimo on non *nix systems, fs_homepath == fs_basepath, might want to avoid
 		if (Q_stricmp(fs_homepath->string,fs_basepath->string))
 		{
@@ -399,6 +403,7 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 				Com_Printf( "FS_SV_FOpenFileRead (fs_basepath): %s\n", ospath );
 			}
 			
+
 			fsh[f].handleFiles.file.o = fopen( ospath, "rb" );
 			fsh[f].handleSync = qfalse;
 			
@@ -409,7 +414,8 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 		}
 	}
 	
-	if (!fsh[f].handleFiles.file.o) {
+	if (!fsh[f].handleFiles.file.o)
+	{
 		// search cd path
 		ospath = FS_BuildOSPath( fs_cdpath->string, filename, "" );
 		ospath[strlen(ospath)-1] = '\0';
@@ -418,7 +424,7 @@ int FS_SV_FOpenFileRead( const char *filename, fileHandle_t *fp ) {
 		{
 			Com_Printf( "FS_SV_FOpenFileRead (fs_cdpath) : %s\n", ospath );
 		}
-		
+
 		fsh[f].handleFiles.file.o = fopen( ospath, "rb" );
 		fsh[f].handleSync = qfalse;
 		
@@ -579,6 +585,12 @@ void FS_Shutdown( void ) {
 			FS_FCloseFile(i);
 		}
 	}
+
+	#ifdef DELAY_WRITECONFIG // ec-/Quake3e - Cowcat added
+
+	Com_WriteConfiguration();
+
+	#endif
 
 	// free everything
 	for ( p = fs_searchpaths ; p ; p = next ) {

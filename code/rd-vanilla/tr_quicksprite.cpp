@@ -35,9 +35,26 @@ CQuickSpriteSystem SQuickSprite;
 // Construction/Destruction
 //////////////////////////////////////////////////////////////////////
 
-CQuickSpriteSystem::CQuickSpriteSystem(void)
+//CQuickSpriteSystem::CQuickSpriteSystem(void)
+//{
+
+CQuickSpriteSystem::CQuickSpriteSystem() : // new Cowcat
+
+	// new Cowcat
+	mTexBundle(NULL),
+	mGLStateBits(0),
+	mFogIndex(-1),
+	mUseFog(qfalse),
+	mNextVert(0)
+	//
 {
 	int i;
+
+	// new Cowcat
+	memset( mVerts, 0, sizeof( mVerts ) );
+	memset( mFogTextureCoords, 0, sizeof( mFogTextureCoords ) );
+	memset( mColors, 0, sizeof( mColors ) );
+	//
 
 	for (i = 0; i < SHADER_MAX_VERTEXES; i += 4)
 	{
@@ -62,15 +79,15 @@ CQuickSpriteSystem::~CQuickSpriteSystem(void)
 
 void CQuickSpriteSystem::Flush(void)
 {
-	if (mNextVert==0)
+	if (mNextVert == 0)
 	{
 		return;
 	}
 
 	/*
-	if (mUseFog && r_drawfog->integer == 2 &&
-		mFogIndex == tr.world->globalFog)
-	{ //enable hardware fog when we draw this thing if applicable -rww
+	if (mUseFog && r_drawfog->integer == 2 && mFogIndex == tr.world->globalFog)
+	{
+		//enable hardware fog when we draw this thing if applicable -rww
 		fog_t *fog = tr.world->fogs + mFogIndex;
 
 		qglFogf(GL_FOG_MODE, GL_EXP2);
@@ -79,6 +96,7 @@ void CQuickSpriteSystem::Flush(void)
 		qglEnable(GL_FOG);
 	}
 	*/
+
 	//this should not be needed, since I just wait to disable fog for the surface til after surface sprites are done
 
 	//
@@ -98,11 +116,19 @@ void CQuickSpriteSystem::Flush(void)
 
 	qglVertexPointer (3, GL_FLOAT, 16, mVerts);
 
+	#if !defined( AMIGAOS )
+
 	if ( qglLockArraysEXT )
 	{
 		qglLockArraysEXT(0, mNextVert);
 		GLimp_LogComment( "glLockArraysEXT\n" );
 	}
+
+	#else
+
+	//qglLockArrays(0, mNextVert); // Cowcat
+
+	#endif
 
 	qglDrawArrays(GL_QUADS, 0, mNextVert);
 
@@ -145,13 +171,22 @@ void CQuickSpriteSystem::Flush(void)
 	// 
 	// unlock arrays
 	//
+
+	#if !defined(AMIGAOS)
+
 	if (qglUnlockArraysEXT) 
 	{
 		qglUnlockArraysEXT();
 		GLimp_LogComment( "glUnlockArraysEXT\n" );
 	}
 
-	mNextVert=0;
+	#else
+	
+	//qglUnlockArrays(); // Cowcat
+	
+	#endif
+
+	mNextVert = 0;
 }
 
 
@@ -161,11 +196,13 @@ void CQuickSpriteSystem::StartGroup(textureBundle_t *bundle, uint32_t glbits, in
 
 	mTexBundle = bundle;
 	mGLStateBits = glbits;
+
 	if (fogIndex != -1)
 	{
 		mUseFog = qtrue;
 		mFogIndex = fogIndex;
 	}
+
 	else
 	{
 		mUseFog = qfalse;
@@ -178,10 +215,12 @@ void CQuickSpriteSystem::StartGroup(textureBundle_t *bundle, uint32_t glbits, in
 	{
 		mTurnCullBackOn=true;
 	}
+
 	else
 	{
 		mTurnCullBackOn=false;
 	}
+
 	qglDisable(GL_CULL_FACE);
 }
 
@@ -191,6 +230,7 @@ void CQuickSpriteSystem::EndGroup(void)
 	Flush();
 
 	qglColor4ub(255,255,255,255);
+
 	if(mTurnCullBackOn)
 	{
 		qglEnable(GL_CULL_FACE);
@@ -239,6 +279,7 @@ void CQuickSpriteSystem::Add(float *pointdata, color4ub_t color, vec2_t fog)
 
 		mUseFog=qtrue;
 	}
+
 	else
 	{
 		mUseFog=qfalse;

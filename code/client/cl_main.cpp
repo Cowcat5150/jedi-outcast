@@ -84,10 +84,14 @@ clientStatic_t		cls;
 
 // Structure containing functions exported from refresh DLL
 refexport_t	re;
+
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 static void *rendererLib = NULL;
+#endif
 
 //RAZFIXME: BAD BAD, maybe? had to move it out of ghoul2_shared.h -> CGhoul2Info_v at the least..
-IGhoul2InfoArray &_TheGhoul2InfoArray( void ) {
+IGhoul2InfoArray &_TheGhoul2InfoArray( void )
+{
 	return re.TheGhoul2InfoArray();
 }
 
@@ -350,7 +354,8 @@ void CL_ForwardToServer_f( void ) {
 CL_Disconnect_f
 ==================
 */
-void CL_Disconnect_f( void ) {
+void CL_Disconnect_f( void )
+{
 	SCR_StopCinematic();	
 
 	//FIXME:
@@ -371,8 +376,9 @@ CL_Vid_Restart_f
 Restart the video subsystem
 =================
 */
-void CL_Vid_Restart_f( void ) {
-	S_StopAllSounds();		// don't let them loop during the restart
+void CL_Vid_Restart_f( void )
+{
+	S_StopAllSounds();	// don't let them loop during the restart
 	S_BeginRegistration();	// all sound handles are now invalid
 	CL_ShutdownRef(qtrue);
 	CL_ShutdownUI();
@@ -401,7 +407,8 @@ The cgame and game must also be forced to restart because
 handles will be invalid
 =================
 */
-void CL_Snd_Restart_f( void ) {
+void CL_Snd_Restart_f( void )
+{
 	S_Shutdown();
 
 	S_Init();
@@ -424,20 +431,25 @@ void CL_Snd_Restart_f( void ) {
 CL_Configstrings_f
 ==================
 */
-void CL_Configstrings_f( void ) {
-	int		i;
-	int		ofs;
+void CL_Configstrings_f( void )
+{
+	int	i;
+	int	ofs;
 
-	if ( cls.state != CA_ACTIVE ) {
+	if ( cls.state != CA_ACTIVE )
+	{
 		Com_Printf( "Not connected to a server.\n");
 		return;
 	}
 
-	for ( i = 0 ; i < MAX_CONFIGSTRINGS ; i++ ) {
+	for ( i = 0 ; i < MAX_CONFIGSTRINGS ; i++ )
+	{
 		ofs = cl.gameState.stringOffsets[ i ];
+
 		if ( !ofs ) {
 			continue;
 		}
+
 		Com_Printf( "%4i: %s\n", i, cl.gameState.stringData + ofs );
 	}
 }
@@ -447,7 +459,8 @@ void CL_Configstrings_f( void ) {
 CL_Clientinfo_f
 ==============
 */
-void CL_Clientinfo_f( void ) {
+void CL_Clientinfo_f( void )
+{
 	Com_Printf( "--------- Client Information ---------\n" );
 	Com_Printf( "state: %i\n", cls.state );
 	Com_Printf( "Server: %s\n", cls.servername );
@@ -468,8 +481,9 @@ CL_CheckForResend
 Resend a connect message if the last one has timed out
 =================
 */
-void CL_CheckForResend( void ) {
-	int		port;
+void CL_CheckForResend( void )
+{
+	int	port;
 	char	info[MAX_INFO_STRING];
 
 //	if ( cls.state == CA_CINEMATIC )  
@@ -757,8 +771,9 @@ CL_Frame
 extern cvar_t	*cl_newClock;
 static unsigned int frameCount;
 float avgFrametime=0.0;
-void CL_Frame ( int msec,float fractionMsec ) {
 
+void CL_Frame ( int msec,float fractionMsec )
+{
 	if ( !com_cl_running->integer ) {
 		return;
 	}
@@ -894,10 +909,14 @@ static void CL_ShutdownRef( qboolean restarting ) {
 
 	memset( &re, 0, sizeof( re ) );
 
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
+
 	if ( rendererLib != NULL ) {
 		Sys_UnloadDll (rendererLib);
 		rendererLib = NULL;
 	}
+
+	#endif
 }
 
 /*
@@ -925,7 +944,8 @@ void CL_StartSound( void ) {
 CL_InitRenderer
 ============
 */
-void CL_InitRenderer( void ) {
+void CL_InitRenderer( void )
+{
 	// this sets up the renderer and calls R_Init
 	re.BeginRegistration( &cls.glconfig );
 
@@ -945,7 +965,8 @@ After the server has cleared the hunk, these will need to be restarted
 This is the only place that any of these functions are called from
 ============================
 */
-void CL_StartHunkUsers( void ) {
+void CL_StartHunkUsers( void )
+{
 	if ( !com_cl_running->integer ) {
 		return;
 	}
@@ -966,7 +987,8 @@ void CL_StartHunkUsers( void ) {
 	}
 
 	//we require the ui to be loaded here or else it crashes trying to access the ui on command line map loads
-	if ( !cls.uiStarted ) {
+	if ( !cls.uiStarted )
+	{
 		cls.uiStarted = qtrue;
 		CL_InitUI();
 	}
@@ -987,7 +1009,9 @@ DLL glue
 ================
 */
 #define	MAXPRINTMSG	4096
-void QDECL CL_RefPrintf( int print_level, const char *fmt, ...) {
+
+void QDECL CL_RefPrintf( int print_level, const char *fmt, ...)
+{
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
 	
@@ -1070,7 +1094,9 @@ extern bool CM_CullWorldBox (const cplane_t *frustum, const vec3pair_t bounds);
 extern qboolean SND_RegisterAudio_LevelLoadEnd(qboolean bDeleteEverythingNotUsedThisLevel /* 99% qfalse */);
 extern cvar_t *Cvar_Set2( const char *var_name, const char *value, qboolean force);
 extern CMiniHeap *G2VertSpaceServer;
-static CMiniHeap *GetG2VertSpaceServer( void ) {
+
+static CMiniHeap *GetG2VertSpaceServer( void )
+{
 	return G2VertSpaceServer;
 }
 
@@ -1081,14 +1107,19 @@ static CMiniHeap *GetG2VertSpaceServer( void ) {
 #define DEFAULT_RENDER_LIBRARY	"rdsp-vanilla"	
 #endif
 
-void CL_InitRef( void ) {
-	refexport_t	*ret;
-	refimport_t rit;
+void CL_InitRef( void )
+{
+	refexport_t		*ret;
+	static refimport_t 	rit; // now static - Cowcat
+	
+	Com_Printf( "----- Initializing Renderer ----\n" );
+
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
+
 	char		dllName[MAX_OSPATH];
 	GetRefAPI_t	GetRefAPI;
 
-	Com_Printf( "----- Initializing Renderer ----\n" );
-    cl_renderer = Cvar_Get( "cl_renderer", DEFAULT_RENDER_LIBRARY, CVAR_ARCHIVE|CVAR_LATCH );
+    	cl_renderer = Cvar_Get( "cl_renderer", DEFAULT_RENDER_LIBRARY, CVAR_ARCHIVE|CVAR_LATCH );
 
 	Com_sprintf( dllName, sizeof( dllName ), "%s_" ARCH_STRING DLL_EXT, cl_renderer->string );
 
@@ -1106,10 +1137,18 @@ void CL_InitRef( void ) {
 	}
 
 	GetRefAPI = (GetRefAPI_t)Sys_LoadFunction( rendererLib, "GetRefAPI" );
+	//GetRefAPI = (GetRefAPI_t)dllGetProcAddress( rendererLib, (char *)"GetRefAPI" ); // Cowcat
+
 	if ( !GetRefAPI )
 		Com_Error( ERR_FATAL, "Can't load symbol GetRefAPI: '%s'", Sys_LibraryError() );
+		//Com_Error( ERR_FATAL, "Can't load symbol GetRefAPI: "); // Cowcat
+
+	#endif
+
+	//memset ( &rit, 0, sizeof( rit ) ); // Cowcat test
 
 #define RIT(y)	rit.y = y
+
 	RIT(CIN_PlayCinematic);
 	RIT(CIN_RunCinematic);
 	RIT(CIN_UploadCinematic);
@@ -1158,12 +1197,13 @@ void CL_InitRef( void ) {
 
 	RIT(Hunk_ClearToMark);
 
+#if !defined(AMIGAOS) && !defined(MORPHOS)
 #ifndef _WIN32
     RIT(IN_Init);
     RIT(IN_Shutdown);
     RIT(IN_Restart);
 #endif
-
+#endif
 	rit.PD_Load = PD_Load;
 	rit.PD_Store = PD_Store;
 
@@ -1200,6 +1240,7 @@ void CL_InitRef( void ) {
 
 	// unpause so the cgame definately gets a snapshot and renders a frame
 	Cvar_Set( "cl_paused", "0" );
+
 }
 
 
@@ -1210,7 +1251,8 @@ void CL_InitRef( void ) {
 CL_Init
 ====================
 */
-void CL_Init( void ) {
+void CL_Init( void )
+{
 	Com_Printf( "----- Client Initialization -----\n" );
 
 #ifdef JK2_MODE
@@ -1319,7 +1361,7 @@ void CL_Init( void ) {
 	SCR_Init ();
 
 	Cbuf_Execute ();
-	
+
 	Cvar_Set( "cl_running", "1" );
 
 	Com_Printf( "----- Client Initialization Complete -----\n" );
@@ -1332,7 +1374,8 @@ CL_Shutdown
 
 ===============
 */
-void CL_Shutdown( void ) {
+void CL_Shutdown( void )
+{
 	static qboolean recursive = qfalse;
 	
 	if ( !com_cl_running || !com_cl_running->integer ) {
@@ -1341,10 +1384,12 @@ void CL_Shutdown( void ) {
 
 	Com_Printf( "----- CL_Shutdown -----\n" );
 
-	if ( recursive ) {
+	if ( recursive )
+	{
 		Com_Printf( "WARNING: Recursive shutdown\n" );
 		return;
 	}
+
 	recursive = qtrue;
 
 	CL_ShutdownUI();
