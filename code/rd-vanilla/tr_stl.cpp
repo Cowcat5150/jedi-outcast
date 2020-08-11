@@ -44,10 +44,13 @@ This file is part of Jedi Academy.
 
 #include <map>
 #include "../qcommon/sstring.h"	// #include <string>
-using namespace std;
 
-typedef map<sstring_t, const char *>	ShaderEntryPtrs_t;
-										ShaderEntryPtrs_t ShaderEntryPtrs;
+//using namespace std; // Cowcat
+
+typedef std::map<sstring_t, const char *> ShaderEntryPtrs_t; // Cowcat
+typedef ShaderEntryPtrs_t::size_type ShaderEntryPtrs_size; // Cowcat
+
+ShaderEntryPtrs_t ShaderEntryPtrs;
 
 
 void ShaderEntryPtrs_Clear(void)
@@ -70,6 +73,7 @@ void ShaderEntryPtrs_Insert(const char  *token, const char  *p)
 	{
 		ShaderEntryPtrs[token] = p;
 	}
+
 	else
 	{
 		ri.Printf( PRINT_DEVELOPER, "Duplicate shader entry %s!\n",token );
@@ -83,6 +87,7 @@ void ShaderEntryPtrs_Insert(const char  *token, const char  *p)
 const char *ShaderEntryPtrs_Lookup(const char *psShaderName)
 {
 	ShaderEntryPtrs_t::iterator it = ShaderEntryPtrs.find(psShaderName);
+
 	if (it != ShaderEntryPtrs.end())
 	{
 		const char *p = (*it).second;

@@ -1387,8 +1387,10 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 			}
 			// Copy image ptrs into an array of ptrs
 			stage->bundle[0].image = (image_t*) Hunk_Alloc( stage->bundle[0].numImageAnimations * sizeof( image_t* ), qfalse );
-			memcpy( stage->bundle[0].image,	images,			stage->bundle[0].numImageAnimations * sizeof( image_t* ) );
+			memcpy( stage->bundle[0].image,	images,	stage->bundle[0].numImageAnimations * sizeof( image_t* ) );
 		}
+
+		#if 1
 		else if ( !Q_stricmp( token, "videoMap" ) )
 		{
 			token = COM_ParseExt( text, qfalse );
@@ -1397,12 +1399,15 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 				ri.Printf( PRINT_WARNING, "WARNING: missing parameter for 'videoMap' keyword in shader '%s'\n", shader.name );
 				return qfalse;
 			}
+
 			stage->bundle[0].videoMapHandle = ri.CIN_PlayCinematic( token, 0, 0, 256, 256, (CIN_loop | CIN_silent | CIN_shader), NULL);
+
 			if (stage->bundle[0].videoMapHandle != -1) {
 				stage->bundle[0].isVideoMap = true;
 				stage->bundle[0].image = tr.scratchImage[stage->bundle[0].videoMapHandle];
 			}
 		}
+		#endif
 		//
 		// alphafunc <func>
 		//

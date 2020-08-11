@@ -22,10 +22,13 @@ This file is part of Jedi Academy.
 //
 #include "../server/exe_headers.h"
 
-
 #include "tr_local.h"
 
-#define SKY_SUBDIVISIONS		8
+#if defined(AMIGAOS)
+#include <mgl/mglmacros.h>
+#endif
+
+#define SKY_SUBDIVISIONS	8
 #define HALF_SKY_SUBDIVISIONS	(SKY_SUBDIVISIONS/2)
 
 static float s_cloudTexCoords[6][SKY_SUBDIVISIONS+1][SKY_SUBDIVISIONS+1][2];
@@ -143,7 +146,7 @@ static void AddSkyPolygon (int nump, vec3_t vecs)
 	}
 }
 
-#define	ON_EPSILON		0.1			// point on plane side epsilon
+#define	ON_EPSILON	0.1f	// point on plane side epsilon - now float - Cowcat
 #define	MAX_CLIP_VERTS	64
 /*
 ================
@@ -296,7 +299,7 @@ CLOUD VERTEX GENERATION
 static void MakeSkyVec( float s, float t, int axis, float outSt[2], vec3_t outXYZ )
 {
 	// 1 = s, 2 = t, 3 = 2048
-	static int	st_to_vec[6][3] =
+	static int st_to_vec[6][3] =
 	{
 		{3,-1,2},
 		{-3,1,2},
@@ -308,11 +311,11 @@ static void MakeSkyVec( float s, float t, int axis, float outSt[2], vec3_t outXY
 		{2,-1,-3}		// look straight down
 	};
 
-	vec3_t		b;
-	int			j, k;
+	vec3_t	b;
+	int	j, k;
 	float	boxSize;
 
-	boxSize = backEnd.viewParms.zFar / 1.75;		// div sqrt(3)
+	boxSize = backEnd.viewParms.zFar / 1.75;	// div sqrt(3)
 	b[0] = s*boxSize;
 	b[1] = t*boxSize;
 	b[2] = boxSize;
@@ -320,42 +323,46 @@ static void MakeSkyVec( float s, float t, int axis, float outSt[2], vec3_t outXY
 	for (j=0 ; j<3 ; j++)
 	{
 		k = st_to_vec[axis][j];
+
 		if (k < 0)
 		{
 			outXYZ[j] = -b[-k - 1];
 		}
+
 		else
 		{
 			outXYZ[j] = b[k - 1];
 		}
 	}
 
-	// avoid bilerp seam
-	s = (s+1)*0.5;
-	t = (t+1)*0.5;
-	if (s < sky_min)
-	{
-		s = sky_min;
-	}
-	else if (s > sky_max)
-	{
-		s = sky_max;
-	}
-
-	if (t < sky_min)
-	{
-		t = sky_min;
-	}
-	else if (t > sky_max)
-	{
-		t = sky_max;
-	}
-
-	t = 1.0 - t;
-
-
 	if ( outSt )
 	{
+		// avoid bilerp seam
+		s = (s+1)*0.5;
+		t = (t+1)*0.5;
+
+		if (s < sky_min)
+		{
+			s = sky_min;
+		}
+		else if (s > sky_max)
+		{
+			s = sky_max;
+		}
+
+		if (t < sky_min)
+		{
+			t = sky_min;
+		}
+		else if (t > sky_max)
+		{
+			t = sky_max;
+		}
+
+		t = 1.0 - t;
+
+	//if ( outSt )
+	//{
 		outSt[0] = s;
 		outSt[1] = t;
 	}

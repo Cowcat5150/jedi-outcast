@@ -52,35 +52,35 @@ This file is part of Jedi Academy.
 #define	START_TIME_FIND_WAYPOINT	FRAMETIME*5 // time-delay after map start after which it's okay to try to find your best waypoint
 
 // gentity->flags
-#define	FL_SHIELDED				0x00000001	// protected from all damage except lightsabers
+#define	FL_SHIELDED			0x00000001	// protected from all damage except lightsabers
 #define FL_DMG_BY_HEAVY_WEAP_ONLY	0x00000002	// protected from all damage except heavy weap class missiles
-#define	FL_DMG_BY_SABER_ONLY	0x00000004	//protected from all damage except saber damage
-#define	FL_GODMODE				0x00000010
-#define	FL_NOTARGET				0x00000020
+#define	FL_DMG_BY_SABER_ONLY		0x00000004	//protected from all damage except saber damage
+#define	FL_GODMODE			0x00000010
+#define	FL_NOTARGET			0x00000020
 #define	FL_TEAMSLAVE			0x00000400	// not the first on the team
 #define FL_NO_KNOCKBACK			0x00000800
 #define FL_DROPPED_ITEM			0x00001000
 #define	FL_DONT_SHOOT			0x00002000	// Can target him, but not shoot him
-#define	FL_UNDYING				0x00004000	// Takes damage down to 1 point, but does not die
-//#define FL_OVERCHARGED			0x00008000	// weapon shot is an overcharged version....probably a lame place to be putting this flag...
-#define FL_LOCK_PLAYER_WEAPONS	0x00010000	// player can't switch weapons... ask james if there's a better spot for this
+#define	FL_UNDYING			0x00004000	// Takes damage down to 1 point, but does not die
+//#define FL_OVERCHARGED		0x00008000	// weapon shot is an overcharged version....probably a lame place to be putting this flag...
+#define FL_LOCK_PLAYER_WEAPONS		0x00010000	// player can't switch weapons... ask james if there's a better spot for this
 #define FL_DISINTEGRATED		0x00020000	// marks that the corpse has already been disintegrated
-#define FL_FORCE_PULLABLE_ONLY	0x00040000	// cannot be force pushed
+#define FL_FORCE_PULLABLE_ONLY		0x00040000	// cannot be force pushed
 #define FL_NO_IMPACT_DMG		0x00080000	// Will not take impact damage
-#define FL_OVERCHARGED_HEALTH	0x00100000	// Reduce health back to max
+#define FL_OVERCHARGED_HEALTH		0x00100000	// Reduce health back to max
 #define FL_NO_ANGLES			0x00200000	// No bone angle overrides, no pitch or roll in full angles
 #define FL_RED_CROSSHAIR		0x00400000	// Crosshair red on me
 
 
 //Pointer safety utilities
-#define VALID( a )		( a != NULL )
+#define VALID( a )	( a != NULL )
 #define	VALIDATE( a )	( assert( a ) )
 
-#define	VALIDATEV( a )	if ( a == NULL ) {	assert(0);	return;			}
+#define	VALIDATEV( a )	if ( a == NULL ) {	assert(0);	return;		}
 #define	VALIDATEB( a )	if ( a == NULL ) {	assert(0);	return qfalse;	}
 #define VALIDATEP( a )	if ( a == NULL ) {	assert(0);	return NULL;	}
 
-#define VALIDSTRING( a )	( ( a != NULL ) && ( a[0] != NULL ) )
+#define VALIDSTRING( a )	( ( a != NULL ) && ( a[0] != '\0' ) )  // was a[0] != NULL - Cowcat
 
 //animations
 typedef struct

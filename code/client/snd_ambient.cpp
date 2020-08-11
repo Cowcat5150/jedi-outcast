@@ -29,72 +29,72 @@ This file is part of Jedi Academy.
 #include "snd_ambient.h"
 #include "snd_local.h"
 
-static const int MAX_SET_VOLUME =	255;
+static const int MAX_SET_VOLUME = 255;
 
 static void AS_GetGeneralSet( ambientSet_t & );
 static void AS_GetLocalSet( ambientSet_t & );
 static void AS_GetBModelSet( ambientSet_t & );
 
 //Current set and old set for crossfading
-static int	currentSet	= -1;
-static int oldSet		= -1;
+static int currentSet	= -1;
+static int oldSet	= -1;
 static int crossDelay	= 1000;	//1 second
 
 static int currentSetTime = 0;
 static int oldSetTime = 0;
 
 // Globals for debug purposes
-static int		numSets	= 0;
+static int numSets	= 0;
 
 // Main ambient sound group
-static CSetGroup*	aSets = NULL;
+static CSetGroup* aSets = NULL;
 
 // Globals for speed, blech
-static char	*parseBuffer	= NULL;
-static int		parseSize		= 0;
-static int		parsePos		= 0;
-static char	tempBuffer[1024];
+static char *parseBuffer = NULL;
+static int parseSize = 0;
+static int parsePos = 0;
+static char tempBuffer[1024];
 
 //NOTENOTE: Be sure to change the mirrored code in g_spawn.cpp, and cg_main.cpp
-typedef	map<sstring_t, unsigned char>	namePrecache_m;
+typedef	map<sstring_t, unsigned char> namePrecache_m;
 static namePrecache_m	*pMap;
 
 // Used for enum / string matching
-static const char	*setNames[NUM_AS_SETS] =
-					{	
-						"generalSet",
-						"localSet",
-						"bmodelSet",
-					};
+static const char *setNames[NUM_AS_SETS] =
+{	
+	"generalSet",
+	"localSet",
+	"bmodelSet",
+};
 
 // Used for enum / function matching
-static const parseFunc_t 	parseFuncs[NUM_AS_SETS] =	
-							{
-								AS_GetGeneralSet,
-								AS_GetLocalSet,
-								AS_GetBModelSet,
-							};
+static const parseFunc_t parseFuncs[NUM_AS_SETS] =	
+{
+	AS_GetGeneralSet,
+	AS_GetLocalSet,
+	AS_GetBModelSet,
+};
 
 // Used for keyword / enum matching
-static const char	*keywordNames[NUM_AS_KEYWORDS]=
-					{	
-						"timeBetweenWaves",
-						"subWaves",
-						"loopedWave",
-						"volRange",
-						"radius",
-						"type",
-						"amsdir",
-						"outdir",
-						"basedir",
-					};
+static const char *keywordNames[NUM_AS_KEYWORDS]=
+{	
+	"timeBetweenWaves",
+	"subWaves",
+	"loopedWave",
+	"volRange",
+	"radius",
+	"type",
+	"amsdir",
+	"outdir",
+	"basedir",
+};
 
 
 CSetGroup::CSetGroup(void)
 {
 	m_ambientSets = new vector<ambientSet_t*>;
 	m_setMap = new map<sstring_t, ambientSet_t*>;
-	m_numSets = 0;
+	m_numSets = 0; 
 }
 
 
@@ -112,7 +112,7 @@ Free
 
 void CSetGroup::Free( void )
 {
-	vector<ambientSet_t *>::iterator	ai;
+	vector<ambientSet_t *>::iterator ai;
 
 	for ( ai = m_ambientSets->begin(); ai != m_ambientSets->end(); ai++ )
 	{
@@ -175,12 +175,18 @@ ambientSet_t *CSetGroup::GetSet( const char *name )
 	map<sstring_t, ambientSet_t *>::iterator	mi;
 
 	if ( name == NULL )
+	{
+		//Com_Printf("getset name NULL %s\n", name); // Cowcat
 		return NULL;
+	}
 
 	mi = m_setMap->find( name );
 
 	if ( mi == m_setMap->end() )
+	{
+		//Com_Printf("getset setmap->end NULL %s\n", name);
 		return NULL;
+	}
 
 	return (*mi).second;
 
@@ -827,6 +833,8 @@ Called on the client side to load and precache all the ambient sound sets
 void AS_ParseSets( void )
 {
 	cvar_t	*cv = Cvar_Get ("s_initsound", "1", 0);
+	//cvar_t	*cv = Cvar_Get ("s_initsound", "1", CVAR_ARCHIVE); // test Cowcat
+
 	if ( !cv->integer ) {
 		return;
 	}
@@ -1023,9 +1031,10 @@ Alters lastTime to reflect the time updates.
 static void AS_PlayLocalSet( vec3_t listener_origin, vec3_t origin, ambientSet_t *set, int entID, int *lastTime )
 {
 	unsigned char	volume;
-	vec3_t			dir;
-	float			volScale, dist, distScale;
-	int				time = cls.realtime;
+	vec3_t		dir;
+	float		volScale, dist, distScale;
+	//int		time = cls.realtime;
+	int		time = cl.serverTime; // new Cowcat
 
 	//Make sure it's valid
 	if ( set == NULL )
@@ -1148,7 +1157,8 @@ int S_AddLocalSet( const char *name, vec3_t listener_origin, vec3_t origin, int 
 	set = aSets->GetSet( name );
 
 	if ( set == NULL )
-		return cls.realtime;
+		//return cls.realtime;
+		return cl.serverTime; // new Cowcat
 
 	currentTime = time;
 

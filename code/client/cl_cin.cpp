@@ -1470,6 +1470,8 @@ CL_PlayCinematic
 */
 int CIN_PlayCinematic( const char *arg, int x, int y, int w, int h, int systemBits, const char *psAudioFile /* = NULL */ )
 {
+	#if 1
+
 	unsigned short	RoQID;
 	char		name[MAX_OSPATH];
 	int		i;
@@ -1579,6 +1581,8 @@ int CIN_PlayCinematic( const char *arg, int x, int y, int w, int h, int systemBi
 	Com_DPrintf("trFMV::play(), invalid RoQ ID\n");
 
 	RoQShutdown();
+
+	#endif
 	return -1;
 }
 
@@ -1768,6 +1772,7 @@ CIN_DrawCinematic
 
 ==================
 */
+
 void CIN_DrawCinematic (int handle)
 {
 	float	x, y, w, h;
@@ -1803,6 +1808,7 @@ void CIN_DrawCinematic (int handle)
 	re.DrawStretchRaw( x, y, w, h, cinTable[handle].drawX, cinTable[handle].drawY, buf, handle, cinTable[handle].dirty);
 	cinTable[handle].dirty = qfalse;
 }
+
 
 // external vars so I can check if the game is setup enough that I can play the intro video...
 //
@@ -1914,7 +1920,7 @@ static void PlayCinematic(const char *arg, const char *s, qboolean qbInGame)
 		{
 			psAudioFile = "music/cinematic_1";
 #ifdef JK2_MODE
-			hCrawl = re.RegisterShaderNoMip( va("menu/video/tc_%d", sp_language->string) );
+			hCrawl = re.RegisterShaderNoMip( va("menu/video/tc_%d", sp_language->integer) ); // was sp_language->string - cowcat
 
 			if(!hCrawl)
 			{
@@ -2051,6 +2057,7 @@ void CL_PlayInGameCinematic_f(void)
 
 // Externally-called only, and only if cls.state == CA_CINEMATIC (or CL_IsRunningInGameCinematic() == true now)
 //
+
 void SCR_DrawCinematic (void) 
 {
 	if (CL_InGameCinematicOnStandBy())

@@ -190,10 +190,10 @@ cvar_t	*broadsword_effcorr=0;
 cvar_t	*broadsword_ragtobase=0;
 cvar_t	*broadsword_dircap=0;
 
-// More bullshit needed for the proper modular renderer --eez
 
 #if !defined(AMIGAOS) && !defined(MORPHOS)
 
+// More bullshit needed for the proper modular renderer --eez
 cvar_t	*sv_mapname;
 cvar_t	*sv_mapChecksum;
 cvar_t	*se_language;			// JKA
@@ -224,19 +224,19 @@ void ( APIENTRY * qglUnlockArraysEXT) ( void );
 #ifdef _WIN32	// GLOWXXX
 
 // Declare Register Combiners function pointers.
-PFNGLCOMBINERPARAMETERFVNV				qglCombinerParameterfvNV = NULL;
-PFNGLCOMBINERPARAMETERIVNV				qglCombinerParameterivNV = NULL;
-PFNGLCOMBINERPARAMETERFNV				qglCombinerParameterfNV = NULL;
-PFNGLCOMBINERPARAMETERINV				qglCombinerParameteriNV = NULL;
-PFNGLCOMBINERINPUTNV					qglCombinerInputNV = NULL;
-PFNGLCOMBINEROUTPUTNV					qglCombinerOutputNV = NULL;
-PFNGLFINALCOMBINERINPUTNV				qglFinalCombinerInputNV = NULL;
+PFNGLCOMBINERPARAMETERFVNV			qglCombinerParameterfvNV = NULL;
+PFNGLCOMBINERPARAMETERIVNV			qglCombinerParameterivNV = NULL;
+PFNGLCOMBINERPARAMETERFNV			qglCombinerParameterfNV = NULL;
+PFNGLCOMBINERPARAMETERINV			qglCombinerParameteriNV = NULL;
+PFNGLCOMBINERINPUTNV				qglCombinerInputNV = NULL;
+PFNGLCOMBINEROUTPUTNV				qglCombinerOutputNV = NULL;
+PFNGLFINALCOMBINERINPUTNV			qglFinalCombinerInputNV = NULL;
 PFNGLGETCOMBINERINPUTPARAMETERFVNV		qglGetCombinerInputParameterfvNV = NULL;
 PFNGLGETCOMBINERINPUTPARAMETERIVNV		qglGetCombinerInputParameterivNV = NULL;
 PFNGLGETCOMBINEROUTPUTPARAMETERFVNV		qglGetCombinerOutputParameterfvNV = NULL;
 PFNGLGETCOMBINEROUTPUTPARAMETERIVNV		qglGetCombinerOutputParameterivNV = NULL;
-PFNGLGETFINALCOMBINERINPUTPARAMETERFVNV	qglGetFinalCombinerInputParameterfvNV = NULL;
-PFNGLGETFINALCOMBINERINPUTPARAMETERIVNV	qglGetFinalCombinerInputParameterivNV = NULL;
+PFNGLGETFINALCOMBINERINPUTPARAMETERFVNV		qglGetFinalCombinerInputParameterfvNV = NULL;
+PFNGLGETFINALCOMBINERINPUTPARAMETERIVNV		qglGetFinalCombinerInputParameterivNV = NULL;
 
 // Declare Pixel Format function pointers.
 PFNWGLGETPIXELFORMATATTRIBIVARBPROC		qwglGetPixelFormatAttribivARB = NULL;
@@ -244,14 +244,14 @@ PFNWGLGETPIXELFORMATATTRIBFVARBPROC		qwglGetPixelFormatAttribfvARB = NULL;
 PFNWGLCHOOSEPIXELFORMATARBPROC			qwglChoosePixelFormatARB = NULL;
 
 // Declare Pixel Buffer function pointers.
-PFNWGLCREATEPBUFFERARBPROC				qwglCreatePbufferARB = NULL;
-PFNWGLGETPBUFFERDCARBPROC				qwglGetPbufferDCARB = NULL;
+PFNWGLCREATEPBUFFERARBPROC			qwglCreatePbufferARB = NULL;
+PFNWGLGETPBUFFERDCARBPROC			qwglGetPbufferDCARB = NULL;
 PFNWGLRELEASEPBUFFERDCARBPROC			qwglReleasePbufferDCARB = NULL;
-PFNWGLDESTROYPBUFFERARBPROC				qwglDestroyPbufferARB = NULL;
-PFNWGLQUERYPBUFFERARBPROC				qwglQueryPbufferARB = NULL;
+PFNWGLDESTROYPBUFFERARBPROC			qwglDestroyPbufferARB = NULL;
+PFNWGLQUERYPBUFFERARBPROC			qwglQueryPbufferARB = NULL;
 
 // Declare Render-Texture function pointers.
-PFNWGLBINDTEXIMAGEARBPROC				qwglBindTexImageARB = NULL;
+PFNWGLBINDTEXIMAGEARBPROC			qwglBindTexImageARB = NULL;
 PFNWGLRELEASETEXIMAGEARBPROC			qwglReleaseTexImageARB = NULL;
 PFNWGLSETPBUFFERATTRIBARBPROC			qwglSetPbufferAttribARB = NULL;
 
@@ -287,11 +287,13 @@ void R_Splash()
 	pImage = R_FindImageFile( "menu/splash", qfalse, qfalse, qfalse, GL_CLAMP);
 
 	extern void	RB_SetGL2D (void);
-	RB_SetGL2D();	
+	RB_SetGL2D();
+
 	if (pImage )
 	{//invalid paths?
 		GL_Bind( pImage );
 	}
+
 	GL_State(GLS_SRCBLEND_ONE | GLS_DSTBLEND_ZERO);
 
 	const int width = 640;
@@ -348,6 +350,7 @@ static void InitOpenGL( void )
 #endif
 		GfxInfo_f();
 	}
+
 	else
 	{
 		// set default state
@@ -360,7 +363,8 @@ static void InitOpenGL( void )
 GL_CheckErrors
 ==================
 */
-void GL_CheckErrors( void ) {
+void GL_CheckErrors( void )
+{
     int		err;
     char	s[64];
 
@@ -423,9 +427,11 @@ const vidmode_t r_vidModes[] =
     { "Mode 11: 856x480 (wide)", 856,	 480 },
     { "Mode 12: 2400x600(surround)",2400,600 }
 };
-static const int	s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
 
-qboolean R_GetModeInfo( int *width, int *height, int mode ) {
+static const int s_numVidModes = ( sizeof( r_vidModes ) / sizeof( r_vidModes[0] ) );
+
+qboolean R_GetModeInfo( int *width, int *height, int mode )
+{
 	const vidmode_t	*vm;
 
     if ( mode < -1 ) {
@@ -518,7 +524,8 @@ byte *RB_ReadPixels(int x, int y, int width, int height, size_t *offset, int *pa
 R_TakeScreenshot
 ================== 
 */
-void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
+void R_TakeScreenshot( int x, int y, int width, int height, char *fileName )
+{
 	byte *allbuf, *buffer;
 	byte *srcptr, *destptr;
 	byte *endline, *endmem;
@@ -578,7 +585,8 @@ void R_TakeScreenshot( int x, int y, int width, int height, char *fileName ) {
 R_TakeScreenshotPNG
 ================== 
 */  
-void R_TakeScreenshotPNG( int x, int y, int width, int height, char *fileName ) {
+void R_TakeScreenshotPNG( int x, int y, int width, int height, char *fileName )
+{
 	byte *buffer=NULL;
 	size_t offset=0;
 	int padlen=0;
@@ -593,7 +601,8 @@ void R_TakeScreenshotPNG( int x, int y, int width, int height, char *fileName ) 
 R_TakeScreenshotJPEG
 ================== 
 */  
-void R_TakeScreenshotJPEG( int x, int y, int width, int height, char *fileName ) {
+void R_TakeScreenshotJPEG( int x, int y, int width, int height, char *fileName )
+{
 	byte *buffer;
 	size_t offset = 0, memcount;
 	int padlen;
@@ -614,7 +623,8 @@ void R_TakeScreenshotJPEG( int x, int y, int width, int height, char *fileName )
 R_ScreenshotFilename
 ================== 
 */  
-void R_ScreenshotFilename( char *buf, int bufSize, const char *ext ) {
+void R_ScreenshotFilename( char *buf, int bufSize, const char *ext )
+{
 	time_t rawtime;
 	char timeStr[32] = {0}; // should really only reach ~19 chars
 
@@ -633,7 +643,9 @@ the menu system, sampled down from full screen distorted images
 ====================
 */
 #define LEVELSHOTSIZE 256
-static void R_LevelShot( void ) {
+
+static void R_LevelShot( void )
+{
 	char		checkname[MAX_OSPATH];
 	byte		*buffer;
 	byte		*source, *allsource;
@@ -705,7 +717,8 @@ screenshot [filename]
 Doesn't print the pacifier message if there is a second arg
 ================== 
 */
-void R_ScreenShotTGA_f (void) {
+void R_ScreenShotTGA_f (void)
+{
 	char checkname[MAX_OSPATH] = {0};
 	qboolean silent = qfalse;
 
@@ -749,7 +762,8 @@ screenshot [filename]
 Doesn't print the pacifier message if there is a second arg
 ================== 
 */
-void R_ScreenShotPNG_f (void) {
+void R_ScreenShotPNG_f (void)
+{
 	char checkname[MAX_OSPATH] = {0};
 	qboolean silent = qfalse;
 
@@ -781,7 +795,8 @@ void R_ScreenShotPNG_f (void) {
 		Com_Printf( "Wrote %s\n", checkname );
 } 
 
-void R_ScreenShot_f (void) {
+void R_ScreenShot_f (void)
+{
 	char checkname[MAX_OSPATH] = {0};
 	qboolean silent = qfalse;
 
@@ -827,7 +842,8 @@ void GL_SetDefaultState( void )
 
 	// initialize downstream texture unit if we're running
 	// in a multitexture environment
-	if ( qglActiveTextureARB ) {
+	if ( qglActiveTextureARB )
+	{
 		GL_SelectTexture( 1 );
 		GL_TextureMode( r_textureMode->string );
 		GL_TexEnv( GL_MODULATE );
@@ -870,7 +886,8 @@ Workaround for ri.Printf's 1024 characters buffer limit.
 ================
 */
 
-void R_PrintLongString(const char *string) {
+void R_PrintLongString(const char *string)
+{
 	char buffer[1024];
 	const char *p;
 	int size = strlen(string);
@@ -899,11 +916,13 @@ void GfxInfo_f( void )
 		"disabled",
 		"enabled"
 	};
+
 	const char *fsstrings[] =
 	{
 		"windowed",
 		"fullscreen"
 	};
+
 	const char *noborderstrings[] =
 	{
 		"",
@@ -935,6 +954,7 @@ void GfxInfo_f( void )
 	{
 		ri.Printf( PRINT_ALL, "N/A\n" );
 	}
+
 	if ( glConfig.deviceSupportsGamma )
 	{
 		ri.Printf( PRINT_ALL, "GAMMA: hardware w/ %d overbright bits\n", tr.overbrightBits );
@@ -1446,8 +1466,8 @@ void R_Init( void )
 	{
 		tr.sinTable[i]		= sin( DEG2RAD( i * 360.0f / ( ( float ) ( FUNCTABLE_SIZE - 1 ) ) ) );
 		tr.squareTable[i]	= ( i < FUNCTABLE_SIZE/2 ) ? 1.0f : -1.0f;
-		tr.sawToothTable[i] = (float)i / FUNCTABLE_SIZE;
-		tr.inverseSawToothTable[i] = 1.0 - tr.sawToothTable[i];
+		tr.sawToothTable[i]	= (float)i / FUNCTABLE_SIZE;
+		tr.inverseSawToothTable[i] = 1.0f - tr.sawToothTable[i];
 
 		if ( i < FUNCTABLE_SIZE / 2 )
 		{
@@ -1475,7 +1495,7 @@ void R_Init( void )
 	backEndData = (backEndData_t *) Hunk_Alloc( sizeof( backEndData_t ), qtrue );
 	R_InitNextFrame();
 
-	const color4ub_t	color = {0xff, 0xff, 0xff, 0xff};
+	const color4ub_t color = {0xff, 0xff, 0xff, 0xff};
 
 	for(i=0;i<MAX_LIGHT_STYLES;i++)
 	{
@@ -1509,8 +1529,7 @@ RE_Shutdown
 extern void R_ShutdownWorldEffects(void);
 
 void RE_Shutdown( qboolean destroyWindow, qboolean restarting )
-{	
-
+{
 	// Need this temporarily.
 #ifdef _WIN32
 	tr.wv = ri.GetWinVars();
@@ -1607,7 +1626,8 @@ RE_EndRegistration
 Touch all images to make sure they are resident
 =============
 */
-void	RE_EndRegistration( void ) {
+void RE_EndRegistration( void )
+{
 	R_SyncRenderThread();
 }
 
@@ -1672,15 +1692,19 @@ qboolean *get_tr_distortionNegate( void )
 }
 
 float g_oldRangedFog = 0.0f;
+
 void RE_SetRangedFog( float dist )
 {
 	if (tr.rangedFog <= 0.0f)
 	{
 		g_oldRangedFog = tr.rangedFog;
 	}
+
 	tr.rangedFog = dist;
+
 	if (tr.rangedFog == 0.0f && g_oldRangedFog)
-	{ //restore to previous state if applicable
+	{
+		//restore to previous state if applicable
 		tr.rangedFog = g_oldRangedFog;
 	}
 }
@@ -1732,212 +1756,9 @@ unsigned int AnyLanguage_ReadCharFromString_JK2 ( char **text, qboolean *pbIsTra
 #endif
 
 #if !defined (AMIGAOS) && !defined(MORPHOS)
-
-extern "C" Q_EXPORT refexport_t* QDECL GetRefAPI ( int apiVersion, refimport_t *refimp )
-{
-	static refexport_t	re;
-
-	ri = *refimp;
-
-	memset( &re, 0, sizeof( re ) );
-
-	if ( apiVersion != REF_API_VERSION ) {
-		ri.Printf(PRINT_ALL, "Mismatched REF_API_VERSION: expected %i, got %i\n", 
-			REF_API_VERSION, apiVersion );
-		return NULL;
-	}
-
-	// the RE_ functions are Renderer Entry points
-
-#define REX(x)	re.x = RE_##x
-
-	REX(Shutdown);
-
-	REX(BeginRegistration);
-	REX(RegisterModel);
-	REX(RegisterSkin);
-	REX(GetAnimationCFG);
-	REX(RegisterShader);
-	REX(RegisterShaderNoMip);
-	re.LoadWorld = RE_LoadWorldMap;
-	re.R_LoadImage = R_LoadImage;
-
-	REX(RegisterMedia_LevelLoadBegin);
-	REX(RegisterMedia_LevelLoadEnd);
-	REX(RegisterMedia_GetLevel);
-	REX(RegisterImages_LevelLoadEnd);
-	REX(RegisterModels_LevelLoadEnd);
-
-	REX(SetWorldVisData);
-
-	REX(EndRegistration);
-
-	REX(ClearScene);
-	REX(AddRefEntityToScene);
-	REX(GetLighting);
-	REX(AddPolyToScene);
-	REX(AddLightToScene);
-	REX(RenderScene);
-	REX(GetLighting);
-
-	REX(SetColor);
-	re.DrawStretchPic = RE_StretchPic;
-	re.DrawRotatePic = RE_RotatePic;
-	re.DrawRotatePic2 = RE_RotatePic2;
-	REX(LAGoggles);
-	REX(Scissor);
-
-	re.DrawStretchRaw = RE_StretchRaw;
-	REX(UploadCinematic);
-
-	REX(BeginFrame);
-	REX(EndFrame);
-
-	REX(ProcessDissolve);
-	REX(InitDissolve);
-
-	REX(GetScreenShot);
-	REX(TempRawImage_ReadFromFile);
-	REX(TempRawImage_CleanUp);
-
-	re.MarkFragments = R_MarkFragments;
-	re.LerpTag = R_LerpTag;
-	re.ModelBounds = R_ModelBounds;
-	REX(GetLightStyle);
-	REX(SetLightStyle);
-	REX(GetBModelVerts);
-	re.WorldEffectCommand = R_WorldEffectCommand;
-	REX(GetModelBounds);
-
-	REX(SVModelInit);
-
-	REX(RegisterFont);
-	REX(Font_HeightPixels);
-	REX(Font_StrLenPixels);
-	REX(Font_DrawString);
-	REX(Font_StrLenChars);
-	re.Language_IsAsian = Language_IsAsian;
-	re.Language_UsesSpaces = Language_UsesSpaces;
-	re.AnyLanguage_ReadCharFromString = AnyLanguage_ReadCharFromString;
-#ifdef JK2_MODE
-	re.AnyLanguage_ReadCharFromString2 = AnyLanguage_ReadCharFromString_JK2;
+extern "C" Q_EXPORT 
 #endif
-
-	re.R_InitWorldEffects = R_InitWorldEffects;
-	re.R_ClearStuffToStopGhoul2CrashingThings = R_ClearStuffToStopGhoul2CrashingThings;
-	re.R_inPVS = R_inPVS;
-
-	re.tr_distortionAlpha = get_tr_distortionAlpha;
-	re.tr_distortionStretch = get_tr_distortionStretch;
-	re.tr_distortionPrePost = get_tr_distortionPrePost;
-	re.tr_distortionNegate = get_tr_distortionNegate;
-
-	re.GetWindVector = R_GetWindVector;
-	re.GetWindGusting = R_GetWindGusting;
-	re.IsOutside = R_IsOutside;
-	re.IsOutsideCausingPain = R_IsOutsideCausingPain;
-	re.GetChanceOfSaberFizz = R_GetChanceOfSaberFizz;
-	re.IsShaking = R_IsShaking;
-	re.AddWeatherZone = R_AddWeatherZone;
-	re.SetTempGlobalFogColor = R_SetTempGlobalFogColor;
-
-	REX(SetRangedFog);
-
-	re.TheGhoul2InfoArray = TheGhoul2InfoArray;
-
-#define G2EX(x)	re.G2API_##x = G2API_##x
-
-	G2EX(AddBolt);
-	G2EX(AddBoltSurfNum);
-	G2EX(AddSurface);
-	G2EX(AnimateG2Models);
-	G2EX(AttachEnt);
-	G2EX(AttachG2Model);
-	G2EX(CollisionDetect);
-	G2EX(CleanGhoul2Models);
-	G2EX(CopyGhoul2Instance);
-	G2EX(DetachEnt);
-	G2EX(DetachG2Model);
-	G2EX(GetAnimFileName);
-	G2EX(GetAnimFileNameIndex);
-	G2EX(GetAnimFileInternalNameIndex);
-	G2EX(GetAnimIndex);
-	G2EX(GetAnimRange);
-	G2EX(GetAnimRangeIndex);
-	G2EX(GetBoneAnim);
-	G2EX(GetBoneAnimIndex);
-	G2EX(GetBoneIndex);
-	G2EX(GetBoltMatrix);
-	G2EX(GetGhoul2ModelFlags);
-	G2EX(GetGLAName);
-	G2EX(GetParentSurface);
-	G2EX(GetRagBonePos);
-	G2EX(GetSurfaceIndex);
-	G2EX(GetSurfaceName);
-	G2EX(GetSurfaceRenderStatus);
-	G2EX(GetTime);
-	G2EX(GiveMeVectorFromMatrix);
-	G2EX(HaveWeGhoul2Models);
-	G2EX(IKMove);
-	G2EX(InitGhoul2Model);
-	G2EX(IsPaused);
-	G2EX(ListBones);
-	G2EX(ListSurfaces);
-	G2EX(LoadGhoul2Models);
-	G2EX(LoadSaveCodeDestructGhoul2Info);
-	G2EX(PauseBoneAnim);
-	G2EX(PauseBoneAnimIndex);
-	G2EX(PrecacheGhoul2Model);
-	G2EX(RagEffectorGoal);
-	G2EX(RagEffectorKick);
-	G2EX(RagForceSolve);
-	G2EX(RagPCJConstraint);
-	G2EX(RagPCJGradientSpeed);
-	G2EX(RemoveBolt);
-	G2EX(RemoveBone);
-	G2EX(RemoveGhoul2Model);
-	G2EX(RemoveSurface);
-	G2EX(SaveGhoul2Models);
-	G2EX(SetAnimIndex);
-	G2EX(SetBoneAnim);
-	G2EX(SetBoneAnimIndex);
-	G2EX(SetBoneAngles);
-	G2EX(SetBoneAnglesIndex);
-	G2EX(SetBoneAnglesMatrix);
-	G2EX(SetBoneIKState);
-	G2EX(SetGhoul2ModelFlags);
-	G2EX(SetGhoul2ModelIndexes);
-	G2EX(SetLodBias);
-	//G2EX(SetModelIndexes);
-	G2EX(SetNewOrigin);
-	G2EX(SetRagDoll);
-	G2EX(SetRootSurface);
-	G2EX(SetShader);
-	G2EX(SetSkin);
-	G2EX(SetSurfaceOnOff);
-	G2EX(SetTime);
-	G2EX(StopBoneAnim);
-	G2EX(StopBoneAnimIndex);
-	G2EX(StopBoneAngles);
-	G2EX(StopBoneAnglesIndex);
-#ifdef _G2_GORE
-	G2EX(AddSkinGore);
-	G2EX(ClearSkinGore);
-#endif
-
-#ifdef G2_PERFORMANCE_ANALYSIS
-	re.G2Time_ReportTimers = G2Time_ReportTimers;
-	re.G2Time_ResetTimers = G2Time_ResetTimers;
-#endif
-
-	//Swap_Init();
-
-	return &re;
-}
-
-#else
-
-refexport_t *QDECL GetRefAPI( int apiVersion, refimport_t *refimp )
+refexport_t* QDECL GetRefAPI ( int apiVersion, refimport_t *refimp )
 {
 	static refexport_t	re;
 
@@ -1947,7 +1768,7 @@ refexport_t *QDECL GetRefAPI( int apiVersion, refimport_t *refimp )
 
 	if ( apiVersion != REF_API_VERSION )
 	{
-		ri.Printf(PRINT_ALL, "Mismatched REF_API_VERSION: expected %i, got %i\n",  REF_API_VERSION, apiVersion );
+		ri.Printf(PRINT_ALL, "Mismatched REF_API_VERSION: expected %i, got %i\n", REF_API_VERSION, apiVersion );
 		return NULL;
 	}
 
@@ -2139,4 +1960,3 @@ refexport_t *QDECL GetRefAPI( int apiVersion, refimport_t *refimp )
 	return &re;
 }
 
-#endif

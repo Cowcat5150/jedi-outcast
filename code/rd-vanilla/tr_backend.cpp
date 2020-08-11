@@ -23,6 +23,10 @@ This file is part of Jedi Academy.
 
 #include "tr_local.h"
 
+#if defined(AMIGAOS)
+#include <mgl/mglmacros.h>
+#endif
+
 backEndData_t	*backEndData;
 backEndState_t	backEnd;
 
@@ -43,6 +47,7 @@ bool g_bRenderGlowingObjects = false;
 // Whether the current hardware supports dynamic glows/flares.
 bool g_bDynamicGlowSupported = false;
 
+#if !defined(AMIGAOS)
 static const float s_flipMatrix[16] = 
 {
 	// convert from our coordinate system (looking down X)
@@ -52,7 +57,7 @@ static const float s_flipMatrix[16] =
 	0, 1, 0, 0,
 	0, 0, 0, 1
 };
-
+#endif
 
 /*
 ** GL_Bind
@@ -61,18 +66,24 @@ void GL_Bind( image_t *image )
 {
 	int texnum;
 
-	if ( !image ) {
+	if ( !image )
+	{
 		ri.Printf( PRINT_WARNING, "GL_Bind: NULL image\n" );
 		texnum = tr.defaultImage->texnum;
-	} else {
+	}
+
+	else {
 		texnum = image->texnum;
 	}
 
-	if ( r_nobind->integer && tr.dlightImage ) {		// performance evaluation option
+	if ( r_nobind->integer && tr.dlightImage )
+	{
+		// performance evaluation option
 		texnum = tr.dlightImage->texnum;
 	}
 
-	if ( glState.currenttextures[glState.currenttmu] != texnum ) {
+	if ( glState.currenttextures[glState.currenttmu] != texnum )
+	{
 		image->frameUsed = tr.frameCount;
 		glState.currenttextures[glState.currenttmu] = texnum;
 		qglBindTexture (GL_TEXTURE_2D, texnum);
@@ -147,7 +158,8 @@ void GL_Cull( int cullType )
 	if ( cullType == CT_TWO_SIDED ) 
 	{
 		qglDisable( GL_CULL_FACE );
-	} 
+	}
+
 	else 
 	{
 		qglEnable( GL_CULL_FACE );
@@ -170,6 +182,7 @@ void GL_Cull( int cullType )
 			{
 				qglCullFace( GL_BACK );
 			}
+
 			else
 			{
 				qglCullFace( GL_FRONT );
@@ -421,7 +434,7 @@ A player has predicted a teleport, but hasn't arrived yet
 */
 static void RB_Hyperspace( void )
 {
-	float		c;
+	float	c;
 
 	if ( !backEnd.isHyperspace ) {
 		// do initialization shit
@@ -503,9 +516,10 @@ static void RB_BeginDrawingView (void)
 
 				if (tr.world && tr.world->globalFog != -1)
 				{
-					const fog_t	*fog = &tr.world->fogs[tr.world->globalFog];
-					qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
+					const fog_t *fog = &tr.world->fogs[tr.world->globalFog];
+					qglClearColor(fog->parms.color[0], fog->parms.color[1], fog->parms.color[2], 1.0f );
 				}
+
 				else
 				{
 					qglClearColor ( 0.3f, 0.3f, 0.3f, 1.0 );
@@ -520,9 +534,10 @@ static void RB_BeginDrawingView (void)
 		{
 			if (tr.world && tr.world->globalFog != -1)
 			{
-				const fog_t	*fog = &tr.world->fogs[tr.world->globalFog];
-				qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
+				const fog_t *fog = &tr.world->fogs[tr.world->globalFog];
+				qglClearColor(fog->parms.color[0], fog->parms.color[1], fog->parms.color[2], 1.0f );
 			}
+
 			else
 			{
 				qglClearColor( 0.3f, 0.3f, 0.3f, 1 );	// FIXME: get color of sky
@@ -537,9 +552,9 @@ static void RB_BeginDrawingView (void)
 		if (tr.world && tr.world->globalFog != -1)
 		{
 			//this is because of a bug in multiple scenes I think, it needs to clear for the second scene but it doesn't normally.
-			const fog_t	*fog = &tr.world->fogs[tr.world->globalFog];
+			const fog_t *fog = &tr.world->fogs[tr.world->globalFog];
 
-			qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
+			qglClearColor(fog->parms.color[0], fog->parms.color[1], fog->parms.color[2], 1.0f );
 			clearBits |= GL_COLOR_BUFFER_BIT;
 		}
 	}
@@ -567,12 +582,13 @@ static void RB_BeginDrawingView (void)
 		backEnd.isHyperspace = qfalse;
 	}
 
-	glState.faceCulling = -1;		// force face culling to set next time
+	glState.faceCulling = -1;	// force face culling to set next time
 
 	// we will only draw a sun if there was sky rendered in this view
 	backEnd.skyRenderedThisView = qfalse;
 
 	#if !defined(AMIGAOS)
+
 	// clip to the plane of the portal
 	if ( backEnd.viewParms.isPortal ) {
 		float	plane[4];
@@ -594,10 +610,11 @@ static void RB_BeginDrawingView (void)
 	} else {
 		qglDisable (GL_CLIP_PLANE0);
 	}
+
 	#endif
 }
 
-#define	MAC_EVENT_PUMP_MSEC		5
+#define	MAC_EVENT_PUMP_MSEC	5
 
 //used by RF_DISTORTION
 static inline bool R_WorldCoordToScreenCoordFloat(vec3_t worldCoord, float *x, float *y)
@@ -667,6 +684,7 @@ typedef struct
 	int		depthRange;
 	drawSurf_t	*drawSurf;
 	shader_t	*shader;
+
 } postRender_t;
 
 static postRender_t g_postRenders[MAX_POST_RENDERS];
@@ -891,7 +909,8 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs )
 
 	#if !defined(AMIGAOS)
 	if (tr_stencilled && tr_distortionPrePost)
-	{ //ok, cap it now
+	{
+		//ok, cap it now
 		RB_CaptureScreenImage();
 		RB_DistortionFill();
 	}
@@ -1002,9 +1021,11 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs )
 #if 0
 	RB_DrawSun();
 #endif
+
 	#if !defined(AMIGAOS)
 	if (tr_stencilled && !tr_distortionPrePost)
-	{ //draw in the stencil buffer's cutout
+	{
+		//draw in the stencil buffer's cutout
 		RB_DistortionFill();
 	}
 	#endif
@@ -1029,6 +1050,43 @@ RENDER BACK END THREAD FUNCTIONS
 ============================================================================
 */
 
+#if 0
+
+const float *GL_Ortho( const float left, const float right, const float bottom, const float top, const float znear, const float zfar)
+{
+	static float m[16] = { 0 };
+
+	#if 1
+
+	const float rl = 1.0f / ( right - left );
+	const float tb = 1.0f / ( top - bottom );
+	const float fn = 1.0f / ( zfar - znear );
+
+	m[0] = 2.0f * rl;
+	m[5] = 2.0f * tb;
+	m[10] = 2.0f * fn;
+	m[12] = -(right + left ) * rl;
+	m[13] = -(top + bottom ) * tb;
+	m[14] = -(zfar + znear) * fn;
+	m[15] = 1.0f;
+
+	#else
+
+	m[0] = 2.0f / (right - left );
+	m[5] = 2.0f / (top - bottom );
+	m[10] = 2.0f / (zfar - znear );
+	m[12] = -(right + left ) / (right - left );
+	m[13] = -(top + bottom ) / (top - bottom );
+	m[14] = -(zfar + znear) / (zfar - znear );
+	m[15] = 1.0f;
+
+	#endif
+
+	return m;
+}
+
+#endif
+	
 /*
 ================
 RB_SetGL2D
@@ -1043,9 +1101,14 @@ void RB_SetGL2D (void)
 	qglViewport( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglMatrixMode(GL_PROJECTION);
+#if 1
     	qglLoadIdentity ();
 	qglOrtho (0, 640, 480, 0, 0, 1);
+#else
+	qglLoadMatrixf( GL_Ortho( 0, 640, 480, 0, 0, 1 ) );
+#endif
 	qglMatrixMode(GL_MODELVIEW);
+	
     	qglLoadIdentity ();
 
 	GL_State( GLS_DEPTHTEST_DISABLE | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
@@ -1058,7 +1121,7 @@ void RB_SetGL2D (void)
 
 	// set time for 2D shaders
 	backEnd.refdef.time = ri.Milliseconds();
-	backEnd.refdef.floatTime = backEnd.refdef.time * 0.001;
+	backEnd.refdef.floatTime = backEnd.refdef.time * 0.001f; // f - Cowcat
 }
 
 
@@ -1090,10 +1153,15 @@ RB_StretchPic
 const void *RB_StretchPic ( const void *data )
 {
 	const stretchPicCommand_t	*cmd;
-	shader_t *shader;
-	int		numVerts, numIndexes;
+	shader_t			*shader;
+	int				numVerts, numIndexes;
 
 	cmd = (const stretchPicCommand_t *)data;
+
+	if ( !backEnd.projection2D ) // put this here - cowcat
+	{
+		RB_SetGL2D();
+	}
 
 	shader = cmd->shader;
 
@@ -1107,9 +1175,11 @@ const void *RB_StretchPic ( const void *data )
 		RB_BeginSurface( shader, 0 );
 	}
 
+	/*
 	if ( !backEnd.projection2D ) {
 		RB_SetGL2D();	//set culling and other states
 	}
+	*/
 
 	RB_CHECKOVERFLOW( 4, 6 );
 	numVerts = tess.numVertexes;
@@ -1169,9 +1239,11 @@ RB_DrawRotatePic
 */
 const void *RB_RotatePic ( const void *data ) 
 {
+	//ri.Printf( PRINT_ALL, "RotatePic\n");
+
 	const rotatePicCommand_t	*cmd;
-	image_t *image;
-	shader_t *shader;
+	image_t				*image;
+	shader_t			*shader;
 
 	cmd = (const rotatePicCommand_t *)data;
 
@@ -1180,17 +1252,24 @@ const void *RB_RotatePic ( const void *data )
 
 	if ( image )
 	{
-		if ( !backEnd.projection2D ) {
+		if ( !backEnd.projection2D )
+		{
 			RB_SetGL2D();
 		}
 
 		qglColor4ubv( backEnd.color2D );
 		qglPushMatrix();
 
-		qglTranslatef(cmd->x+cmd->w,cmd->y,0);
+		qglTranslatef(cmd->x+cmd->w, cmd->y,0);
+
+		#if defined(AMIGAOS)
+		glRotatefEXT(cmd->a, GLROT_001);
+		#else
 		qglRotatef(cmd->a, 0.0, 0.0, 1.0);
-		
+		#endif
+
 		GL_Bind( image );
+
 		qglBegin (GL_QUADS);
 		qglTexCoord2f( cmd->s1, cmd->t1);
 		qglVertex2f( -cmd->w, 0 );
@@ -1215,9 +1294,11 @@ RB_DrawRotatePic2
 */
 const void *RB_RotatePic2 ( const void *data ) 
 {
+	//ri.Printf( PRINT_ALL, "RotatePic2\n");
+
 	const rotatePicCommand_t	*cmd;
-	image_t *image;
-	shader_t *shader;
+	image_t				*image;
+	shader_t			*shader;
 
 	cmd = (const rotatePicCommand_t *)data;
 
@@ -1242,22 +1323,27 @@ const void *RB_RotatePic2 ( const void *data )
 
 			// rotation point is going to be around the center of the passed in coordinates
 			qglTranslatef( cmd->x, cmd->y, 0 );
+
+			#if defined(AMIGAOS)
+			glRotatefEXT(cmd->a, GLROT_001);
+			#else
 			qglRotatef( cmd->a, 0.0, 0.0, 1.0 );
-			
+			#endif
+
 			GL_Bind( image );
 
 			qglBegin( GL_QUADS );
-				qglTexCoord2f( cmd->s1, cmd->t1);
-				qglVertex2f( -cmd->w * 0.5f, -cmd->h * 0.5f );
+			qglTexCoord2f( cmd->s1, cmd->t1);
+			qglVertex2f( -cmd->w * 0.5f, -cmd->h * 0.5f );
 
-				qglTexCoord2f( cmd->s2, cmd->t1 );
-				qglVertex2f( cmd->w * 0.5f, -cmd->h * 0.5f );
+			qglTexCoord2f( cmd->s2, cmd->t1 );
+			qglVertex2f( cmd->w * 0.5f, -cmd->h * 0.5f );
 
-				qglTexCoord2f( cmd->s2, cmd->t2 );
-				qglVertex2f( cmd->w * 0.5f, cmd->h * 0.5f );
+			qglTexCoord2f( cmd->s2, cmd->t2 );
+			qglVertex2f( cmd->w * 0.5f, cmd->h * 0.5f );
 
-				qglTexCoord2f( cmd->s1, cmd->t2 );
-				qglVertex2f( -cmd->w * 0.5f, cmd->h * 0.5f );
+			qglTexCoord2f( cmd->s1, cmd->t2 );
+			qglVertex2f( -cmd->w * 0.5f, cmd->h * 0.5f );
 			qglEnd();
 			
 			qglPopMatrix();
@@ -1422,7 +1508,7 @@ const void *RB_DrawBuffer( const void *data )
 
 	else if (!( backEnd.refdef.rdflags & RDF_NOWORLDMODEL ) && tr.world && tr.world->globalFog != -1 && tr.sceneCount) //don't clear during menus, wait for real scene
 	{
-		const fog_t		*fog = &tr.world->fogs[tr.world->globalFog];
+		const fog_t	*fog = &tr.world->fogs[tr.world->globalFog];
 
 		qglClearColor(fog->parms.color[0],  fog->parms.color[1], fog->parms.color[2], 1.0f );
 		qglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
@@ -1432,9 +1518,11 @@ const void *RB_DrawBuffer( const void *data )
 	{
 		// clear screen for debugging
 		int i = r_clear->integer;
+
 		if (i == 42) {
 			i = Q_irand(0,8);
 		}
+
 		switch (i)
 		{
 		default:

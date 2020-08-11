@@ -36,6 +36,7 @@ This file is part of Jedi Academy.
 #include "../qcommon/sstring.h"	// #include <string>
 #include <vector>
 #include <map>
+
 #ifdef _MSC_VER
 #pragma warning (pop)
 #pragma warning (disable:4503)	// decorated name length xceeded, name was truncated
@@ -81,17 +82,17 @@ enum setKeyword_e
 //NOTENOTE: Was going to make this a class, but don't want to muck around
 typedef struct ambientSet_s
 {
-	char			name[MAX_SET_NAME_LENGTH];
+	char		name[MAX_SET_NAME_LENGTH];
 	unsigned char	loopedVolume;
 	unsigned int	time_start, time_end;
 	unsigned int	volRange_start, volRange_end;
 	unsigned char	numSubWaves;
-	int				subWaves[MAX_WAVES_PER_GROUP];
-	int				loopedWave;
-	int				radius;							//NOTENOTE: -1 is global
-	int				masterVolume;					//Used for fading ambient sets (not a byte to prevent wrapping)
-	int				id;								//Used for easier referencing of sets
-	int				fadeTime;						//When the fade was started on this set
+	int		subWaves[MAX_WAVES_PER_GROUP];
+	int		loopedWave;
+	int		radius;				//NOTENOTE: -1 is global
+	int		masterVolume;			//Used for fading ambient sets (not a byte to prevent wrapping)
+	int		id;				//Used for easier referencing of sets
+	int		fadeTime;			//When the fade was started on this set
 } ambientSet_t;
 
 typedef void (*parseFunc_t)( ambientSet_t & );
@@ -120,9 +121,9 @@ public:
 
 protected:
 
-	int								m_numSets;
+	int					m_numSets;
 	vector < ambientSet_t * >		*m_ambientSets;
-	map	< sstring_t, ambientSet_t * >	*m_setMap;
+	map < sstring_t, ambientSet_t * >	*m_setMap;
 };
 
 // Prototypes

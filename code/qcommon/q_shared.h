@@ -75,7 +75,7 @@ This file is part of Jedi Academy.
 
 #define Q3CONFIG_NAME PRODUCT_NAME ".cfg"
 
-#define VALIDSTRING( a )	( ( a != NULL ) && ( a[0] != NULL ) )
+#define VALIDSTRING( a )	( ( a != NULL ) && ( a[0] != '\0' ) )  // was a[0] != NULL - Cowcat
 
 //JAC: Added
 #define ARRAY_LEN( x ) ( sizeof( x ) / sizeof( *(x) ) )
@@ -723,7 +723,7 @@ inline void VectorInverse( vec3_t v ){
 	v[2] = -v[2];
 }
 
-inline void VectorRotate( vec3_t in, vec3_t matrix[3], vec3_t out )
+inline void VectorRotate( const vec3_t in, vec3_t matrix[3], vec3_t out )
 {
 	out[0] = DotProduct( in, matrix[0] );
 	out[1] = DotProduct( in, matrix[1] );

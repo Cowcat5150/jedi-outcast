@@ -481,8 +481,8 @@ void S_Init( void )
 
 	MP3_InitCvars();
 
-	//cv = Cvar_Get ("s_initsound", "1", 0);
-	cv = Cvar_Get ("s_initsound", "1", CVAR_ARCHIVE); // Cowcat
+	cv = Cvar_Get ("s_initsound", "1", 0);
+	//cv = Cvar_Get ("s_initsound", "1", CVAR_ARCHIVE); // test Cowcat
 
 	if ( !cv->integer )
 	{

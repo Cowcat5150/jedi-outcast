@@ -620,6 +620,7 @@ Upload32
 qboolean cinematic;
 #endif
 
+
 static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean picmip, qboolean isLightmap, qboolean allowTC, 
 	int *pformat, word *pUploadWidth, word *pUploadHeight )
 {
@@ -628,51 +629,11 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 	int	width = *pUploadWidth;
 	int	height = *pUploadHeight; 
 
-	#if defined(AMIGAOS) // Cowcat
-	if(cinematic)
+	#if 1
+	if (cinematic)
 	{
-		//format = GL_ALPHA;
 		*pformat = GL_ALPHA;
-
-		#if 0
-
-		int 	i;
-
-		if ( picmip )
-		{
-		    	for(i = 0; i < r_picmip->integer; i++)
-			{
-			    R_MipMap( (byte *)data, width, height );
-
-			    width >>= 1;
-			    height >>= 1;
-
-			    if (width < 1) {
-				    width = 1;
-			    }
-
-			    if (height < 1) {
-				    height = 1;
-			    }
-		    	}
-	    	}
-
-		//
-	    	// clamp to the current upper OpenGL limit
-	    	// scale both axis down equally so we don't have to
-	    	// deal with a half mip resampling
-	    	//
-	    	while ( width > glConfig.maxTextureSize || height > glConfig.maxTextureSize )
-	    	{
-		    	R_MipMap( (byte *)data, width, height );
-		    	width >>= 1;
-		    	height >>= 1;
-	    	}
-
-		#endif
-
 		goto jump;
-
 	}
 	#endif
 
@@ -684,7 +645,7 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 		//float		rMax = 0, gMax = 0, bMax = 0;
 		//int		width = *pUploadWidth;
 		//int		height = *pUploadHeight; 
-    
+
 	    	//
 	    	// perform optional picmip operation
 	    	//
@@ -743,7 +704,7 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 				break;
 			}
 	    	}
-
+		
 	    	// select proper internal format
 	    	if ( samples == 3 )
 	    	{
@@ -839,7 +800,7 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 		}
 
 		R_LightScaleTexture (data, width, height, !mipmap );
-    
+
 		qglTexImage2D (GL_TEXTURE_2D, 0, *pformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 
 		if (mipmap)
@@ -851,6 +812,7 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 		    	while (width > 1 || height > 1)
 		    	{
 			    	R_MipMap( (byte *)data, width, height );
+
 			    	width >>= 1;
 			    	height >>= 1;
 
@@ -866,7 +828,7 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 			    	{
 				    	R_BlendOverTexture( (byte *)data, width * height, mipBlendColors[miplevel] );
 			    	}
-    
+
 			    	qglTexImage2D (GL_TEXTURE_2D, miplevel, *pformat, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data );
 		    	}
 	    	}
@@ -874,7 +836,6 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 
 	else
 	{
-
 	}
 
 done:
@@ -911,7 +872,7 @@ typedef map <const char *, image_t *, CStringComparator> AllocatedImages_t;
 AllocatedImages_t AllocatedImages;
 AllocatedImages_t::iterator itAllocatedImages;
 
-int giTextureBindNum; // = 1024;	// will be set to this anyway at runtime, but wtf? - Cowcat give it zero for Amiga WOS
+int giTextureBindNum = 0; // = 1024;	// will be set to this anyway at runtime, but wtf? - Cowcat give it zero for Amiga WOS
 
 int R_Images_StartIteration(void)
 {
@@ -992,12 +953,51 @@ void R_Images_DeleteLightMaps(void)
 	GL_ResetBinds();
 }
 
+#if 0
+void R_Images_DeleteScratch(void)
+{
+	ri.Printf( PRINT_ALL, "in Deletescratch \n");
+
+	qboolean bEraseOccured = qfalse;
+
+	for (AllocatedImages_t::iterator itImage = AllocatedImages.begin(); itImage != AllocatedImages.end(); bEraseOccured?itImage:++itImage)
+	{			
+		bEraseOccured = qfalse;
+
+		image_t *pImage = (*itImage).second;
+		
+		//if (pImage->imgName[0] == '$' /*&& strstr(pImage->imgName,"lightmap")*/)	// loose check, but should be ok
+		//if ( !strncmp(pImage->imgName, "*scratch", 8 ) )
+		if ( strstr(pImage->imgName, "scratch" ) )
+		{
+			R_Images_DeleteImageContents(pImage);
+#ifdef _WIN32
+			itImage = AllocatedImages.erase(itImage);
+#else
+			AllocatedImages_t::iterator itTemp = itImage;
+			itImage++;
+			AllocatedImages.erase(itTemp);
+#endif
+
+			bEraseOccured = qtrue;
+
+			ri.Printf( PRINT_ALL, "Deletescratch %s\n",pImage->imgName);
+		}
+	}
+
+	GL_ResetBinds();
+}
+#endif
+
 // special function currently only called by Dissolve code...
 //
+
 void R_Images_DeleteImage(image_t *pImage)
 {		
 	// Even though we supply the image handle, we need to get the corresponding iterator entry...
 	//
+
+
 	AllocatedImages_t::iterator itImage = AllocatedImages.find(pImage->imgName);
 
 	if (itImage != AllocatedImages.end())
@@ -1011,6 +1011,7 @@ void R_Images_DeleteImage(image_t *pImage)
 		assert(0);
 	}
 }
+
 
 // called only at app startup, vid_restart, app-exit
 //
@@ -1055,9 +1056,23 @@ void RE_RegisterImages_Info_f( void )
 
 // currently, this just goes through all the images and dumps any not referenced on this level...
 //
+
+
 qboolean RE_RegisterImages_LevelLoadEnd(void)
 {
 	//ri.Printf( PRINT_DEVELOPER, "RE_RegisterImages_LevelLoadEnd():\n");
+	//ri.Printf( PRINT_ALL, "RE_RegisterImages_LevelLoadEnd():\n");
+
+	#if 0
+	if(scratch)
+	{
+		R_Images_DeleteScratch();
+		scratch = qfalse;
+	}
+
+	else
+		scratch = qtrue;
+	#endif
 
 	qboolean bEraseOccured = qfalse;
 
@@ -1067,15 +1082,27 @@ qboolean RE_RegisterImages_LevelLoadEnd(void)
 
 		image_t *pImage = (*itImage).second;
 
-		// don't un-register system shaders (*fog, *dlight, *white, *default), but DO de-register lightmaps ("$<mapname>/lightmap%d")
-		if (pImage->imgName[0] != '*')
+		#if 0
 		{
+			if ( !strncmp(pImage->imgName, "*scratch", 8 ) )
+				goto crap;
+		}
+		#endif
+
+		// don't un-register system shaders (*fog, *dlight, *white, *default), but DO de-register lightmaps ("$<mapname>/lightmap%d")
+		if (pImage->imgName[0] != '*' ) // || !strncmp(pImage->imgName, "*scratch", 8 ) )
+		{
+			//crap:
+
 			// image used on this level?
 			//
 			if ( pImage->iLastLevelUsedOn != RE_RegisterMedia_GetLevel() )
 			{
+			//crap:
 				// nope, so dump it...
 				//ri.Printf( PRINT_DEVELOPER, "Dumping image \"%s\"\n",pImage->imgName);
+				//ri.Printf( PRINT_ALL, "Dumping image \"%s\"\n",pImage->imgName);
+
 				R_Images_DeleteImageContents(pImage);
 #ifdef _WIN32
 				itImage = AllocatedImages.erase(itImage);
@@ -1090,6 +1117,7 @@ qboolean RE_RegisterImages_LevelLoadEnd(void)
 	}
 
 	//ri.Printf( PRINT_DEVELOPER, "RE_RegisterImages_LevelLoadEnd(): Ok\n");
+	//ri.Printf(PRINT_ALL,"RE_RegisterImages_LevelLoadEnd(): Ok\n");
 
 	GL_ResetBinds();
 
@@ -1204,7 +1232,11 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 
 	//image->imgfileSize=fileSize;	
 	
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
 	image->texnum = 1024 + giTextureBindNum++;	// ++ is of course staggeringly important...
+	#else
+	image->texnum = giTextureBindNum++; // do not miss that one - Cowcat
+	#endif
 
 	// record which map it was used on...
 	//
@@ -1225,7 +1257,7 @@ image_t *R_CreateImage( const char *name, const byte *pic, int width, int height
 
 	GL_Bind(image);
 
-	Upload32( (unsigned *)pic, format, image->mipmap, allowPicmip,  isLightmap, allowTC, &image->internalFormat, &image->width, &image->height );
+	Upload32( (unsigned *)pic, format, image->mipmap, allowPicmip, isLightmap, allowTC, &image->internalFormat, &image->width, &image->height );
 
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, glWrapClampMode );
 	qglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, glWrapClampMode );
@@ -1453,14 +1485,17 @@ float R_FogFactor( float s, float t )
 	float	d;
 
 	s -= 1.0/512;
+
 	if ( s < 0 ) {
 		return 0;
 	}
+
 	if ( t < 1.0/32 ) {
 		return 0;
 	}
+
 	if ( t < 31.0/32 ) {
-		s *= (t - 1.0/32) / (30.0/32);
+		s *= (t - 1.0f/32.0f) / (30.0f/32.0f);
 	}
 
 	// we need to leave a lot of clamp range
@@ -1497,7 +1532,7 @@ static void R_CreateFogImage( void )
 	{
 		for (y=0 ; y<FOG_T ; y++)
 		{
-			d = R_FogFactor( ( x + 0.5 ) / FOG_S, ( y + 0.5 ) / FOG_T );
+			d = R_FogFactor( ( x + 0.5f ) / FOG_S, ( y + 0.5f ) / FOG_T );
 
 			data[(y*FOG_S+x)*4+0] = 
 			data[(y*FOG_S+x)*4+1] = 
@@ -1512,6 +1547,7 @@ static void R_CreateFogImage( void )
 	Z_Free( data );
 
 	#if !defined(AMIGAOS)
+
 	float	borderColor[4];
 
 	borderColor[0] = 1.0;
@@ -1646,12 +1682,17 @@ void R_CreateBuiltinImages( void )
 
 	tr.identityLightImage = R_CreateImage("*identityLight", (byte *)data, 8, 8, GL_RGBA, qfalse, qfalse, qtrue, GL_REPEAT);
 
+	#if 1
 	// scratchimage is usually used for cinematic drawing
 	for(x=0;x<NUM_SCRATCH_IMAGES;x++)
 	{
 		// scratchimage is usually used for cinematic drawing
-		tr.scratchImage[x] = R_CreateImage(va("*scratch%d",x), (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
+		//tr.scratchImage[x] = R_CreateImage(va("*scratch%d",x), (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
+		//tr.scratchImage[x] = R_CreateImage("*scratch", (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
+		//tr.scratchImage[x] = R_CreateImage("*scratch", (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
+		tr.scratchImage[x] = R_CreateImage("*scratch", NULL, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qtrue, qfalse, GL_CLAMP);
 	}
+	#endif
 
 	R_CreateDlightImage();
 	R_CreateFogImage();
@@ -2027,6 +2068,7 @@ bool RE_SplitSkins(const char *INname, char *skinhead, char *skintorso, char *sk
 
 
 qhandle_t RE_RegisterIndividualSkin( const char *name , qhandle_t hSkin);
+
 /*
 ===============
 RE_RegisterSkin
@@ -2115,6 +2157,8 @@ qhandle_t RE_RegisterSkin( const char *name)
 		//three part
 		hSkin = RE_RegisterIndividualSkin(skinhead, hSkin);
 
+		#if 0
+
 		if (hSkin)
 		{
 			hSkin = RE_RegisterIndividualSkin(skintorso, hSkin);
@@ -2124,6 +2168,22 @@ qhandle_t RE_RegisterSkin( const char *name)
 				hSkin = RE_RegisterIndividualSkin(skinlower, hSkin);
 			}
 		}
+
+		#else // don´t load skin multiple times - new Cowcat
+
+		if (hSkin && strcmp( skinhead, skintorso))
+		{
+			hSkin = RE_RegisterIndividualSkin(skintorso, hSkin);
+
+		}
+
+		if (hSkin && strcmp( skinhead, skinlower ) && strcmp( skintorso, skinlower ))
+		{
+			hSkin = RE_RegisterIndividualSkin(skinlower, hSkin);
+
+		}
+
+		#endif
 	}
 
 	else

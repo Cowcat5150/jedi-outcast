@@ -504,8 +504,9 @@ entityState_t communication
 
 typedef struct {
 	const char	*name;
-	int		offset;
-	int		bits;		// 0 = float
+	size_t		offset; // was int - Cowcat
+	int		bits;	// 0 = float
+
 } netField_t;
 
 // using the stringizing operator to save typing...

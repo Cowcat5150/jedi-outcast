@@ -355,7 +355,8 @@ without compiled vertex arrays.
 ==================
 */
 
-static void R_DrawElements( int numIndexes, const glIndex_t *indexes )
+//static
+void R_DrawElements( int numIndexes, const glIndex_t *indexes )
 {
 	#if !defined(AMIGAOS) && !defined(MORPHOS)
 

@@ -51,10 +51,10 @@ extern void			SetViewportAndScissor( void );
 // Defines
 ////////////////////////////////////////////////////////////////////////////////////////
 #define GLS_ALPHA				(GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA)
-#define	MAX_WIND_ZONES			12
-#define MAX_WEATHER_ZONES		50	// so we can more zones that are smaller
-#define	MAX_PUFF_SYSTEMS		2
-#define	MAX_PARTICLE_CLOUDS		5
+#define	MAX_WIND_ZONES		12
+#define MAX_WEATHER_ZONES	50	// so we can more zones that are smaller
+#define	MAX_PUFF_SYSTEMS	2
+#define	MAX_PARTICLE_CLOUDS	5
 #define POINTCACHE_CELL_SIZE	32.0f
 
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -67,14 +67,14 @@ bool		mFrozen = false;
 CVec3		mGlobalWindVelocity;
 CVec3		mGlobalWindDirection;
 float		mGlobalWindSpeed;
-int			mParticlesRendered;
+int		mParticlesRendered;
 
 
 
 ////////////////////////////////////////////////////////////////////////////////////////
 // Handy Functions
 ////////////////////////////////////////////////////////////////////////////////////////
-inline void		VectorMA( vec3_t vecAdd, const float scale, const vec3_t vecScale)
+inline void VectorMA( vec3_t vecAdd, const float scale, const vec3_t vecScale)
 {
 	vecAdd[0] += (scale * vecScale[0]);
 	vecAdd[1] += (scale * vecScale[1]);
@@ -95,29 +95,31 @@ inline void VectorCeil(vec3_t in)
 	in[2] = ceilf(in[2]);
 }
 
-inline float	FloatRand(void) 
+inline float FloatRand(void) 
 { 
 	return ((float)rand() / (float)RAND_MAX);
 }
 
-inline float	fast_flrand(float min, float max)
+inline float fast_flrand(float min, float max)
 {
 	//return min + (max - min) * flrand;
 	return Q_flrand(min, max); //fixme?
 }
 
-inline	void	SnapFloatToGrid(float& f, int GridSize)
+inline	void SnapFloatToGrid(float& f, int GridSize)
 {
 	f = (int)(f);
 
-	bool	fNeg		= (f<0);
+	bool fNeg = (f<0);
+
 	if (fNeg)
 	{
-		f *= -1;		// Temporarly make it positive
+		f *= -1;	// Temporarly make it positive
 	}
 
-	int		Offset		= ((int)(f) % (int)(GridSize));
-	int		OffsetAbs	= abs(Offset);
+	int	Offset	= ((int)(f) % (int)(GridSize));
+	int	OffsetAbs = abs(Offset);
+
 	if (OffsetAbs>(GridSize/2))
 	{
 		Offset = (GridSize - OffsetAbs) * -1;
@@ -127,7 +129,7 @@ inline	void	SnapFloatToGrid(float& f, int GridSize)
 
 	if (fNeg)
 	{
-		f *= -1;		// Put It Back To Negative
+		f *= -1;	// Put It Back To Negative
 	}
 
 	f = (int)(f);
@@ -135,7 +137,7 @@ inline	void	SnapFloatToGrid(float& f, int GridSize)
 	assert(((int)(f)%(int)(GridSize)) == 0);
 }
 
-inline	void	SnapVectorToGrid(CVec3& Vec, int GridSize)
+inline void SnapVectorToGrid(CVec3& Vec, int GridSize)
 {
 	SnapFloatToGrid(Vec[0], GridSize);
 	SnapFloatToGrid(Vec[1], GridSize);
@@ -237,15 +239,17 @@ struct	SFloatRange
 	float	mMin;
 	float	mMax;
 
-	inline void	Clear()
+	inline void Clear()
 	{
 		mMin = 0;
 		mMin = 0;
 	}
+
 	inline void Pick(float& V)
 	{
 		V = Q_flrand(mMin, mMax);
 	}
+
 	inline bool In(const float& V)
 	{
 		return (V>mMin && V<mMax);
@@ -257,15 +261,17 @@ struct	SIntRange
 	int	mMin;
 	int	mMax;
 
-	inline void	Clear()
+	inline void Clear()
 	{
 		mMin = 0;
 		mMin = 0;
 	}
+
 	inline void Pick(int& V)
 	{
 		V = Q_irand(mMin, mMax);
 	}
+
 	inline bool In(const int& V)
 	{
 		return (V>mMin && V<mMax);
@@ -292,7 +298,7 @@ public:
 
 		FLAG_MAX
 	};
-	typedef		ratl::bits_vs<FLAG_MAX>		TFlags;
+	typedef	 ratl::bits_vs<FLAG_MAX>TFlags;
 
 	float	mAlpha;
 	TFlags	mFlags;
@@ -321,7 +327,7 @@ public:
 
 	CVec3		mCurrentVelocity;
 	CVec3		mTargetVelocity;
-	int			mTargetVelocityTimeRemaining;
+	int		mTargetVelocityTimeRemaining;
 
 
 public:
@@ -331,31 +337,31 @@ public:
 	void		Initialize()
 	{
 		mRBounds.Clear();
-		mGlobal						= true;
+		mGlobal				= true;
 
-		mRVelocity.mMins			= -1500.0f;
-		mRVelocity.mMins[2]			= -10.0f;
-		mRVelocity.mMaxs			= 1500.0f;
-		mRVelocity.mMaxs[2]			= 10.0f;
+		mRVelocity.mMins		= -1500.0f;
+		mRVelocity.mMins[2]		= -10.0f;
+		mRVelocity.mMaxs		= 1500.0f;
+		mRVelocity.mMaxs[2]		= 10.0f;
 
 		mMaxDeltaVelocityPerUpdate	= 10.0f;
 
-		mRDuration.mMin				= 1000;
-		mRDuration.mMax				= 2000;
+		mRDuration.mMin			= 1000;
+		mRDuration.mMax			= 2000;
 
-		mChanceOfDeadTime			= 0.3f;
-		mRDeadTime.mMin				= 1000;
-		mRDeadTime.mMax				= 3000;
+		mChanceOfDeadTime		= 0.3f;
+		mRDeadTime.mMin			= 1000;
+		mRDeadTime.mMax			= 3000;
 
 		mCurrentVelocity.Clear();
 		mTargetVelocity.Clear();
-		mTargetVelocityTimeRemaining = 0;
+		mTargetVelocityTimeRemaining	= 0;
 	}
 
 	////////////////////////////////////////////////////////////////////////////////////
 	// Update - Changes wind when current target velocity expires
 	////////////////////////////////////////////////////////////////////////////////////
-	void		Update()
+	void	Update()
 	{
 		if (mTargetVelocityTimeRemaining==0)
 		{
@@ -376,21 +382,24 @@ public:
 
 			CVec3	DeltaVelocity(mTargetVelocity - mCurrentVelocity);
 			float	DeltaVelocityLen = VectorNormalize(DeltaVelocity.v);
+
 			if (DeltaVelocityLen > mMaxDeltaVelocityPerUpdate)
 			{
 				DeltaVelocityLen = mMaxDeltaVelocityPerUpdate;
 			}
+
 			DeltaVelocity *= (DeltaVelocityLen);
 			mCurrentVelocity += DeltaVelocity;
 		}
 	}
 };
-ratl::vector_vs<CWindZone, MAX_WIND_ZONES>		mWindZones;
-ratl::vector_vs<CWindZone*, MAX_WIND_ZONES>		mLocalWindZones;
+ratl::vector_vs<CWindZone, MAX_WIND_ZONES>mWindZones;
+ratl::vector_vs<CWindZone*, MAX_WIND_ZONES>mLocalWindZones;
 
 bool R_GetWindVector(vec3_t windVector, vec3_t atpoint)
 {
 	VectorCopy(mGlobalWindDirection.v, windVector);
+
 	if (atpoint && mLocalWindZones.size())
 	{
 		for (int curLocalWindZone=0; curLocalWindZone<mLocalWindZones.size(); curLocalWindZone++)
@@ -400,14 +409,17 @@ bool R_GetWindVector(vec3_t windVector, vec3_t atpoint)
 				VectorAdd(windVector, mLocalWindZones[curLocalWindZone]->mCurrentVelocity.v, windVector);
 			}
 		}
+
 		VectorNormalize(windVector);
 	}
+
 	return true;
 }
 
 bool R_GetWindSpeed(float &windSpeed, vec3_t atpoint)
 {
 	windSpeed = mGlobalWindSpeed;
+
 	if (atpoint && mLocalWindZones.size())
 	{
 		for (int curLocalWindZone=0; curLocalWindZone<mLocalWindZones.size(); curLocalWindZone++)
@@ -418,6 +430,7 @@ bool R_GetWindSpeed(float &windSpeed, vec3_t atpoint)
 			}
 		}
 	}
+
 	return true;
 }
 
@@ -433,7 +446,7 @@ bool R_GetWindGusting(vec3_t atpoint)
 ////////////////////////////////////////////////////////////////////////////////////////
 class COutside
 {
-#define COUTSIDE_STRUCT_VERSION 1	// you MUST increase this any time you change any binary (fields) inside this class, or cahced files will fuck up
+#define COUTSIDE_STRUCT_VERSION 1	// you MUST increase this any time you change any binary (fields) inside this class, or cached files will fuck up
 public:
 	////////////////////////////////////////////////////////////////////////////////////
 	//Global Public Outside Variables
@@ -443,7 +456,7 @@ public:
 	float			mOutsidePain;
 
 	CVec3			mFogColor;
-	int				mFogColorInt;
+	int			mFogColorInt;
 	bool			mFogColorTempActive;
 
 private:
@@ -457,12 +470,12 @@ private:
 		static bool	mMarkedOutside;		
 		uint32_t	*mPointCache;			// malloc block ptr
 		
-		int			miPointCacheByteSize;	// size of block
+		int		miPointCacheByteSize;	// size of block
 		SVecRange	mExtents;
 		SVecRange	mSize;
-		int			mWidth;
-		int			mHeight;
-		int			mDepth;
+		int		mWidth;
+		int		mHeight;
+		int		mDepth;
 
 		void WriteToDisk( fileHandle_t f )
 		{			
@@ -479,7 +492,7 @@ private:
 		////////////////////////////////////////////////////////////////////////////////////
 		// Convert To Cell
 		////////////////////////////////////////////////////////////////////////////////////
-		inline	void	ConvertToCell(const CVec3& pos, int& x, int& y, int& z, int& bit)
+		inline	void ConvertToCell(const CVec3& pos, int& x, int& y, int& z, int& bit)
 		{
 			x = (int)((pos[0] / POINTCACHE_CELL_SIZE) - mSize.mMins[0]);
 			y = (int)((pos[1] / POINTCACHE_CELL_SIZE) - mSize.mMins[1]);
@@ -492,7 +505,7 @@ private:
 		////////////////////////////////////////////////////////////////////////////////////
 		// CellOutside - Test to see if a given cell is outside
 		////////////////////////////////////////////////////////////////////////////////////
-		inline	bool	CellOutside(int x, int y, int z, int bit)
+		inline	bool CellOutside(int x, int y, int z, int bit)
 		{
 			if ((x < 0 || x >= mWidth) || (y < 0 || y >= mHeight) || (z < 0 || z >= mDepth) || (bit < 0 || bit >= 32))
 			{
@@ -508,16 +521,16 @@ private:
 	////////////////////////////////////////////////////////////////////////////////////
 	// Iteration Variables
 	////////////////////////////////////////////////////////////////////////////////////
-	int				mWCells;
-	int				mHCells;
+	int	mWCells;
+	int	mHCells;
 
-	int				mXCell;
-	int				mYCell;
-	int				mZBit;
+	int	mXCell;
+	int	mYCell;
+	int	mZBit;
 
-	int				mXMax;
-	int				mYMax;
-	int				mZMax;
+	int	mXMax;
+	int	mYMax;
+	int	mZMax;
 
 
 private:
@@ -526,7 +539,7 @@ private:
 	////////////////////////////////////////////////////////////////////////////////////
 	// Contents Outside
 	////////////////////////////////////////////////////////////////////////////////////
-	inline	bool	ContentsOutside(int contents)
+	inline	bool ContentsOutside(int contents)
 	{
 		if (contents&CONTENTS_WATER || contents&CONTENTS_SOLID)
 		{
@@ -567,6 +580,7 @@ public:
 			mWeatherZones[wz].mPointCache = 0;
 			mWeatherZones[wz].miPointCacheByteSize = 0;	// not really necessary because of .clear() below, but keeps things together in case stuff changes
 		}
+
 		mWeatherZones.clear();
 	}
 
@@ -574,12 +588,13 @@ public:
 	{
 		Reset();
 	}
+
 	~COutside()
 	{
 		Reset();
 	}
 
-	bool			Initialized()
+	bool Initialized()
 	{
 		return mCacheInit;
 	}
@@ -587,12 +602,13 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 	// AddWeatherZone - Will add a zone of mins and maxes
 	////////////////////////////////////////////////////////////////////////////////////
-	void			AddWeatherZone(vec3_t mins, vec3_t maxs)
+	void AddWeatherZone(vec3_t mins, vec3_t maxs)
 	{
 		if (mCacheInit)
 		{
 			return;
 		}
+
 		if (!mWeatherZones.full())
 		{
 			SWeatherZone&	Wz = mWeatherZones.push_back();
@@ -605,11 +621,11 @@ public:
 			Wz.mSize.mMins = Wz.mExtents.mMins;
 			Wz.mSize.mMaxs = Wz.mExtents.mMaxs;
 
-			Wz.mSize.mMins /= POINTCACHE_CELL_SIZE;
-			Wz.mSize.mMaxs /= POINTCACHE_CELL_SIZE;
-			Wz.mWidth		=  (int)(Wz.mSize.mMaxs[0] - Wz.mSize.mMins[0]);
-			Wz.mHeight		=  (int)(Wz.mSize.mMaxs[1] - Wz.mSize.mMins[1]);
-			Wz.mDepth		= ((int)(Wz.mSize.mMaxs[2] - Wz.mSize.mMins[2]) + 31) >> 5;
+			Wz.mSize.mMins	/= POINTCACHE_CELL_SIZE;
+			Wz.mSize.mMaxs	/= POINTCACHE_CELL_SIZE;
+			Wz.mWidth	=  (int)(Wz.mSize.mMaxs[0] - Wz.mSize.mMins[0]);
+			Wz.mHeight	=  (int)(Wz.mSize.mMaxs[1] - Wz.mSize.mMins[1]);
+			Wz.mDepth	= ((int)(Wz.mSize.mMaxs[2] - Wz.mSize.mMins[2]) + 31) >> 5;
 			
 			Wz.miPointCacheByteSize = (Wz.mWidth * Wz.mHeight * Wz.mDepth) * sizeof(uint32_t);
 			Wz.mPointCache  = (uint32_t *)Z_Malloc( Wz.miPointCacheByteSize, TAG_POINTCACHE, qtrue );
@@ -634,21 +650,23 @@ public:
 
 		WeatherFileHeader_t()
 		{
-			m_iVersion			= COUTSIDE_STRUCT_VERSION;
-			m_iChecksum			= sv_mapChecksum->integer;
+			m_iVersion	= COUTSIDE_STRUCT_VERSION;
+			m_iChecksum	= sv_mapChecksum->integer;
 		}
 	};
 	
 	fileHandle_t WriteCachedWeatherFile( void )
 	{
 		fileHandle_t f = ri.FS_FOpenFileWrite( GenCachedWeatherFilename() );
+
 		if (f)
 		{
 			WeatherFileHeader_t WeatherFileHeader;
+			ri.FS_Write(&WeatherFileHeader, sizeof(WeatherFileHeader), f);
 
-            ri.FS_Write(&WeatherFileHeader, sizeof(WeatherFileHeader), f);
 			return f;
 		}
+
 		else
 		{
 			ri.Printf( PRINT_WARNING, "(Unable to open weather file \"%s\" for writing!)\n",GenCachedWeatherFilename());
@@ -663,6 +681,7 @@ public:
 	{
 		fileHandle_t f = 0;
 		ri.FS_FOpenFileRead( GenCachedWeatherFilename(), &f, qfalse );
+
 		if ( f )
 		{
 			// ok, it exists, but is it valid for this map?...
@@ -679,7 +698,7 @@ public:
 				return f;
 			}
 
-            ri.Printf( PRINT_WARNING, "( Cached weather file \"%s\" out of date, regenerating... )\n",GenCachedWeatherFilename());
+			ri.Printf( PRINT_WARNING, "( Cached weather file \"%s\" out of date, regenerating... )\n",GenCachedWeatherFilename());
 			ri.FS_FCloseFile( f );
 		}
 		else
@@ -693,7 +712,7 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 	// Cache - Will Scan the World, Creating The Cache
 	////////////////////////////////////////////////////////////////////////////////////
-	void			Cache()
+	void	Cache()
 	{
 		if (!tr.world || mCacheInit)
 		{
@@ -703,6 +722,7 @@ public:
 		// all this piece of code does really is fill in the bool "SWeatherZone::mMarkedOutside", plus the mPointCache[] for each zone,
 		//	so we can diskload those. Maybe.		
 		fileHandle_t f = ReadCachedWeatherFile();
+
 		if ( f )
 		{
 			for (int iZone=0; iZone<mWeatherZones.size(); iZone++)
@@ -718,10 +738,10 @@ public:
 			CVec3		CurPos;
 			CVec3		Size;
 			CVec3		Mins;
-			int			x, y, z, q, zbase;
+			int		x, y, z, q, zbase;
 			bool		curPosOutside;
-			uint32_t		contents;
-			uint32_t		bit;
+			uint32_t	contents;
+			uint32_t	bit;
 
 
 			// Record The Extents Of The World Incase No Other Weather Zones Exist
@@ -1430,10 +1450,10 @@ public:
 	////////////////////////////////////////////////////////////////////////////////////
 	// Render - 
 	////////////////////////////////////////////////////////////////////////////////////
-	void		Render()
+	void	Render()
 	{
 		WFXParticle*	part=0;
-		int			particleNum;
+		int		particleNum;
 		CVec3		partDirection;
 
 
@@ -1461,9 +1481,11 @@ public:
 		// Begin
 		//-------
 		qglBegin(mGLModeEnum);
+
 		for (particleNum=0; particleNum<mParticleCount; particleNum++)
 		{
 			part = &(mParticles[particleNum]);
+
 			if (!part->mFlags.get_bit(WFXParticle::FLAG_RENDER))
 			{
 				continue;
@@ -1477,6 +1499,7 @@ public:
 				VectorNormalize(partDirection.v);
 				mCameraDown = partDirection;
 				mCameraDown *= (mHeight * -1);
+
 				if (mVertexCount==4)
 				{
 		 			mCameraLeftPlusUp  = (mCameraLeft - mCameraDown);
@@ -1505,11 +1528,10 @@ public:
 
 			// Render A Triangle
 			//-------------------
-			if (mVertexCount==3)
+			if (mVertexCount == 3)
 			{
  				qglTexCoord2f(1.0, 0.0);
-				qglVertex3f(part->mPosition[0],
-							part->mPosition[1],
+				qglVertex3f(part->mPosition[0], part->mPosition[1],
 							part->mPosition[2]);
 
 				qglTexCoord2f(0.0, 1.0);
@@ -1646,7 +1668,7 @@ void RB_RenderWorldEffects(void)
 				}
 			}
 			mGlobalWindDirection	= mGlobalWindVelocity;
-			mGlobalWindSpeed		= VectorNormalize(mGlobalWindDirection.v);
+			mGlobalWindSpeed	= VectorNormalize(mGlobalWindDirection.v);
 		}
 
 		// Update All Particle Clouds

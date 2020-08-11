@@ -233,6 +233,7 @@ static qboolean GLW_StartDriverAndSetMode( int mode, int colorbits, qboolean ful
 	// clear - Cowcat
 	qglClearColor(0,0,0,1);
 	qglClear(GL_COLOR_BUFFER_BIT);
+	mglSwitchDisplay();
 
 	return qtrue;
 }

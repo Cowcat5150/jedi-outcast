@@ -1164,7 +1164,7 @@ Ghoul2 Insert End
 		return 0;
 
 	case CG_OPENJK_MENU_PAINT:
-		Menu_Paint( (menuDef_t *)VMA(1), (intptr_t)VMA(2) );
+		Menu_Paint( (menuDef_t *)VMA(1), args[2] ); // was ,(intptr_t)VMA(2) ) cowcat
 		return 0;
 
 	case CG_OPENJK_GETMENU_BYNAME:
