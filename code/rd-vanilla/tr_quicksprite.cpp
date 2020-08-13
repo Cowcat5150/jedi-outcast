@@ -126,7 +126,7 @@ void CQuickSpriteSystem::Flush(void)
 
 	#else
 
-	//qglLockArrays(0, mNextVert); // Cowcat
+	qglLockArrays(0, mNextVert); // Cowcat
 
 	#endif
 
@@ -182,7 +182,7 @@ void CQuickSpriteSystem::Flush(void)
 
 	#else
 	
-	//qglUnlockArrays(); // Cowcat
+	qglUnlockArrays(); // Cowcat
 	
 	#endif
 

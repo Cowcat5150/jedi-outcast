@@ -1144,7 +1144,7 @@ static void ProjectDlightTexture2( void )
 
 			#else
 			
-			//qglUnlockArrays(); // Cowcat
+			qglUnlockArrays(); // Cowcat
 
 			#endif
 		}
@@ -1255,7 +1255,7 @@ static void ProjectDlightTexture2( void )
 
 		#else
 
-		//qglLockArrays(0, tess.numVertexes); // Cowcat
+		qglLockArrays(0, tess.numVertexes); // Cowcat
 
 		#endif
 	}
@@ -2477,7 +2477,7 @@ void RB_StageIteratorGeneric( void )
 
 	#else
 
-	//qglLockArrays(0, input->numVertexes); // Cowcat
+	qglLockArrays(0, input->numVertexes); // Cowcat
 
 	#endif
 
@@ -2536,7 +2536,7 @@ void RB_StageIteratorGeneric( void )
 
 	#else
 
-	//qglUnlockArrays(); // Cowcat
+	qglUnlockArrays(); // Cowcat
 
 	#endif
 
