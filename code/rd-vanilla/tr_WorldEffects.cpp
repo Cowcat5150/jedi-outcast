@@ -47,6 +47,10 @@ extern void			SetViewportAndScissor( void );
 #include "../Ratl/vector_vs.h"
 #include "../Ratl/bits_vs.h"
 
+#if defined(AMIGAOS)
+#include <mgl/mglmacros.h>
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////
 // Defines
 ////////////////////////////////////////////////////////////////////////////////////////
@@ -1085,6 +1089,7 @@ public:
 
 		mVertexCount = VertexCount;
 		mGLModeEnum = (mVertexCount==3)?(GL_TRIANGLES):(GL_QUADS);
+		//mGLModeEnum = MGL_FLATFAN;
 	}
 
 
@@ -1466,10 +1471,12 @@ public:
 		// Enable And Disable Things
 		//---------------------------
 		qglEnable(GL_TEXTURE_2D);
-		qglDisable(GL_CULL_FACE);
 
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (mFilterMode==0)?(GL_LINEAR):(GL_NEAREST));
-		qglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (mFilterMode==0)?(GL_LINEAR):(GL_NEAREST));
+		//qglDisable(GL_CULL_FACE);
+		GL_Cull(CT_TWO_SIDED); // fix Cowcat
+
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (mFilterMode==0)?(GL_LINEAR):(GL_NEAREST));
+		qglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, (mFilterMode==0)?(GL_LINEAR):(GL_NEAREST));
 
 
 		// Setup Matrix Mode And Translation
@@ -1576,7 +1583,7 @@ public:
 		}
 		qglEnd();
 
-		qglEnable(GL_CULL_FACE);
+		//qglEnable(GL_CULL_FACE); // fix Cowcat
 		qglPopMatrix();
 
 		mParticlesRendered += mParticleCountRender;
