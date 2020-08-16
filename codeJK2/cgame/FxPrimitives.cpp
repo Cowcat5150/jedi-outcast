@@ -790,7 +790,7 @@ bool CElectricity::Update()
 	UpdateAlpha();
 
 	Draw();
-
+	
 	return true;
 }
 
@@ -1806,7 +1806,7 @@ bool CBezier::Update( void )
 	UpdateAlpha();
 
 	Draw();
-
+	
 	return true;
 }
 

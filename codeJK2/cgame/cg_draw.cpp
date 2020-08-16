@@ -40,13 +40,14 @@ qboolean cg_forceCrosshair = qfalse;
 extern int g_rocketLockEntNum;
 extern int g_rocketLockTime;
 extern int g_rocketSlackTime;
-
+/*
 vec3_t	vfwd;
 vec3_t	vright;
 vec3_t	vup;
 vec3_t	vfwd_n;
 vec3_t	vright_n;
 vec3_t	vup_n;
+*/
 int		infoStringCount;
 
 //===============================================================
@@ -2450,6 +2451,7 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	}
 
 	//FIXME: these globals done once at start of frame for various funcs
+	/*
 	AngleVectors (cg.refdefViewAngles, vfwd, vright, vup);
 	VectorCopy( vfwd, vfwd_n );
 	VectorCopy( vright, vright_n );
@@ -2457,7 +2459,7 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	VectorNormalize( vfwd_n );
 	VectorNormalize( vright_n );
 	VectorNormalize( vup_n );
-
+	*/
 	switch ( stereoView ) {
 	case STEREO_CENTER:
 		separation = 0;
