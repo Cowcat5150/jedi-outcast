@@ -1233,7 +1233,7 @@ void R_Register( void )
 	r_overBrightBits = ri.Cvar_Get ("r_overBrightBits", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_mapOverBrightBits = ri.Cvar_Get( "r_mapOverBrightBits", "0", CVAR_ARCHIVE|CVAR_LATCH );
 	r_ignorehwgamma = ri.Cvar_Get( "r_ignorehwgamma", "0", CVAR_ARCHIVE | CVAR_LATCH);
-	r_mode = ri.Cvar_Get( "r_mode", "4", CVAR_ARCHIVE | CVAR_LATCH );
+	r_mode = ri.Cvar_Get( "r_mode", "3", CVAR_ARCHIVE | CVAR_LATCH ); // was 4 - Cowcat
 	r_fullscreen = ri.Cvar_Get( "r_fullscreen", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_customwidth = ri.Cvar_Get( "r_customwidth", "1600", CVAR_ARCHIVE | CVAR_LATCH );
 	r_customheight = ri.Cvar_Get( "r_customheight", "1024", CVAR_ARCHIVE | CVAR_LATCH );
@@ -1499,7 +1499,16 @@ void R_Init( void )
 
 	for(i=0;i<MAX_LIGHT_STYLES;i++)
 	{
+		#if 0
+
 		RE_SetLightStyle(i, *(int*)color);
+
+		#else // new Cowcat
+	
+		byteAlias_t *ba = (byteAlias_t *)&color;
+		RE_SetLightStyle(i, ba->i );
+
+		#endif
 	}
 
 	InitOpenGL();
@@ -1640,7 +1649,16 @@ void RE_GetLightStyle(int style, color4ub_t color)
 		return;
 	}
 
+	#if 0
+
 	*(int *)color = *(int *)styleColors[style];
+
+	#else // new Cowcat
+
+	byteAlias_t *baDest = (byteAlias_t *)&color, *baSource = (byteAlias_t *)&styleColors[style];
+	baDest->i = baSource->i;
+
+	#endif
 }
 
 void RE_SetLightStyle(int style, int color)
@@ -1651,11 +1669,25 @@ void RE_SetLightStyle(int style, int color)
 		return;
 	}
 
+	#if 0
+
 	if (*(int*)styleColors[style] != color)
 	{
 		*(int *)styleColors[style] = color;
 		styleUpdated[style] = true;
 	}
+
+	#else // new Cowcat
+
+	byteAlias_t *ba = (byteAlias_t *)&styleColors[style];
+
+	if( ba->i != color)
+	{
+		ba->i = color;
+		styleUpdated[style] = true;
+	}
+
+	#endif
 }
 
 /*

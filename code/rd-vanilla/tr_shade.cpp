@@ -260,6 +260,10 @@ static void R_DrawStripElements( int numIndexes, const glIndex_t *indexes, void 
 
 //extern UWORD *ElementIndex; // test Cowcat - amiga_glimp.cpp
 
+#if defined(MORPHOS)
+static UWORD ElementIndex[4096];
+#endif
+
 static void R_DrawStripElementsAmiga( int numIndexes, const glIndex_t *indexes )
 {
 	int		i;
@@ -269,7 +273,9 @@ static void R_DrawStripElementsAmiga( int numIndexes, const glIndex_t *indexes )
 	if ( numIndexes <= 0 )
 		return;
 
+	#if defined(AMIGAOS)
 	UWORD *ElementIndex = CC->ElementIndex; // mglmacros.h
+	#endif
 
 	unsigned int VertexBufferPointer = 0;
 	
@@ -355,8 +361,7 @@ without compiled vertex arrays.
 ==================
 */
 
-//static
-void R_DrawElements( int numIndexes, const glIndex_t *indexes )
+static void R_DrawElements( int numIndexes, const glIndex_t *indexes )
 {
 	#if !defined(AMIGAOS) && !defined(MORPHOS)
 
@@ -1092,9 +1097,21 @@ static void ProjectDlightTexture2( void )
 			colorTemp[1] = Q_ftol(floatColor[1] * modulate);
 			colorTemp[2] = Q_ftol(floatColor[2] * modulate);
 			colorTemp[3] = 255;
+
+			#if 0
+
 			colorArray[numIndexes]=*(unsigned int *)colorTemp;
 			colorArray[numIndexes+1]=*(unsigned int *)colorTemp;
 			colorArray[numIndexes+2]=*(unsigned int *)colorTemp;
+			
+			#else // new Cowcat
+	
+			byteAlias_t *ba = (byteAlias_t *)&colorTemp;
+			colorArray[numIndexes+0] = ba->ui;
+			colorArray[numIndexes+1] = ba->ui;
+			colorArray[numIndexes+2] = ba->ui;
+
+			#endif
 
 			hitIndexes[numIndexes] = numIndexes;
 			hitIndexes[numIndexes+1] = numIndexes+1;
@@ -1134,7 +1151,7 @@ static void ProjectDlightTexture2( void )
 		{
 			needResetVerts = 1;
 			
-			#if !defined(AMIGAOS) && !defined(MORPHOS)
+			#if !defined(AMIGAOS)
 
 			if (qglUnlockArraysEXT) 
 			{
@@ -1245,7 +1262,7 @@ static void ProjectDlightTexture2( void )
 	{
 		qglVertexPointer (3, GL_FLOAT, 16, tess.xyz);	// padded for SIMD
 
-		#if !defined(AMIGAOS) && !defined(MORPHOS)
+		#if !defined(AMIGAOS)
 
 		if (qglLockArraysEXT)
 		{
@@ -1679,8 +1696,18 @@ static void RB_FogPass( void )
 
 	fog = tr.world->fogs + tess.fogNum;
 
-	for ( i = 0; i < tess.numVertexes; i++ ) {
+	for ( i = 0; i < tess.numVertexes; i++ )
+	{
+		#if 0 
+
 		* ( int * )&tess.svars.colors[i] = fog->colorInt;
+
+		#else // new Cowcat
+
+		byteAlias_t *ba = (byteAlias_t *)&tess.svars.colors[i];
+		ba->i = fog->colorInt;
+
+		#endif
 	}
 
 	RB_CalcFogTexCoords( ( float * ) tess.svars.texcoords[0] );
@@ -1785,11 +1812,25 @@ static void ComputeColors( shaderStage_t *pStage, alphaGen_t forceAlphaGen, colo
 		case CGEN_EXACT_VERTEX:
 			memcpy( tess.svars.colors, tess.vertexColors, tess.numVertexes * sizeof( tess.vertexColors[0] ) );
 			break;
+
 		case CGEN_CONST:
-			for ( i = 0; i < tess.numVertexes; i++ ) {
+
+			for ( i = 0; i < tess.numVertexes; i++ )
+			{
+				#if 0
+
 				*(int *)tess.svars.colors[i] = *(int *)pStage->constantColor;
+
+				#else // new Cowcat
+	
+				byteAlias_t *baDest = (byteAlias_t *)&tess.svars.colors[i], *baSource = (byteAlias_t *)&pStage->constantColor;
+				baDest->i = baSource->i;
+
+				#endif
+				
 			}
 			break;
+
 		case CGEN_VERTEX:
 			if ( tr.identityLight == 1 )
 			{
@@ -1828,12 +1869,22 @@ static void ComputeColors( shaderStage_t *pStage, alphaGen_t forceAlphaGen, colo
 			break;
 		case CGEN_FOG:
 			{
-				fog_t	*fog;
+				//fog_t	*fog;
 
-				fog = tr.world->fogs + tess.fogNum;
+				const fog_t *fog = tr.world->fogs + tess.fogNum;
 
-				for ( i = 0; i < tess.numVertexes; i++ ) {
+				for ( i = 0; i < tess.numVertexes; i++ )
+				{
+					#if 0
+
 					* ( int * )&tess.svars.colors[i] = fog->colorInt;
+
+					#else // new Cowcat
+
+					byteAlias_t *ba = (byteAlias_t *)&tess.svars.colors[i];
+					ba->i = fog->colorInt;
+
+					#endif
 				}
 			}
 			break;
@@ -1852,11 +1903,23 @@ static void ComputeColors( shaderStage_t *pStage, alphaGen_t forceAlphaGen, colo
 		case CGEN_ONE_MINUS_ENTITY:
 			RB_CalcColorFromOneMinusEntity( ( unsigned char * ) tess.svars.colors );
 			break;
+
 		case CGEN_LIGHTMAPSTYLE:
+
 			for ( i = 0; i < tess.numVertexes; i++ ) 
 			{
+				#if 0
+
 				* ( int * )&tess.svars.colors[i] = *(int *)styleColors[pStage->lightmapStyle];
+
+				#else // new Cowcat
+
+				byteAlias_t *baDest = (byteAlias_t *)&tess.svars.colors[i], *baSource = (byteAlias_t *)&styleColors[pStage->lightmapStyle];
+				baDest->ui = baSource->ui;
+
+				#endif
 			}
+
 			break;
 		}
 
@@ -1997,10 +2060,13 @@ static void ComputeTexCoords( shaderStage_t *pStage )
 {
 	int	i;
 	int	b;
+	
 
 	for ( b = 0; b < NUM_TEXTURE_BUNDLES; b++ )
 	{
 		int tm;
+		
+		//texcoords = (float *)tess.svars.texcoords[b];
 
 		//
 		// generate the texture coordinates
@@ -2351,7 +2417,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 				R_BindAnimatedImage( &pStage->bundle[0] );
 
 			
-			#if !defined(AMIGAOS)
+			#if !defined(AMIGAOS) && !defined(MORPHOS)
 
 			if (tess.shader == tr.distortionShader && glConfig.stencilBits >= 4)
 			{
@@ -2378,7 +2444,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 			//
 			R_DrawElements( input->numIndexes, input->indexes );
 
-			#if !defined(AMIGAOS)
+			#if !defined(AMIGAOS) && !defined(MORPHOS)
 
 			if (lStencilled)
 			{
@@ -2403,6 +2469,7 @@ static void RB_IterateStagesGeneric( shaderCommands_t *input )
 /*
 ** RB_StageIteratorGeneric
 */
+
 void RB_StageIteratorGeneric( void )
 {
 	shaderCommands_t	*input;

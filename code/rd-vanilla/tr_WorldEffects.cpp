@@ -1089,7 +1089,6 @@ public:
 
 		mVertexCount = VertexCount;
 		mGLModeEnum = (mVertexCount==3)?(GL_TRIANGLES):(GL_QUADS);
-		//mGLModeEnum = MGL_FLATFAN;
 	}
 
 

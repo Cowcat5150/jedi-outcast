@@ -732,6 +732,11 @@ void TestAllGhoul2Anims()
 
 #define PERSISTENT_G2DATA "g2infoarray"
 
+#if defined(MORPHOS)
+//#undef read
+//#undef written
+#endif
+
 void RestoreGhoul2InfoArray()
 {
 	if (singleton == NULL)
@@ -750,6 +755,7 @@ void RestoreGhoul2InfoArray()
 		size_t read =
 #endif // _DEBUG
 			singleton->Deserialize ((const char *)data, size);
+
 		Z_Free ((void *)data);
 
 		assert (read == size);
@@ -760,6 +766,7 @@ void SaveGhoul2InfoArray()
 {
 	size_t size = singleton->GetSerializedSize();
 	void *data = Z_Malloc (size, TAG_GHOUL2, qfalse);
+
 #ifdef _DEBUG
 	size_t written =
 #endif // _DEBUG
@@ -1959,8 +1966,7 @@ void G2API_CollisionDetect(CCollisionRecord *collRecMap, CGhoul2Info_v &ghoul2, 
 
 		ri.GetG2VertSpaceServer()->ResetHeap();
 		// now sort the resulting array of collision records so they are distance ordered
-		qsort( collRecMap, MAX_G2_COLLISIONS,
-			sizeof( CCollisionRecord ), QsortDistance );
+		qsort( collRecMap, MAX_G2_COLLISIONS, sizeof( CCollisionRecord ), QsortDistance );
 		G2ANIM(ghoul2,"G2API_CollisionDetect");
 	}
 }

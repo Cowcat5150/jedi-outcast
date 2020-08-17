@@ -15,7 +15,7 @@ RANLIB = ranlib
 # FULL PATH DIR HERE !
 BD = Work:OpenJK-Speed-master/
 
-CXXFLAGS = -O2 -Wall -noixemul -fomit-frame-pointer -ffast-math -fno-strict-aliasing -fno-strict-overflow -fsigned-char -fpermissive 
+CXXFLAGS = -O2 -Wall -noixemul -ffast-math -fomit-frame-pointer -fno-strict-aliasing -fno-strict-overflow -fsigned-char -fpermissive
 CFLAGS = -O2 -noixemul -fomit-frame-pointer -ffast-math -fno-strict-aliasing -fno-strict-overflow -fsigned-char
 
 C_DEFINES = -DFINAL_BUILD -DJK2_MODE -D_JK2EXE -DNDEBUG -DAMIGAOS -DDLL

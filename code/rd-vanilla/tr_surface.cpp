@@ -49,24 +49,35 @@ use the shader system.
 RB_CheckOverflow
 ==============
 */
-void RB_CheckOverflow( int verts, int indexes ) {
-	if ( tess.shader == tr.shadowShader ) {
-		if (tess.numVertexes + verts < SHADER_MAX_VERTEXES/2
-			&& tess.numIndexes + indexes < SHADER_MAX_INDEXES) {
+void RB_CheckOverflow( int verts, int indexes )
+{
+	#if 0
+	
+	if ( tess.shader == tr.shadowShader )
+	{
+		if (tess.numVertexes + verts < SHADER_MAX_VERTEXES/2 && tess.numIndexes + indexes < SHADER_MAX_INDEXES)
+		{
 			return;
 		}
-	} else 
-		if (tess.numVertexes + verts < SHADER_MAX_VERTEXES
-			&& tess.numIndexes + indexes < SHADER_MAX_INDEXES) {
-			return;
-		}
+	}
+	
+	else 
+	#endif // new Cowcat
+
+	if (tess.numVertexes + verts < SHADER_MAX_VERTEXES && tess.numIndexes + indexes < SHADER_MAX_INDEXES)
+	{
+		return;
+	}
 
 	RB_EndSurface();
 
-	if ( verts >= SHADER_MAX_VERTEXES ) {
+	if ( verts >= SHADER_MAX_VERTEXES )
+	{
 		Com_Error(ERR_DROP, "RB_CheckOverflow: verts > MAX (%d > %d)", verts, SHADER_MAX_VERTEXES );
 	}
-	if ( indexes >= SHADER_MAX_INDEXES ) {
+
+	if ( indexes >= SHADER_MAX_INDEXES )
+	{
 		Com_Error(ERR_DROP, "RB_CheckOverflow: indices > MAX (%d > %d)", indexes, SHADER_MAX_INDEXES );
 	}
 
@@ -79,9 +90,10 @@ void RB_CheckOverflow( int verts, int indexes ) {
 RB_AddQuadStampExt
 ==============
 */
-void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, byte *color, float s1, float t1, float s2, float t2 ) {
-	vec3_t		normal;
-	int			ndx;
+void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, byte *color, float s1, float t1, float s2, float t2 )
+{
+	vec3_t	normal;
+	int	ndx;
 
 	RB_CHECKOVERFLOW( 4, 6 );
 
@@ -135,12 +147,29 @@ void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, byte *color, flo
 
 	// constant color all the way around
 	// should this be identity and let the shader specify from entity?
+
+	#if 0
+
 	* ( unsigned int * ) &tess.vertexColors[ndx] = 
 	* ( unsigned int * ) &tess.vertexColors[ndx+1] = 
 	* ( unsigned int * ) &tess.vertexColors[ndx+2] = 
 	* ( unsigned int * ) &tess.vertexColors[ndx+3] = 
 		* ( unsigned int * )color;
 
+	#else // new Cowcat
+
+	byteAlias_t *baSource = (byteAlias_t *)color, *baDest;
+	baDest = (byteAlias_t *)&tess.vertexColors[ndx + 0];
+	baDest->ui = baSource->ui;
+	baDest = (byteAlias_t *)&tess.vertexColors[ndx + 1];
+	baDest->ui = baSource->ui;
+	baDest = (byteAlias_t *)&tess.vertexColors[ndx + 2];
+	baDest->ui = baSource->ui;
+	baDest = (byteAlias_t *)&tess.vertexColors[ndx + 3];
+	baDest->ui = baSource->ui;
+
+	#endif
+	
 	tess.numVertexes += 4;
 	tess.numIndexes += 6;
 }
@@ -150,7 +179,8 @@ void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, byte *color, flo
 RB_AddQuadStamp
 ==============
 */
-void RB_AddQuadStamp( vec3_t origin, vec3_t left, vec3_t up, byte *color ) {
+void RB_AddQuadStamp( vec3_t origin, vec3_t left, vec3_t up, byte *color )
+{
 	RB_AddQuadStampExt( origin, left, up, color, 0, 0, 1, 1 );
 }
 
@@ -159,9 +189,10 @@ void RB_AddQuadStamp( vec3_t origin, vec3_t left, vec3_t up, byte *color ) {
 RB_SurfaceSprite
 ==============
 */
-static void RB_SurfaceSprite( void ) {
-	vec3_t		left, up;
-	float		radius;
+static void RB_SurfaceSprite( void )
+{
+	vec3_t	left, up;
+	float	radius;
 
 	// calculate the xyz locations for the four corners
 	radius = backEnd.currentEntity->e.radius;
@@ -909,25 +940,40 @@ void RB_SurfacePolychain( srfPoly_t *p ) {
 	tess.numVertexes = numv;
 }
 */
-void RB_SurfacePolychain( srfPoly_t *p ) {
-	int		i;
-	int		numv;
+
+void RB_SurfacePolychain( srfPoly_t *p )
+{
+	int	i;
+	int	numv;
 
 	RB_CHECKOVERFLOW( p->numVerts, 3*(p->numVerts - 2) );
 
 	// fan triangles into the tess array
 	numv = tess.numVertexes;
-	for ( i = 0; i < p->numVerts; i++ ) {
+
+	for ( i = 0; i < p->numVerts; i++ )
+	{
 		VectorCopy( p->verts[i].xyz, tess.xyz[numv] );
 		tess.texCoords[numv][0][0] = p->verts[i].st[0];
 		tess.texCoords[numv][0][1] = p->verts[i].st[1];
+
+		#if 0
+
 		*(int *)&tess.vertexColors[numv] = *(int *)p->verts[ i ].modulate;
 
 		numv++;
+
+		#else // new Cowcat
+
+		byteAlias_t *baDest = (byteAlias_t *)&tess.vertexColors[numv++], *baSource = (byteAlias_t *)&p->verts[ i ].modulate;
+		baDest->i = baSource->i;
+
+		#endif
 	}
 
 	// generate fan indexes into the tess array
-	for ( i = 0; i < p->numVerts-2; i++ ) {
+	for ( i = 0; i < p->numVerts-2; i++ )
+	{
 		tess.indexes[tess.numIndexes + 0] = tess.numVertexes;
 		tess.indexes[tess.numIndexes + 1] = tess.numVertexes + i + 1;
 		tess.indexes[tess.numIndexes + 2] = tess.numVertexes + i + 2;
@@ -937,10 +983,11 @@ void RB_SurfacePolychain( srfPoly_t *p ) {
 	tess.numVertexes = numv;
 }
 
-inline static uint32_t ComputeFinalVertexColor( const byte *colors ) {
-	int k;
-	byteAlias_t result;
-	uint32_t r, g, b;
+inline static uint32_t ComputeFinalVertexColor( const byte *colors )
+{
+	int		k;
+	byteAlias_t	result;
+	uint32_t	r, g, b;
 
 	for ( k=0; k<4; k++ )
 		result.b[k] = colors[k];
@@ -954,6 +1001,7 @@ inline static uint32_t ComputeFinalVertexColor( const byte *colors ) {
 		result.b[2] = 255;
 		return result.ui;
 	}
+
 	// an optimization could be added here to compute the style[0] (which is always the world normal light)
 	r = g = b = 0;
 	for( k=0; k<MAXLIGHTMAPS; k++ ) {
@@ -968,9 +1016,16 @@ inline static uint32_t ComputeFinalVertexColor( const byte *colors ) {
 		else
 			break;
 	}
+
+	#if 0
 	result.b[0] = Com_Clamp( 0, 255, r >> 8 );
 	result.b[1] = Com_Clamp( 0, 255, g >> 8 );
 	result.b[2] = Com_Clamp( 0, 255, b >> 8 );
+	#else // optimization - new Cowcat
+	result.b[0] = ( r >> 8 ) & 0xffu;
+	result.b[1] = ( g >> 8 ) & 0xffu;
+	result.b[2] = ( b >> 8 ) & 0xffu;
+	#endif
 
 	return result.ui;
 }

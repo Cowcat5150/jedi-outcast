@@ -590,6 +590,10 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 	} while ( 1 );
 
 	{
+
+		if(node->nummarksurfaces == 0) // test Cowcat
+			return;
+
 		// leaf node, so add mark surfaces
 		int			c;
 		msurface_t	*surf, **mark;

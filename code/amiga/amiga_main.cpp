@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "amiga_local.h"
 
+#include <unistd.h> // usleep - Cowcat
+
 #define __USE_BASETYPE__
 
 #pragma pack(push,2)
@@ -59,6 +61,8 @@ extern struct Library *SocketBase;
 */
 
 #define MEM_THRESHOLD 96*1024*1024
+
+cvar_t	*com_maxfps; // new Cowcat
 
 static qboolean consoleoutput = qfalse;
 
@@ -633,6 +637,8 @@ void Sys_Init( void )
 	Cmd_AddCommand ("in_restart", Sys_In_Restart_f);
 
 	Cvar_Set("arch", "amigaos");
+	
+	com_maxfps = Cvar_Get("com_maxfps", "60", CVAR_ARCHIVE); // new Cowcat
 
 	// Cowcat
 	sys_nostdout = Cvar_Get("sys_nostdout", "1", CVAR_ARCHIVE);
@@ -900,6 +906,21 @@ void Sys_QueEvent( int evTime, sysEventType_t evType, int value, int value2, int
 #define fgetenv() ({ float env; asm("mffs %0" : "=f" (env)); env; })
 #define fsetenv(env) ({ double d = (env); asm("mtfsffs 0xff, %0" : : "f" (d)); })
 
+
+void Sys_Sleep(int msec) // used in common.c/Com_Frame - never reached? - Cowcat
+{
+	// Just in case - Cowcat
+	if( msec == 0)
+		return;
+
+	if( msec < 0 )
+		msec = 10;
+	//
+
+	usleep(1000 * msec);
+}
+
+
 int main(int argc, char **argv)
 {
 	char 	*cmdline;
@@ -939,7 +960,15 @@ int main(int argc, char **argv)
 
 	while( 1 ) 
 	{
-		IN_Frame(); // future in qcommon/com_frame
+		if( com_busyWait->integer )
+		{
+			bool shouldSleep = false;
+
+			if( shouldSleep )
+				Sys_Sleep(5);
+		}
+
+		//IN_Frame(); // future in qcommon/com_frame
 		Com_Frame();
 	}
 
@@ -947,22 +976,6 @@ int main(int argc, char **argv)
 
 	return 0; 
 }
-
-
-#if 0 // not used now - Cowcat
-void Sys_Sleep(int msec) // used in common.c/Com_Frame - never reached? - Cowcat
-{
-	// Just in case - Cowcat
-	if( msec == 0)
-		return;
-
-	if( msec < 0 )
-		msec = 10;
-	//
-
-	usleep(1000 * msec);
-}
-#endif
 
 char *Sys_ConsoleInput(void) // Cowcat
 {

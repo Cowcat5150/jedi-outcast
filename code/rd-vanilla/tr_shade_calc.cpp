@@ -617,11 +617,13 @@ COLORS
 void RB_CalcColorFromEntity( unsigned char *dstColors )
 {
 	int	i;
-	int *pColors = ( int * ) dstColors;
-	int c;
+	int	*pColors = ( int * ) dstColors;
+	int	c;
 
 	if ( !backEnd.currentEntity )
 		return;
+
+	#if 0
 
 	c = * ( int * ) backEnd.currentEntity->e.shaderRGBA;
 
@@ -629,6 +631,17 @@ void RB_CalcColorFromEntity( unsigned char *dstColors )
 	{
 		*pColors = c;
 	}
+
+	#else // new Cowcat
+
+	const byteAlias_t *ba = (byteAlias_t *)&backEnd.currentEntity->e.shaderRGBA;
+
+	for ( i = 0; i < tess.numVertexes; i++ )
+	{
+		*pColors++ = ba->i;
+	}
+
+	#endif
 }
 
 /*
@@ -649,12 +662,25 @@ void RB_CalcColorFromOneMinusEntity( unsigned char *dstColors )
 	invModulate[2] = 255 - backEnd.currentEntity->e.shaderRGBA[2];
 	invModulate[3] = 255 - backEnd.currentEntity->e.shaderRGBA[3];	// this trashes alpha, but the AGEN block fixes it
 
+	#if 0
+
 	c = * ( int * ) invModulate;
 
 	for ( i = 0; i < tess.numVertexes; i++, pColors++ )
 	{
 		*pColors = c;
 	}
+
+	#else // new Cowcat
+
+	byteAlias_t *ba = (byteAlias_t *)&invModulate;
+
+	for ( i = 0; i < tess.numVertexes; i++ )
+	{
+		*pColors++ = ba->i;
+	}
+
+	#endif
 }
 
 /*
@@ -698,10 +724,10 @@ void RB_CalcAlphaFromOneMinusEntity( unsigned char *dstColors )
 */
 void RB_CalcWaveColor( const waveForm_t *wf, unsigned char *dstColors )
 {
-	int i;
-	int v;
-	float glow;
-	int *colors = ( int * ) dstColors;
+	int	i;
+	int	v;
+	float	glow;
+	int	*colors = ( int * ) dstColors;
 	byte	color[4];
 	
 	if ( wf->func == GF_NOISE ) {
@@ -713,6 +739,7 @@ void RB_CalcWaveColor( const waveForm_t *wf, unsigned char *dstColors )
 	if ( glow < 0 ) {
 		glow = 0;
 	}
+
 	else if ( glow > 1 ) {
 		glow = 1;
 	}
@@ -720,11 +747,26 @@ void RB_CalcWaveColor( const waveForm_t *wf, unsigned char *dstColors )
 	v = Q_ftol( 255 * glow );
 	color[0] = color[1] = color[2] = v;
 	color[3] = 255;
+
+	#if 0
+
 	v = *(int *)color;
 	
-	for ( i = 0; i < tess.numVertexes; i++, colors++ ) {
+	for ( i = 0; i < tess.numVertexes; i++, colors++ )
+	{
 		*colors = v;
 	}
+
+	#else // new Cowcat
+
+	byteAlias_t *ba = (byteAlias_t *)&color;
+
+	for ( i = 0; i < tess.numVertexes; i++ )
+	{
+		*colors++ = ba->i;
+	}
+
+	#endif
 }
 
 /*
@@ -732,9 +774,9 @@ void RB_CalcWaveColor( const waveForm_t *wf, unsigned char *dstColors )
 */
 void RB_CalcWaveAlpha( const waveForm_t *wf, unsigned char *dstColors )
 {
-	int i;
-	int v;
-	float glow;
+	int	i;
+	int	v;
+	float	glow;
 	
 	glow = EvalWaveFormClamped( wf );
 
@@ -749,8 +791,9 @@ void RB_CalcWaveAlpha( const waveForm_t *wf, unsigned char *dstColors )
 /*
 ** RB_CalcModulateColorsByFog
 */
-void RB_CalcModulateColorsByFog( unsigned char *colors ) {
-	int i;
+void RB_CalcModulateColorsByFog( unsigned char *colors )
+{
+	int	i;
 	float	texCoords[SHADER_MAX_VERTEXES][2];
 
 	// calculate texcoords so we can derive density
@@ -885,7 +928,8 @@ void RB_CalcFogTexCoords( float *st ) {
 
 		// partially clipped fogs use the T axis		
 		if ( eyeOutside ) {
-			if ( t < 1.0 ) {
+			if ( t < 1.0 )
+			{
 				t = 1.0/32;	// point is outside, so no fogging
 			} else {
 				t = 1.0/32 + 30.0/32 * t / ( t - eyeT );	// cut the distance at the fog plane
@@ -1052,14 +1096,15 @@ void RB_CalcRotateTexCoords( float degsPerSecond, float *st )
 */
 vec3_t lightOrigin = { -960, 1980, 96 };		// FIXME: track dynamically
 
-void RB_CalcSpecularAlpha( unsigned char *alphas ) {
-	int			i;
+void RB_CalcSpecularAlpha( unsigned char *alphas )
+{
+	int		i;
 	float		*v, *normal;
 	vec3_t		viewer,  reflected;
 	float		l, d;
-	int			b;
+	int		b;
 	vec3_t		lightDir;
-	int			numVertexes;
+	int		numVertexes;
 
 	v = tess.xyz[0];
 	normal = tess.normal[0];
@@ -1067,7 +1112,9 @@ void RB_CalcSpecularAlpha( unsigned char *alphas ) {
 	alphas += 3;
 
 	numVertexes = tess.numVertexes;
-	for (i = 0 ; i < numVertexes ; i++, v += 4, normal += 4, alphas += 4) {
+
+	for (i = 0 ; i < numVertexes ; i++, v += 4, normal += 4, alphas += 4)
+	{
 		float ilength;
 
 		if (backEnd.currentEntity && 
@@ -1114,15 +1161,15 @@ void RB_CalcSpecularAlpha( unsigned char *alphas ) {
 */
 void RB_CalcDiffuseColor( unsigned char *colors )
 {
-	int				i, j;
-	float			*v, *normal;
-	float			incoming;
+	int		i, j;
+	float		*v, *normal;
+	float		incoming;
 	trRefEntity_t	*ent;
-	int				ambientLightInt;
-	vec3_t			ambientLight;
-	vec3_t			lightDir;
-	vec3_t			directedLight;
-	int				numVertexes;
+	int		ambientLightInt;
+	vec3_t		ambientLight;
+	vec3_t		lightDir;
+	vec3_t		directedLight;
+	int		numVertexes;
 
 	ent = backEnd.currentEntity;
 	ambientLightInt = ent->ambientLightInt;
@@ -1171,16 +1218,16 @@ void RB_CalcDiffuseColor( unsigned char *colors )
 */
 void RB_CalcDiffuseEntityColor( unsigned char *colors )
 {
-	int				i;
-	float			*v, *normal;
-	float			incoming;
+	int		i;
+	float		*v, *normal;
+	float		incoming;
 	trRefEntity_t	*ent;
-	int				ambientLightInt;
-	vec3_t			ambientLight;
-	vec3_t			lightDir;
-	vec3_t			directedLight;
-	int				numVertexes;
-	float			j,r,g,b;
+	int		ambientLightInt;
+	vec3_t		ambientLight;
+	vec3_t		lightDir;
+	vec3_t		directedLight;
+	int		numVertexes;
+	float		j,r,g,b;
 
 	if ( !backEnd.currentEntity )
 	{//error, use the normal lighting
@@ -1238,7 +1285,7 @@ void RB_CalcDiffuseEntityColor( unsigned char *colors )
 //---------------------------------------------------------
 void RB_CalcDisintegrateColors( unsigned char *colors, colorGen_t rgbGen )
 {
-	int			i, numVertexes;
+	int		i, numVertexes;
 	float		dis, threshold;
 	float		*v;
 	vec3_t		temp;

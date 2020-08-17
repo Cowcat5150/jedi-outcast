@@ -620,7 +620,6 @@ Upload32
 qboolean cinematic;
 #endif
 
-
 static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean picmip, qboolean isLightmap, qboolean allowTC, 
 	int *pformat, word *pUploadWidth, word *pUploadHeight )
 {
@@ -629,10 +628,49 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 	int	width = *pUploadWidth;
 	int	height = *pUploadHeight; 
 
-	#if 1
+	#if defined(AMIGAOS)
 	if (cinematic)
 	{
 		*pformat = GL_ALPHA;
+
+		#if 0
+		
+		int i;
+		//
+	    	// perform optional picmip operation
+	    	//
+	    	if ( picmip )
+		{
+		    	for(i = 0; i < r_picmip->integer; i++)
+			{
+				R_MipMap( (byte *)data, width, height );
+				width >>= 1;
+				height >>= 1;
+
+				if (width < 1) {
+					width = 1;
+				}
+
+				if (height < 1) {
+					height = 1;
+				}
+			}
+	    	}
+    
+	    	//
+	    	// clamp to the current upper OpenGL limit
+	    	// scale both axis down equally so we don't have to
+	    	// deal with a half mip resampling
+	    	//
+	    	while ( width > glConfig.maxTextureSize || height > glConfig.maxTextureSize )
+	    	{
+		    	R_MipMap( (byte *)data, width, height );
+		    	width >>= 1;
+		    	height >>= 1;
+	    	}
+
+		#endif
+
 		goto jump;
 	}
 	#endif
@@ -953,41 +991,6 @@ void R_Images_DeleteLightMaps(void)
 	GL_ResetBinds();
 }
 
-#if 0
-void R_Images_DeleteScratch(void)
-{
-	ri.Printf( PRINT_ALL, "in Deletescratch \n");
-
-	qboolean bEraseOccured = qfalse;
-
-	for (AllocatedImages_t::iterator itImage = AllocatedImages.begin(); itImage != AllocatedImages.end(); bEraseOccured?itImage:++itImage)
-	{			
-		bEraseOccured = qfalse;
-
-		image_t *pImage = (*itImage).second;
-		
-		//if (pImage->imgName[0] == '$' /*&& strstr(pImage->imgName,"lightmap")*/)	// loose check, but should be ok
-		//if ( !strncmp(pImage->imgName, "*scratch", 8 ) )
-		if ( strstr(pImage->imgName, "scratch" ) )
-		{
-			R_Images_DeleteImageContents(pImage);
-#ifdef _WIN32
-			itImage = AllocatedImages.erase(itImage);
-#else
-			AllocatedImages_t::iterator itTemp = itImage;
-			itImage++;
-			AllocatedImages.erase(itTemp);
-#endif
-
-			bEraseOccured = qtrue;
-
-			ri.Printf( PRINT_ALL, "Deletescratch %s\n",pImage->imgName);
-		}
-	}
-
-	GL_ResetBinds();
-}
-#endif
 
 // special function currently only called by Dissolve code...
 //
@@ -1061,18 +1064,6 @@ void RE_RegisterImages_Info_f( void )
 qboolean RE_RegisterImages_LevelLoadEnd(void)
 {
 	//ri.Printf( PRINT_DEVELOPER, "RE_RegisterImages_LevelLoadEnd():\n");
-	//ri.Printf( PRINT_ALL, "RE_RegisterImages_LevelLoadEnd():\n");
-
-	#if 0
-	if(scratch)
-	{
-		R_Images_DeleteScratch();
-		scratch = qfalse;
-	}
-
-	else
-		scratch = qtrue;
-	#endif
 
 	qboolean bEraseOccured = qfalse;
 
@@ -1082,26 +1073,16 @@ qboolean RE_RegisterImages_LevelLoadEnd(void)
 
 		image_t *pImage = (*itImage).second;
 
-		#if 0
-		{
-			if ( !strncmp(pImage->imgName, "*scratch", 8 ) )
-				goto crap;
-		}
-		#endif
-
 		// don't un-register system shaders (*fog, *dlight, *white, *default), but DO de-register lightmaps ("$<mapname>/lightmap%d")
 		if (pImage->imgName[0] != '*' ) // || !strncmp(pImage->imgName, "*scratch", 8 ) )
 		{
-			//crap:
 
 			// image used on this level?
 			//
 			if ( pImage->iLastLevelUsedOn != RE_RegisterMedia_GetLevel() )
 			{
-			//crap:
 				// nope, so dump it...
 				//ri.Printf( PRINT_DEVELOPER, "Dumping image \"%s\"\n",pImage->imgName);
-				//ri.Printf( PRINT_ALL, "Dumping image \"%s\"\n",pImage->imgName);
 
 				R_Images_DeleteImageContents(pImage);
 #ifdef _WIN32
@@ -1117,7 +1098,6 @@ qboolean RE_RegisterImages_LevelLoadEnd(void)
 	}
 
 	//ri.Printf( PRINT_DEVELOPER, "RE_RegisterImages_LevelLoadEnd(): Ok\n");
-	//ri.Printf(PRINT_ALL,"RE_RegisterImages_LevelLoadEnd(): Ok\n");
 
 	GL_ResetBinds();
 
@@ -1682,7 +1662,6 @@ void R_CreateBuiltinImages( void )
 
 	tr.identityLightImage = R_CreateImage("*identityLight", (byte *)data, 8, 8, GL_RGBA, qfalse, qfalse, qtrue, GL_REPEAT);
 
-	#if 1
 	// scratchimage is usually used for cinematic drawing
 	for(x=0;x<NUM_SCRATCH_IMAGES;x++)
 	{
@@ -1690,9 +1669,13 @@ void R_CreateBuiltinImages( void )
 		//tr.scratchImage[x] = R_CreateImage(va("*scratch%d",x), (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
 		//tr.scratchImage[x] = R_CreateImage("*scratch", (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
 		//tr.scratchImage[x] = R_CreateImage("*scratch", (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
-		tr.scratchImage[x] = R_CreateImage("*scratch", NULL, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qtrue, qfalse, GL_CLAMP);
+
+		#if defined(AMIGAOS)
+		tr.scratchImage[x] = R_CreateImage("*scratch", NULL, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
+		#else
+		tr.scratchImage[x] = R_CreateImage(va("*scratch%d",x), (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
+		#endif
 	}
-	#endif
 
 	R_CreateDlightImage();
 	R_CreateFogImage();

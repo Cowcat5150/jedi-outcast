@@ -58,6 +58,8 @@ cvar_t *r_guardband;
 cvar_t *r_vertexbuffersize;
 cvar_t *r_glbuffers;
 cvar_t *r_perspective_fast;
+cvar_t *r_customtexturesize;
+//cvar_t *r_mintriarea;
 
 extern cvar_t *in_nograb;
 
@@ -108,6 +110,8 @@ static qboolean GLW_StartDriverAndSetMode( int mode, int colorbits, qboolean ful
 	r_guardband  = Cvar_Get("r_guardband", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	r_closeworkbench = Cvar_Get("r_closeworkbench", "0", CVAR_ARCHIVE);
 	r_perspective_fast = Cvar_Get("r_perspective_fast", "0", CVAR_ARCHIVE | CVAR_LATCH);
+	r_customtexturesize = Cvar_Get("r_customtexturesize", "0", CVAR_ARCHIVE | CVAR_LATCH);
+	//r_mintriarea = Cvar_Get("r_mintriarea", "0", CVAR_ARCHIVE | CVAR_LATCH);
 
 	mglChoosePixelDepth(depth); // default 16
 
@@ -227,9 +231,19 @@ static qboolean GLW_StartDriverAndSetMode( int mode, int colorbits, qboolean ful
 		glHint (GL_PERSPECTIVE_CORRECTION_HINT, GL_FASTEST);
 		ri.Printf(PRINT_ALL, "GL_Perspective_Correction_hint: fast\n");
 	}
-	//
-	mglMinTriArea(0.0f); // Always to 0.
+	
+	#if 0
+	if(r_mintriarea->value) // screenwidth * screenheight/75000 (rounded)
+	{
+		mglMinTriArea(r_mintriarea->value);
+		ri.Printf(PRINT_ALL, "MinTriArea: %1.1f\n", r_mintriarea->value);
+	}
+	#else
 
+	mglMinTriArea(0.0f); // Always to 0
+
+	#endif
+	
 	// clear - Cowcat
 	qglClearColor(0,0,0,1);
 	qglClear(GL_COLOR_BUFFER_BIT);
@@ -245,6 +259,7 @@ static void GLW_Shutdown(void)
 	MGLTerm();
 
 	Sys_EventPort = NULL;
+	win = 0;
 }
 
 static qboolean GLW_LoadOpenGL()
@@ -485,7 +500,11 @@ void GLimp_Init(void)
 
 	ri.Printf(PRINT_ALL, "... Sys_EventPort at %p\n", Sys_EventPort);
 
-	qglGetIntegerv( GL_MAX_TEXTURE_SIZE, &glConfig.maxTextureSize ); // Cowcat
+	if ( r_customtexturesize->value )
+		glConfig.maxTextureSize = (int)r_customtexturesize->value;  // Cowcat
+
+	else
+		qglGetIntegerv( GL_MAX_TEXTURE_SIZE, &glConfig.maxTextureSize );
 }		
 
 void GLimp_Shutdown(void)

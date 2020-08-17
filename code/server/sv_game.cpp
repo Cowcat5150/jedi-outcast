@@ -422,17 +422,18 @@ static void *G_ZMalloc_Helper( int iSize, memtag_t eTag, qboolean bZeroit)
 void G2API_SetRagDoll(CGhoul2Info_v &ghoul2,CRagDollParams *parms);
 void G2API_AnimateG2Models(CGhoul2Info_v &ghoul2, int AcurrentTime,CRagDollUpdateParams *params);
 
-qboolean	G2API_RagPCJConstraint(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t min, vec3_t max);
-qboolean	G2API_RagPCJGradientSpeed(CGhoul2Info_v &ghoul2, const char *boneName, const float speed);
-qboolean	G2API_RagEffectorGoal(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t pos);
-qboolean	G2API_GetRagBonePos(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t pos, vec3_t entAngles, vec3_t entPos, vec3_t entScale);
-qboolean	G2API_RagEffectorKick(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t velocity);
-qboolean	G2API_RagForceSolve(CGhoul2Info_v &ghoul2, qboolean force);
+qboolean G2API_RagPCJConstraint(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t min, vec3_t max);
+qboolean G2API_RagPCJGradientSpeed(CGhoul2Info_v &ghoul2, const char *boneName, const float speed);
+qboolean G2API_RagEffectorGoal(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t pos);
+qboolean G2API_GetRagBonePos(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t pos, vec3_t entAngles, vec3_t entPos, vec3_t entScale);
+qboolean G2API_RagEffectorKick(CGhoul2Info_v &ghoul2, const char *boneName, vec3_t velocity);
+qboolean G2API_RagForceSolve(CGhoul2Info_v &ghoul2, qboolean force);
 
 qboolean G2API_SetBoneIKState(CGhoul2Info_v &ghoul2, int time, const char *boneName, int ikState, sharedSetBoneIKStateParams_t *params);
 qboolean G2API_IKMove(CGhoul2Info_v &ghoul2, int time, sharedIKMoveParams_t *params);
 */
 //rww - RAGDOLL_END
+
 
 /*
 ===============
@@ -591,7 +592,7 @@ Ghoul2 Insert Start
 	import.G2API_RagForceSolve = re.G2API_RagForceSolve;
 
 	import.G2API_SetBoneIKState = re.G2API_SetBoneIKState;
-    import.G2API_IKMove = re.G2API_IKMove;
+    	import.G2API_IKMove = re.G2API_IKMove;
 	//rww - RAGDOLL_END
 
 	import.G2API_AddSkinGore = re.G2API_AddSkinGore;

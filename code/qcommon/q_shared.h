@@ -101,6 +101,7 @@ This file is part of Jedi Academy.
 #include <errno.h>
 #include <stddef.h>
 
+
 //Ignore __attribute__ on non-gcc platforms
 #if !defined(__GNUC__) && !defined(__attribute__)
 	#define __attribute__(x)
@@ -151,7 +152,7 @@ typedef unsigned short word;
 typedef unsigned long ulong;
 
 typedef enum { qfalse=0, qtrue } qboolean;
-#define	qboolean	int		//don't want strict type checking on the qboolean
+#define	qboolean int	//don't want strict type checking on the qboolean
 
 
 #if defined (_MSC_VER) && (_MSC_VER >= 1600)
@@ -221,15 +222,15 @@ typedef int32_t qhandle_t, thandle_t, fxHandle_t, sfxHandle_t, fileHandle_t, cli
 #define NULL ((void *)0)
 #endif
 
-#define	MAX_QINT			0x7fffffff
-#define	MIN_QINT			(-MAX_QINT-1)
+#define	MAX_QINT		0x7fffffff
+#define	MIN_QINT		(-MAX_QINT-1)
 
 #define INT_ID( a, b, c, d ) (uint32_t)((((a) & 0xff) << 24) | (((b) & 0xff) << 16) | (((c) & 0xff) << 8) | ((d) & 0xff))
 
 // angle indexes
-#define	PITCH				0		// up / down
-#define	YAW					1		// left / right
-#define	ROLL				2		// fall over
+#define	PITCH			0		// up / down
+#define	YAW			1		// left / right
+#define	ROLL			2		// fall over
 
 // the game guarantees that no string from the network will ever
 // exceed MAX_STRING_CHARS
@@ -242,24 +243,24 @@ typedef int32_t qhandle_t, thandle_t, fxHandle_t, sfxHandle_t, fileHandle_t, cli
 #define	MAX_INFO_VALUE		1024
 
 #define	BIG_INFO_STRING		8192  // used for system info key only
-#define	BIG_INFO_KEY		  8192
+#define	BIG_INFO_KEY		8192
 #define	BIG_INFO_VALUE		8192
 
-#define	MAX_QPATH			64		// max length of a quake game pathname
+#define	MAX_QPATH		64		// max length of a quake game pathname
 #ifdef PATH_MAX
-#define MAX_OSPATH			PATH_MAX
+#define MAX_OSPATH		PATH_MAX
 #else
-#define	MAX_OSPATH			256		// max length of a filesystem pathname
+#define	MAX_OSPATH		256		// max length of a filesystem pathname
 #endif
 
 #define	MAX_NAME_LENGTH		32		// max length of a client name
 
 // paramters for command buffer stuffing
 typedef enum {
-	EXEC_NOW,			// don't return until completed, a VM should NEVER use this,
-						// because some commands might cause the VM to be unloaded...
+	EXEC_NOW,		// don't return until completed, a VM should NEVER use this,
+				// because some commands might cause the VM to be unloaded...
 	EXEC_INSERT,		// insert at current position, but don't run yet
-	EXEC_APPEND			// add to end of the command buffer (normal case)
+	EXEC_APPEND		// add to end of the command buffer (normal case)
 } cbufExec_t;
 
 
@@ -286,28 +287,28 @@ typedef enum {
 
 // parameters to the main Error routine
 typedef enum {
-	ERR_FATAL,					// exit the entire game with a popup window
-	ERR_DROP,					// print to console and disconnect from game
+	ERR_FATAL,				// exit the entire game with a popup window
+	ERR_DROP,				// print to console and disconnect from game
 	ERR_DISCONNECT,				// don't kill server
 } errorParm_t;
 
 // font rendering values used by ui and cgame
 #define PROP_GAP_WIDTH			2 // 3
 #define PROP_SPACE_WIDTH		4
-#define PROP_HEIGHT				16
+#define PROP_HEIGHT			16
 
-#define PROP_TINY_SIZE_SCALE	1
-#define PROP_SMALL_SIZE_SCALE	1
+#define PROP_TINY_SIZE_SCALE		1
+#define PROP_SMALL_SIZE_SCALE		1
 #define PROP_BIG_SIZE_SCALE		1
-#define PROP_GIANT_SIZE_SCALE	2
+#define PROP_GIANT_SIZE_SCALE		2
 
 #define PROP_TINY_HEIGHT		10
 #define PROP_GAP_TINY_WIDTH		1
-#define PROP_SPACE_TINY_WIDTH	3
+#define PROP_SPACE_TINY_WIDTH		3
 
 #define PROP_BIG_HEIGHT			24
 #define PROP_GAP_BIG_WIDTH		3
-#define PROP_SPACE_BIG_WIDTH	6
+#define PROP_SPACE_BIG_WIDTH		6
 
 
 #define BLINK_DIVISOR			600
@@ -316,15 +317,15 @@ typedef enum {
 #define UI_LEFT			0x00000000	// default
 #define UI_CENTER		0x00000001
 #define UI_RIGHT		0x00000002
-#define UI_FORMATMASK	0x00000007
-#define UI_SMALLFONT	0x00000010
+#define UI_FORMATMASK		0x00000007
+#define UI_SMALLFONT		0x00000010
 #define UI_BIGFONT		0x00000020	// default
-#define UI_GIANTFONT	0x00000040
-#define UI_DROPSHADOW	0x00000800
+#define UI_GIANTFONT		0x00000040
+#define UI_DROPSHADOW		0x00000800
 #define UI_BLINK		0x00001000
 #define UI_INVERSE		0x00002000
 #define UI_PULSE		0x00004000
-#define UI_UNDERLINE	0x00008000
+#define UI_UNDERLINE		0x00008000
 #define UI_TINYFONT		0x00010000
 
 
@@ -567,6 +568,9 @@ float Q_fabs( float f );
 float Q_rsqrt( float f );		// reciprocal square root
 
 #define SQRTFAST( x ) ( 1.0f / Q_rsqrt( x ) )
+
+#define Q_min(x,y) ((x)<(y)?(x):(y))
+#define Q_max(x,y) ((x)>(y)?(x):(y))
 
 signed char ClampChar( int i );
 signed short ClampShort( int i );

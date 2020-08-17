@@ -41,7 +41,10 @@ cvar_t	*com_speeds;
 cvar_t	*com_developer;
 cvar_t	*com_timescale;
 cvar_t	*com_fixedtime;
-cvar_t	*com_maxfps;
+
+//cvar_t	*com_maxfps; // new Cowcat
+extern cvar_t *com_maxfps;
+
 cvar_t	*com_sv_running;
 cvar_t	*com_cl_running;
 cvar_t	*com_logfile;		// 1 = buffer log, 2 = flush after each print
@@ -54,6 +57,7 @@ cvar_t	*sv_paused;
 cvar_t	*com_skippingcin;
 cvar_t	*com_speedslog;		// 1 = buffer log, 2 = flush after each print
 cvar_t  *com_homepath;
+cvar_t	*com_busyWait;	// new Cowcat
 
 #ifdef G2_PERFORMANCE_ANALYSIS
 cvar_t	*com_G2Report;
@@ -70,9 +74,9 @@ int		timeInTrace;
 int		timeInPVSCheck;
 int		numTraces;
 
-int			com_frameTime;
-int			com_frameMsec;
-int			com_frameNumber = 0;
+int		com_frameTime;
+//int		com_frameMsec;	// disabled new - Cowcat
+int		com_frameNumber = 0;
 
 qboolean	com_errorEntered = qfalse;
 qboolean	com_fullyInitialized = qfalse;
@@ -816,7 +820,8 @@ Com_EventLoop
 Returns last event time
 =================
 */
-int Com_EventLoop( void ) {
+int Com_EventLoop( void )
+{
 	sysEvent_t	ev;
 	netadr_t	evFrom;
 	byte		bufData[MAX_MSGLEN];
@@ -867,6 +872,8 @@ int Com_EventLoop( void ) {
 			Cbuf_AddText( (char *)ev.evPtr );
 			Cbuf_AddText( "\n" );
 			break;
+
+	#if 0 // new Cowcat
 		case SE_PACKET:
 			evFrom = *(netadr_t *)ev.evPtr;
 			buf.cursize = ev.evPtrLength - sizeof( evFrom );
@@ -886,6 +893,7 @@ int Com_EventLoop( void ) {
 				CL_PacketEvent( evFrom, &buf );
 			}
 			break;
+	#endif
 		}
 
 		// free any block data
@@ -1130,7 +1138,7 @@ void Com_Init( char *commandLine ) {
 		Cmd_AddCommand ("quit", Com_Quit_f);
 		Cmd_AddCommand ("writeconfig", Com_WriteConfig_f );
 		
-		com_maxfps = Cvar_Get ("com_maxfps", "60", CVAR_ARCHIVE); // was 125 Cowcat
+		//com_maxfps = Cvar_Get ("com_maxfps", "60", CVAR_ARCHIVE); // was 125 Cowcat - new disabled here - Cowcat 
 		
 		com_developer = Cvar_Get ("developer", "0", CVAR_TEMP );
 		com_logfile = Cvar_Get ("logfile", "0", CVAR_TEMP );
@@ -1154,6 +1162,7 @@ void Com_Init( char *commandLine ) {
 		com_buildScript = Cvar_Get( "com_buildScript", "0", 0 );
 
 		com_affinity = Cvar_Get( "com_affinity", "1", CVAR_ARCHIVE );
+		com_busyWait = Cvar_Get( "com_busyWait", "0", CVAR_ARCHIVE ); // new Cowcat
 
 		com_bootlogo = Cvar_Get( "com_bootlogo", "1", CVAR_ARCHIVE );
 		
@@ -1342,6 +1351,21 @@ int Com_ModifyMsec( int msec, float &fraction )
 	return msec;
 }
 
+int Com_TimeVal(int minMsec) // added new - Cowcat
+{
+	int timeVal;
+
+	timeVal = Sys_Milliseconds() - com_frameTime;
+
+	if( timeVal >= minMsec )
+		timeVal = 0;
+
+	else
+		timeVal = minMsec - timeVal;
+
+	return timeVal;
+}
+
 /*
 =================
 Com_Frame
@@ -1350,6 +1374,7 @@ Com_Frame
 static vec3_t corg;
 static vec3_t cangles;
 static bool bComma;
+
 void Com_SetOrgAngles(vec3_t org,vec3_t angles)
 {
 	VectorCopy(org,corg);
@@ -1365,13 +1390,16 @@ void G2Time_ReportTimers(void);
 #pragma warning (disable: 4701)	//local may have been used without init (timing info vars)
 #endif
 
+extern void Sys_Sleep(int msec); // added new - Cowcat
+
 void Com_Frame( void )
 {
 	try 
 	{
 		int		timeBeforeFirstEvents = 0, timeBeforeServer = 0, timeBeforeEvents = 0, timeBeforeClient = 0, timeAfter = 0;
 		int		msec, minMsec;
-		static int	lastTime = 0;
+		int		timeVal;
+		static int	lastTime = 0, bias = 0;
 
 		// write config file if anything changed
 		
@@ -1379,11 +1407,14 @@ void Com_Frame( void )
 		Com_WriteConfiguration();
 		#endif
 
+		#if 0 // needed ? - Cowcat
 		// if "viewlog" has been modified, show or hide the log console
-		if ( com_viewlog->modified ) {
+		if ( com_viewlog->modified )
+		{
 			Sys_ShowConsole( com_viewlog->integer, qfalse );
 			com_viewlog->modified = qfalse;
 		}
+		#endif
 
 		//
 		// main event loop
@@ -1392,34 +1423,47 @@ void Com_Frame( void )
 			timeBeforeFirstEvents = Sys_Milliseconds ();
 		}
 
-		// we may want to spin here if things are going too fast
-		if ( com_maxfps->integer > 0 ) {
+		if( com_maxfps->integer > 0 )
 			minMsec = 1000 / com_maxfps->integer;
-		} else {
+
+		else
 			minMsec = 1;
-		}
+
+		timeVal = com_frameTime - lastTime;
+		bias += timeVal - minMsec;
+
+		if (bias > minMsec)
+			bias = minMsec;
+
+		// Adjust minMsec if previous frame took too long to render
+		//
+		minMsec -= bias;
+
+		timeVal = Com_TimeVal(minMsec);
 
 		do
 		{
-			com_frameTime = Com_EventLoop();
+			// Busy Sleep
+			if( com_busyWait->integer || timeVal < 1 )
+				Sys_Sleep(0);
 
-			if ( lastTime > com_frameTime ) {
-				lastTime = com_frameTime;		// possible on first frame
-			}
+			else
+				Sys_Sleep(timeVal - 1);
+			
 
-			msec = com_frameTime - lastTime;
+		} while ( (timeVal = Com_TimeVal(minMsec)) != 0 );
 
-		} while ( msec < minMsec );
+		IN_Frame(); // was in amiga_main() - Cowcat
 
-		//IN_Frame(); // new Cowcat - was in amiga_main()
+		lastTime = com_frameTime;
+		com_frameTime = Com_EventLoop();
+
+		msec = com_frameTime - lastTime;
 
 		Cbuf_Execute ();
 
-		lastTime = com_frameTime;
-
 		// mess with msec if needed
-		com_frameMsec = msec;
-		float fractionMsec=0.0f;
+		float fractionMsec = 0.0f;
 		msec = Com_ModifyMsec( msec, fractionMsec);
 	
 		//
@@ -1446,9 +1490,9 @@ void Com_Frame( void )
 			if ( com_speeds->integer ) {
 				timeBeforeEvents = Sys_Milliseconds ();
 			}
+
 			Com_EventLoop();
 			Cbuf_Execute ();
-
 
 			//
 			// client side
@@ -1523,7 +1567,8 @@ void Com_Frame( void )
 		//
 		// trace optimization tracking
 		//
-		if ( com_showtrace->integer ) {
+		if ( com_showtrace->integer )
+		{
 			extern	int c_traces, c_brush_traces, c_patch_traces;
 			extern	int	c_pointcontents;
 
@@ -1543,6 +1588,7 @@ void Com_Frame( void )
 
 		com_frameNumber++;
 	}
+
 	catch ( int code )
 	{
 		Com_CatchError (code);

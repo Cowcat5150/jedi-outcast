@@ -1050,43 +1050,6 @@ RENDER BACK END THREAD FUNCTIONS
 ============================================================================
 */
 
-#if 0
-
-const float *GL_Ortho( const float left, const float right, const float bottom, const float top, const float znear, const float zfar)
-{
-	static float m[16] = { 0 };
-
-	#if 1
-
-	const float rl = 1.0f / ( right - left );
-	const float tb = 1.0f / ( top - bottom );
-	const float fn = 1.0f / ( zfar - znear );
-
-	m[0] = 2.0f * rl;
-	m[5] = 2.0f * tb;
-	m[10] = 2.0f * fn;
-	m[12] = -(right + left ) * rl;
-	m[13] = -(top + bottom ) * tb;
-	m[14] = -(zfar + znear) * fn;
-	m[15] = 1.0f;
-
-	#else
-
-	m[0] = 2.0f / (right - left );
-	m[5] = 2.0f / (top - bottom );
-	m[10] = 2.0f / (zfar - znear );
-	m[12] = -(right + left ) / (right - left );
-	m[13] = -(top + bottom ) / (top - bottom );
-	m[14] = -(zfar + znear) / (zfar - znear );
-	m[15] = 1.0f;
-
-	#endif
-
-	return m;
-}
-
-#endif
-	
 /*
 ================
 RB_SetGL2D
@@ -1101,12 +1064,9 @@ void RB_SetGL2D (void)
 	qglViewport( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglMatrixMode(GL_PROJECTION);
-#if 1
     	qglLoadIdentity ();
 	qglOrtho (0, 640, 480, 0, 0, 1);
-#else
-	qglLoadMatrixf( GL_Ortho( 0, 640, 480, 0, 0, 1 ) );
-#endif
+
 	qglMatrixMode(GL_MODELVIEW);
 	
     	qglLoadIdentity ();
@@ -1195,10 +1155,22 @@ const void *RB_StretchPic ( const void *data )
 	tess.indexes[ numIndexes + 4 ] = numVerts + 0;
 	tess.indexes[ numIndexes + 5 ] = numVerts + 1;
 
+	#if 0
+
 	*(int *)tess.vertexColors[ numVerts ] =
 		*(int *)tess.vertexColors[ numVerts + 1 ] =
 		*(int *)tess.vertexColors[ numVerts + 2 ] =
 		*(int *)tess.vertexColors[ numVerts + 3 ] = *(int *)backEnd.color2D;
+
+	#else // new Cowcat
+
+	byteAlias_t *baDest = NULL, *baSource = (byteAlias_t *)&backEnd.color2D;
+	baDest = (byteAlias_t *)&tess.vertexColors[ numVerts + 0 ]; baDest->ui = baSource->ui;
+	baDest = (byteAlias_t *)&tess.vertexColors[ numVerts + 1 ]; baDest->ui = baSource->ui;
+	baDest = (byteAlias_t *)&tess.vertexColors[ numVerts + 2 ]; baDest->ui = baSource->ui;
+	baDest = (byteAlias_t *)&tess.vertexColors[ numVerts + 3 ]; baDest->ui = baSource->ui;
+
+	#endif
 
 	tess.xyz[ numVerts ][0] = cmd->x;
 	tess.xyz[ numVerts ][1] = cmd->y;

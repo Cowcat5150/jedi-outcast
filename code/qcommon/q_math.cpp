@@ -358,6 +358,7 @@ void VectorAdvance( const vec3_t veca, const float scale, const vec3_t vecb, vec
 
 //============================================================================
 
+
 /*
 =====================
 PlaneFromPoints
@@ -419,7 +420,7 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	//dst[2] = DotProduct( point, m[2] );
 }
 
-#else
+#else // test
 
 void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, float degrees )
 {
@@ -446,6 +447,8 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 RotateAroundDirection
 ===============
 */
+#if defined SP_GAME
+
 void RotateAroundDirection( vec3_t axis[3], float yaw )
 {
 	// create an arbitrary axis[1] 
@@ -464,7 +467,7 @@ void RotateAroundDirection( vec3_t axis[3], float yaw )
 	CrossProduct( axis[0], axis[1], axis[2] );
 }
 
-
+#endif
 
 void vectoangles( const vec3_t value1, vec3_t angles )
 {

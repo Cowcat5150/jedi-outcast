@@ -107,25 +107,30 @@ R_IssueRenderCommands
 int	c_blockedOnRender;
 int	c_blockedOnMain;
 
-void R_IssueRenderCommands( qboolean runPerformanceCounters ) {
+void R_IssueRenderCommands( qboolean runPerformanceCounters )
+{
 	renderCommandList_t	*cmdList;
 
 	cmdList = &backEndData->commands;
 
 	// add an end-of-list command
-	*(int *)(cmdList->cmds + cmdList->used) = RC_END_OF_LIST;
+	//*(int *)(cmdList->cmds + cmdList->used) = RC_END_OF_LIST;
+	byteAlias_t *ba = (byteAlias_t *)&cmdList->cmds[cmdList->used]; // new Cowcat
+	ba->ui = RC_END_OF_LIST;
 
 	// clear it out, in case this is a sync and not a buffer flip
 	cmdList->used = 0;
 
 	// at this point, the back end thread is idle, so it is ok
 	// to look at it's performance counters
-	if ( runPerformanceCounters ) {
+	if ( runPerformanceCounters )
+	{
 		R_PerformanceCounters();
 	}
 
 	// actually start the commands going
-	if ( !r_skipBackEnd->integer ) {
+	if ( !r_skipBackEnd->integer )
+	{
 		// let it start on the new batch
 		RB_ExecuteRenderCommands( cmdList->cmds );
 	}
@@ -157,16 +162,23 @@ make sure there is enough command space, waiting on the
 render thread if needed.
 ============
 */
-void *R_GetCommandBuffer( int bytes ) {
+
+#if 1
+
+void *R_GetCommandBuffer( int bytes )
+{
 	renderCommandList_t	*cmdList;
 
 	cmdList = &backEndData->commands;
 
 	// always leave room for the end of list command
-	if ( cmdList->used + bytes + 4 > MAX_RENDER_COMMANDS ) {
-		if ( bytes > MAX_RENDER_COMMANDS - 4 ) {
+	if ( cmdList->used + bytes + 4 > MAX_RENDER_COMMANDS )
+	{
+		if ( bytes > MAX_RENDER_COMMANDS - 4 )
+		{
 			Com_Error( ERR_FATAL, "R_GetCommandBuffer: bad size %i", bytes );
 		}
+
 		// if we run out of room, just start dropping commands
 		return NULL;
 	}
@@ -176,6 +188,38 @@ void *R_GetCommandBuffer( int bytes ) {
 	return cmdList->cmds + cmdList->used - bytes;
 }
 
+#else // test new Cowcat
+
+void *R_GetCommandBufferReserved( int bytes, int reservedBytes )
+{
+	renderCommandList_t	*cmdList;
+
+	cmdList = &backEndData->commands;
+	bytes = PAD( bytes, sizeof( void * ) );
+
+	// always leave room for the end of list command
+	if ( cmdList->used + bytes + sizeof( int ) * reservedBytes > MAX_RENDER_COMMANDS )
+	{
+		if ( bytes > MAX_RENDER_COMMANDS - sizeof( int ) )
+		{
+			Com_Error( ERR_FATAL, "R_GetCommandBuffer: bad size %i", bytes );
+		}
+
+		// if we run out of room, just start dropping commands
+		return NULL;
+	}
+
+	cmdList->used += bytes;
+
+	return cmdList->cmds + cmdList->used - bytes;
+}
+
+void *R_GetCommandBuffer( int bytes )
+{
+	return R_GetCommandBufferReserved( bytes, PAD( sizeof ( swapBuffersCommand_t ), sizeof ( void * ) ) );
+}
+
+#endif
 
 /*
 =============

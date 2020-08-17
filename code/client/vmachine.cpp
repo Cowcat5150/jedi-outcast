@@ -36,8 +36,8 @@ intptr_t VM_Call( int callnum, ... )
 	//Getting crashes here on OSX with debug dlls.
 #if !id386 || defined(MACOS_X)
 
-	intptr_t args[10];
-	va_list ap;
+	intptr_t	args[10];
+	va_list		ap;
 
 	if (cgvm.entryPoint)
 	{
@@ -49,9 +49,7 @@ intptr_t VM_Call( int callnum, ... )
 
 		va_end(ap);
 		
-		return cgvm.entryPoint( callnum,  args[0],  args[1],  args[2], args[3],
-							   args[4],  args[5],  args[6], args[7],
-							   args[8],  args[9] );
+		return cgvm.entryPoint( callnum, args[0], args[1], args[2], args[3], args[4], args[5], args[6], args[7], args[8], args[9] );
 	}
 #else
 	if (cgvm.entryPoint)
@@ -120,15 +118,14 @@ intptr_t VM_DllSyscall( intptr_t arg, ... )
 	#if !id386 || defined __clang__ || defined MACOS_X
 
 	// rcg010206 - see commentary above
-	intptr_t args[16];
-	size_t i;
-	va_list ap;
+	intptr_t	args[16];
+	size_t		i;
+	va_list		ap;
 	
 	args[0] = arg;
 	
 	va_start(ap, arg);
 
-	//for (i = 1; i < sizeof (args) / sizeof (args[i]); i++)
 	for (i = 1; i < ARRAY_LEN (args); i++)
 		args[i] = va_arg(ap, intptr_t);
 

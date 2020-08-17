@@ -572,6 +572,7 @@ unsigned	Com_BlockChecksum( const void *buffer, int length );
 int			Com_Filter(const char *filter, const char *name, int casesensitive);
 int			Com_FilterPath(const char *filter, const char *name, int casesensitive);
 qboolean	Com_SafeMode( void );
+void		Com_RunAndTimeServerPacket(netadr_t *evFrom, msg_t *buf); // new Cowcat
 
 void		Com_StartupVariable( const char *match );
 // checks for and removes command line "+set var arg" constructs
@@ -593,6 +594,7 @@ extern	cvar_t	*com_homepath;
 // both client and server must agree to pause
 extern	cvar_t	*cl_paused;
 extern	cvar_t	*sv_paused;
+extern	cvar_t	*com_busyWait; // new Cowcat
 
 // com_speeds times
 extern	int		time_game;
@@ -604,7 +606,7 @@ extern	int		timeInPVSCheck;
 extern	int		numTraces;
 
 extern	int		com_frameTime;
-extern	int		com_frameMsec;
+//extern int		com_frameMsec; // Cowcat
 
 extern	qboolean	com_errorEntered;
 

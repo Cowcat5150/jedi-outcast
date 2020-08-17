@@ -1389,8 +1389,6 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 			stage->bundle[0].image = (image_t*) Hunk_Alloc( stage->bundle[0].numImageAnimations * sizeof( image_t* ), qfalse );
 			memcpy( stage->bundle[0].image,	images,	stage->bundle[0].numImageAnimations * sizeof( image_t* ) );
 		}
-
-		#if 1
 		else if ( !Q_stricmp( token, "videoMap" ) )
 		{
 			token = COM_ParseExt( text, qfalse );
@@ -1407,7 +1405,6 @@ static qboolean ParseStage( shaderStage_t *stage, const char **text )
 				stage->bundle[0].image = tr.scratchImage[stage->bundle[0].videoMapHandle];
 			}
 		}
-		#endif
 		//
 		// alphafunc <func>
 		//
@@ -3244,6 +3241,20 @@ static shader_t *FinishShader( void ) {
 	if ( !shader.sort ) {
 		shader.sort = SS_OPAQUE;
 	}
+
+
+	#if 0 // future test - Cowcat
+	if (stage > 1 && stages[0].bundle[0].image[0] == tr.whiteImage && stages[0].bundle[0].numImageAnimations <= 1 && stages[0].rgbGen == CGEN_IDENTITY && stages[0].alphaGen == AGEN_SKIP )
+	{
+		if( stages[1].stateBits == (GLS_SRCBLEND_DST_COLOR | GLS_DSTBLEND_ZERO ) )
+		{
+			stages[1].stateBits == stages[0].stateBits & (GLS_DEPTHMASK_TRUE | GLS_DEPTHTEST_DISABLE | GLS_DEPTHFUNC_EQUAL);
+			memmove( &stages[0], &stages[1], sizeof(stages[0]) * (stage -1) );
+			stages[stage-1].active = qfalse;
+			stage--;
+		}
+	}
+	#endif
 
 	//
 	// if we are in r_vertexLight mode, never use a lightmap texture

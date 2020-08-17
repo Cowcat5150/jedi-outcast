@@ -170,15 +170,15 @@ void COM_DefaultExtension( char *path, int maxSize, const char *extension )
 // mess up when qcommon is included in multiple places
 static short	(*_BigShort) (short l);
 static short	(*_LittleShort) (short l);
-static int		(*_BigLong) (int l);
-static int		(*_LittleLong) (int l);
+static int	(*_BigLong) (int l);
+static int	(*_LittleLong) (int l);
 static float	(*_BigFloat) (const float *l);
 static float	(*_LittleFloat) (const float *l);
 
 short	BigShort(short l){return _BigShort(l);}
 short	LittleShort(short l) {return _LittleShort(l);}
-int		BigLong (int l) {return _BigLong(l);}
-int		LittleLong (int l) {return _LittleLong(l);}
+int	BigLong (int l) {return _BigLong(l);}
+int	LittleLong (int l) {return _LittleLong(l);}
 float	BigFloat (const float *l) {return _BigFloat(l);}
 float	LittleFloat (const float *l) {return _LittleFloat(l);}
 */
@@ -250,6 +250,7 @@ float FloatNoSwap (const float *f)
 {
 	return *f;
 }
+
 
 /*
 ================
@@ -806,11 +807,26 @@ void Q_strncpyz( char *dest, const char *src, int destsize, qboolean bBarfIfTooL
 	strncpy( dest, src, destsize-1 );
     dest[destsize-1] = 0;
 }
-#if 1         
-int Q_stricmpn (const char *s1, const char *s2, int n) {
-	int		c1, c2;
+
+        
+int Q_stricmpn (const char *s1, const char *s2, int n)
+{
+	int	c1, c2;
 	
-	do {
+	if ( s1 == NULL )
+	{
+		if ( s2 == NULL )
+			return 0;
+
+		else
+			return -1;
+	}
+
+	else if ( s2 == NULL )
+		return 1;
+
+	do
+	{
 		c1 = *s1++;
 		c2 = *s2++;
 
@@ -818,26 +834,32 @@ int Q_stricmpn (const char *s1, const char *s2, int n) {
 			return 0;		// strings are equal until end point
 		}
 		
-		if (c1 != c2) {
+		if (c1 != c2)
+		{
 			if (c1 >= 'a' && c1 <= 'z') {
 				c1 -= ('a' - 'A');
 			}
+
 			if (c2 >= 'a' && c2 <= 'z') {
 				c2 -= ('a' - 'A');
 			}
+
 			if (c1 != c2) {
 				return c1 < c2 ? -1 : 1;
 			}
 		}
+
 	} while (c1);
 	
 	return 0;		// strings are equal
 }
 
-int Q_strncmp (const char *s1, const char *s2, int n) {
-	int		c1, c2;
+int Q_strncmp (const char *s1, const char *s2, int n)
+{
+	int	c1, c2;
 	
-	do {
+	do
+	{
 		c1 = *s1++;
 		c2 = *s2++;
 
@@ -848,12 +870,14 @@ int Q_strncmp (const char *s1, const char *s2, int n) {
 		if (c1 != c2) {
 			return c1 < c2 ? -1 : 1;
 		}
+
 	} while (c1);
 	
 	return 0;		// strings are equal
 }
 
-char *Q_strlwr( char *s1 ) {
+char *Q_strlwr( char *s1 )
+{
     char	*s;
 
     s = s1;
@@ -864,7 +888,8 @@ char *Q_strlwr( char *s1 ) {
     return s1;
 }
 
-char *Q_strupr( char *s1 ) {
+char *Q_strupr( char *s1 )
+{
     char	*s;
 
     s = s1;
@@ -874,7 +899,7 @@ char *Q_strupr( char *s1 ) {
 	}
     return s1;
 }
-#endif
+
 
 // never goes past bounds or leaves without a terminating 0
 void Q_strcat( char *dest, int size, const char *src ) {
@@ -1149,6 +1174,7 @@ char * QDECL va( const char *format, ... )
 	va_end( argptr );
 	return buf;
 }
+
 
 /*
 ============

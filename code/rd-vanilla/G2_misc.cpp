@@ -60,8 +60,8 @@ static int CurrentTag=GORE_TAG_UPPER+1;
 static int CurrentTagUpper=GORE_TAG_UPPER;
 
 static map<int,GoreTextureCoordinates> GoreRecords;
-static map<pair<int,int>,int> GoreTagsTemp; // this is a surface index to gore tag map used only 
-								  // temporarily during the generation phase so we reuse gore tags per LOD
+static map<pair<int,int>,int> GoreTagsTemp;	// this is a surface index to gore tag map used only 
+						// temporarily during the generation phase so we reuse gore tags per LOD
 int goreModelIndex;
 
 static cvar_t *cg_g2MarksAllModels=NULL;
@@ -575,7 +575,7 @@ void G2_TransformModel(CGhoul2Info_v &ghoul2, const int frameNum, vec3_t scale, 
 void G2_TransformModel(CGhoul2Info_v &ghoul2, const int frameNum, vec3_t scale, CMiniHeap *G2VertSpace, int useLod)
 #endif
 {
-	int				i, lod;
+	int			i, lod;
 	vec3_t			correctScale;
 	qboolean		firstModelOnly = qfalse;
 
@@ -584,8 +584,7 @@ void G2_TransformModel(CGhoul2Info_v &ghoul2, const int frameNum, vec3_t scale, 
 		cg_g2MarksAllModels = ri.Cvar_Get( "cg_g2MarksAllModels", "0", 0 );
 	}
 
-	if (cg_g2MarksAllModels == NULL
-		|| !cg_g2MarksAllModels->integer )
+	if (cg_g2MarksAllModels == NULL || !cg_g2MarksAllModels->integer )
 	{
 		firstModelOnly = qtrue;
 	}
@@ -1559,19 +1558,18 @@ void G2_TraceModels(CGhoul2Info_v &ghoul2, vec3_t rayStart, vec3_t rayEnd, CColl
 void G2_TraceModels(CGhoul2Info_v &ghoul2, vec3_t rayStart, vec3_t rayEnd, CCollisionRecord *collRecMap, int entNum, EG2_Collision eG2TraceType, int useLod, float fRadius)
 #endif
 {
-	int				i, lod;
+	int			i, lod;
 	skin_t			*skin;
 	shader_t		*cust_shader;
 	qboolean		firstModelOnly = qfalse;
-	int				firstModel = 0;
+	int			firstModel = 0;
 
 	if ( cg_g2MarksAllModels == NULL )
 	{
 		cg_g2MarksAllModels = ri.Cvar_Get( "cg_g2MarksAllModels", "0", 0 );
 	}
 
-	if (cg_g2MarksAllModels == NULL
-		|| !cg_g2MarksAllModels->integer )
+	if (cg_g2MarksAllModels == NULL || !cg_g2MarksAllModels->integer )
 	{
 		firstModelOnly = qtrue;
 	}
@@ -1629,13 +1627,17 @@ void G2_TraceModels(CGhoul2Info_v &ghoul2, vec3_t rayStart, vec3_t rayEnd, CColl
 		}
 
 		lod = G2_DecideTraceLod(g,useLod);
+
 		if ( skipIfLODNotMatch )
-		{//we only want to hit this SPECIFIC LOD...
+		{
+			//we only want to hit this SPECIFIC LOD...
 			if ( lod != useLod )
-			{//doesn't match, skip this model
+			{
+				//doesn't match, skip this model
 				continue;
 			}
 		}
+
 		//reset the quick surface override lookup
 		G2_FindOverrideSurface(-1, g.mSlist); 
 

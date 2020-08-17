@@ -432,7 +432,7 @@ LOOPBACK BUFFERS FOR LOCAL PLAYER
 =============================================================================
 */
 
-qboolean	NET_GetLoopPacket (netsrc_t sock, netadr_t *net_from, msg_t *net_message)
+qboolean NET_GetLoopPacket (netsrc_t sock, netadr_t *net_from, msg_t *net_message)
 {
 	int		i;
 	loopback_t	*loop;
@@ -450,7 +450,10 @@ qboolean	NET_GetLoopPacket (netsrc_t sock, netadr_t *net_from, msg_t *net_messag
 	}
 
 	//Get length of packet.
-	int length = *(int*)(loop->loopData + i);
+	//int length = *(int*)(loop->loopData + i);
+	byteAlias_t *ba = (byteAlias_t *)&loop->loopData[i]; // new Cowcat
+	const int length = ba->i;
+
 	i += 4;
 
 	//See if entire packet is at end of buffer or part is at the beginning.
@@ -485,7 +488,9 @@ void NET_SendLoopPacket (netsrc_t sock, int length, const void *data, netadr_t t
 	loop = &loopbacks[sock^1];
 
 	//Make sure there is enough free space in the buffer.
+#ifdef _DEBUG	// new Cowcat
 	int freeSpace;
+
 	if(loop->send >= loop->get) {
 		freeSpace = MAX_LOOPDATA - (loop->send - loop->get);
 	} else {
@@ -493,6 +498,7 @@ void NET_SendLoopPacket (netsrc_t sock, int length, const void *data, netadr_t t
 	}
 
 	assert(freeSpace > length);
+#endif
 
 	//Get write position.  Wrap around if too close to end.
 	i = loop->send;
@@ -501,7 +507,10 @@ void NET_SendLoopPacket (netsrc_t sock, int length, const void *data, netadr_t t
 	}
 
 	//Write length of packet.
-	*(int*)(loop->loopData + i) = length;
+	//*(int*)(loop->loopData + i) = length;
+	byteAlias_t *ba = (byteAlias_t *)&loop->loopData[i]; // new Cowcat
+	ba->i = length;
+
 	i += 4;
 
 	//See if the whole packet will fit on the end of the buffer or if we

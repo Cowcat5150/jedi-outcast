@@ -1542,27 +1542,31 @@ CM_TraceThroughPatchCollide
 */
 void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *pc )
 {
-	int i, j, hit, hitnum;
-	float offset, enterFrac, leaveFrac, t;
-	patchPlane_t *planes;
-	facet_t	*facet;
-	float plane[4], bestplane[4];
-	vec3_t startp, endp;
+	int		i, j, hit, hitnum;
+	float		offset, enterFrac, leaveFrac, t;
+	patchPlane_t	*planes;
+	facet_t		*facet;
+	float		plane[4] = {0, 0}, bestplane[4] = {0, 0};
+	vec3_t		startp, endp;
 #ifndef BSPC
-	static cvar_t *cv;
+	static cvar_t	*cv;
 #endif //BSPC
 
-	if (tw->isPoint) {
+	if (tw->isPoint)
+	{
 		CM_TracePointThroughPatchCollide( tw, pc );
 		return;
 	}
+
 #ifndef ADDBEVELS
 	CM_TracePointThroughPatchCollide( tw, pc );
 	return;
 #endif
 	//
 	facet = pc->facets;
-	for ( i = 0 ; i < pc->numFacets ; i++, facet++ ) {
+
+	for ( i = 0 ; i < pc->numFacets ; i++, facet++ )
+	{
 		enterFrac = -1.0;
 		leaveFrac = 1.0;
 		hitnum = -1;
@@ -1570,6 +1574,7 @@ void CM_TraceThroughPatchCollide( traceWork_t *tw, const struct patchCollide_s *
 		planes = &pc->planes[ facet->surfacePlane ];
 		VectorCopy(planes->plane, plane);
 		plane[3] = planes->plane[3];
+
 		if ( tw->sphere.use ) {
 			// adjust the plane distance apropriately for radius
 			plane[3] += tw->sphere.radius;

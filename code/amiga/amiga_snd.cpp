@@ -60,15 +60,16 @@ static unsigned short callback[] = {
 
 
 // pragma(2) here ? 
-//#pragma pack(push,2)
+#pragma pack(push,2)
 
 struct ChannelInfo
 {
   	struct AHIEffChannelInfo cinfo;
-  	ULONG x[1];
+  	//ULONG x[1];
+	ULONG offset;
 };
 
-//#pragma pack(pop)
+#pragma pack(pop)
 
 
 struct Library *AHIBase = NULL;
@@ -100,7 +101,6 @@ struct Hook EffHook =
 qboolean SNDDMA_Init(void)
 {
 	struct AHISampleInfo 	sample;
-	int 			i;
 	ULONG 			mixfreq, playsamples;
 	UBYTE 			name[256];
 	ULONG 			mode;

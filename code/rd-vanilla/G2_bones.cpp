@@ -4766,6 +4766,7 @@ qboolean G2_IKMove(CGhoul2Info_v &ghoul2, int time, sharedIKMoveParams_t *params
 void G2_Init_Bone_List(boneInfo_v &blist, int numBones) // fix segfault - Cowcat
 {
 	blist.clear();
+	blist.reserve(numBones);
 }
 
 int	G2_Get_Bone_Index(CGhoul2Info *ghoul2, const char *boneName, qboolean bAddIfNotFound)
