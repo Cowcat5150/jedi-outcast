@@ -571,7 +571,7 @@ static void DrawTris (shaderCommands_t *input)
 		if ( qglLockArraysEXT ) 
 		{
 			qglLockArraysEXT( 0, input->numVertexes );
-			GLimp_LogComment( "glLockArraysEXT\n" );
+			//GLimp_LogComment( "glLockArraysEXT\n" );
 		}
 
 		R_DrawElements( input->numIndexes, input->indexes );
@@ -579,7 +579,7 @@ static void DrawTris (shaderCommands_t *input)
 		if ( qglUnlockArraysEXT ) 
 		{
 			qglUnlockArraysEXT( );
-			GLimp_LogComment( "glUnlockArraysEXT\n" );
+			//GLimp_LogComment( "glUnlockArraysEXT\n" );
 		}
 
 		qglDisable( GL_POLYGON_OFFSET_LINE );
@@ -598,14 +598,14 @@ static void DrawTris (shaderCommands_t *input)
 
 		if (qglLockArraysEXT) {
 			qglLockArraysEXT(0, input->numVertexes);
-			GLimp_LogComment( "glLockArraysEXT\n" );
+			//GLimp_LogComment( "glLockArraysEXT\n" );
 		}
 
 		R_DrawElements( input->numIndexes, input->indexes );
 
 		if (qglUnlockArraysEXT) {
 			qglUnlockArraysEXT();
-			GLimp_LogComment( "glUnlockArraysEXT\n" );
+			//GLimp_LogComment( "glUnlockArraysEXT\n" );
 		}
 
 		qglDepthRange( 0, 1 );
@@ -1098,20 +1098,10 @@ static void ProjectDlightTexture2( void )
 			colorTemp[2] = Q_ftol(floatColor[2] * modulate);
 			colorTemp[3] = 255;
 
-			#if 0
-
-			colorArray[numIndexes]=*(unsigned int *)colorTemp;
-			colorArray[numIndexes+1]=*(unsigned int *)colorTemp;
-			colorArray[numIndexes+2]=*(unsigned int *)colorTemp;
-			
-			#else // new Cowcat
-	
 			byteAlias_t *ba = (byteAlias_t *)&colorTemp;
 			colorArray[numIndexes+0] = ba->ui;
 			colorArray[numIndexes+1] = ba->ui;
 			colorArray[numIndexes+2] = ba->ui;
-
-			#endif
 
 			hitIndexes[numIndexes] = numIndexes;
 			hitIndexes[numIndexes+1] = numIndexes+1;
@@ -1156,7 +1146,7 @@ static void ProjectDlightTexture2( void )
 			if (qglUnlockArraysEXT) 
 			{
 				qglUnlockArraysEXT();
-				GLimp_LogComment( "glUnlockArraysEXT\n" );
+				//GLimp_LogComment( "glUnlockArraysEXT\n" );
 			}
 
 			#else
@@ -1267,7 +1257,7 @@ static void ProjectDlightTexture2( void )
 		if (qglLockArraysEXT)
 		{
 			qglLockArraysEXT(0, tess.numVertexes);
-			GLimp_LogComment( "glLockArraysEXT\n" );
+			//GLimp_LogComment( "glLockArraysEXT\n" );
 		}
 
 		#else
@@ -1698,16 +1688,8 @@ static void RB_FogPass( void )
 
 	for ( i = 0; i < tess.numVertexes; i++ )
 	{
-		#if 0 
-
-		* ( int * )&tess.svars.colors[i] = fog->colorInt;
-
-		#else // new Cowcat
-
 		byteAlias_t *ba = (byteAlias_t *)&tess.svars.colors[i];
 		ba->i = fog->colorInt;
-
-		#endif
 	}
 
 	RB_CalcFogTexCoords( ( float * ) tess.svars.texcoords[0] );
@@ -1817,17 +1799,8 @@ static void ComputeColors( shaderStage_t *pStage, alphaGen_t forceAlphaGen, colo
 
 			for ( i = 0; i < tess.numVertexes; i++ )
 			{
-				#if 0
-
-				*(int *)tess.svars.colors[i] = *(int *)pStage->constantColor;
-
-				#else // new Cowcat
-	
 				byteAlias_t *baDest = (byteAlias_t *)&tess.svars.colors[i], *baSource = (byteAlias_t *)&pStage->constantColor;
 				baDest->i = baSource->i;
-
-				#endif
-				
 			}
 			break;
 
@@ -1875,16 +1848,8 @@ static void ComputeColors( shaderStage_t *pStage, alphaGen_t forceAlphaGen, colo
 
 				for ( i = 0; i < tess.numVertexes; i++ )
 				{
-					#if 0
-
-					* ( int * )&tess.svars.colors[i] = fog->colorInt;
-
-					#else // new Cowcat
-
 					byteAlias_t *ba = (byteAlias_t *)&tess.svars.colors[i];
 					ba->i = fog->colorInt;
-
-					#endif
 				}
 			}
 			break;
@@ -1908,16 +1873,8 @@ static void ComputeColors( shaderStage_t *pStage, alphaGen_t forceAlphaGen, colo
 
 			for ( i = 0; i < tess.numVertexes; i++ ) 
 			{
-				#if 0
-
-				* ( int * )&tess.svars.colors[i] = *(int *)styleColors[pStage->lightmapStyle];
-
-				#else // new Cowcat
-
 				byteAlias_t *baDest = (byteAlias_t *)&tess.svars.colors[i], *baSource = (byteAlias_t *)&styleColors[pStage->lightmapStyle];
 				baDest->ui = baSource->ui;
-
-				#endif
 			}
 
 			break;
@@ -2539,7 +2496,7 @@ void RB_StageIteratorGeneric( void )
 	if (qglLockArraysEXT)
 	{
 		qglLockArraysEXT(0, input->numVertexes);
-		GLimp_LogComment( "glLockArraysEXT\n" );
+		//GLimp_LogComment( "glLockArraysEXT\n" );
 	}
 
 	#else
@@ -2598,7 +2555,7 @@ void RB_StageIteratorGeneric( void )
 	if (qglUnlockArraysEXT) 
 	{
 		qglUnlockArraysEXT();
-		GLimp_LogComment( "glUnlockArraysEXT\n" );
+		//GLimp_LogComment( "glUnlockArraysEXT\n" );
 	}
 
 	#else

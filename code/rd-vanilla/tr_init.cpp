@@ -1208,7 +1208,7 @@ void R_Register( void )
 	r_ext_preferred_tc_method = ri.Cvar_Get( "r_ext_preferred_tc_method", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_ext_gamma_control = ri.Cvar_Get( "r_ext_gamma_control", "0", CVAR_ARCHIVE | CVAR_LATCH );  // was 1 Cowcat
 	r_ext_multitexture = ri.Cvar_Get( "r_ext_multitexture", "0", CVAR_ARCHIVE | CVAR_LATCH );  // was 1 Cowcat
-	r_ext_compiled_vertex_array = ri.Cvar_Get( "r_ext_compiled_vertex_array", "0", CVAR_ARCHIVE | CVAR_LATCH); // was 1 Cowcat
+	r_ext_compiled_vertex_array = ri.Cvar_Get( "r_ext_compiled_vertex_array", "1", CVAR_ARCHIVE | CVAR_LATCH);
 	r_ext_texture_env_add = ri.Cvar_Get( "r_ext_texture_env_add", "0", CVAR_ARCHIVE | CVAR_LATCH); // was 1 Cowcat
 	r_ext_texture_filter_anisotropic = ri.Cvar_Get( "r_ext_texture_filter_anisotropic", "16", CVAR_ARCHIVE );
  
@@ -1220,7 +1220,7 @@ void R_Register( void )
 	r_DynamicGlowWidth = ri.Cvar_Get( "r_DynamicGlowWidth", "320", CVAR_ARCHIVE | CVAR_LATCH );
 	r_DynamicGlowHeight = ri.Cvar_Get( "r_DynamicGlowHeight", "240", CVAR_ARCHIVE | CVAR_LATCH );
 
-	r_picmip = ri.Cvar_Get ("r_picmip", "0", CVAR_ARCHIVE | CVAR_LATCH );
+	r_picmip = ri.Cvar_Get ("r_picmip", "1", CVAR_ARCHIVE | CVAR_LATCH ); // was 0 - Cowcat
 	ri.Cvar_CheckRange( r_picmip, 0, 16, qtrue );
 	r_colorMipLevels = ri.Cvar_Get ("r_colorMipLevels", "0", CVAR_LATCH );
 	r_detailTextures = ri.Cvar_Get( "r_detailtextures", "1", CVAR_ARCHIVE | CVAR_LATCH );
@@ -1242,7 +1242,7 @@ void R_Register( void )
 	r_simpleMipMaps = ri.Cvar_Get( "r_simpleMipMaps", "1", CVAR_ARCHIVE | CVAR_LATCH );
 	r_vertexLight = ri.Cvar_Get( "r_vertexLight", "0", CVAR_ARCHIVE | CVAR_LATCH );
 	r_subdivisions = ri.Cvar_Get ("r_subdivisions", "4", CVAR_ARCHIVE | CVAR_LATCH);
-	ri.Cvar_CheckRange( r_subdivisions, 4, 80, qfalse );
+	ri.Cvar_CheckRange( r_subdivisions, 0, 80, qfalse );
 	r_intensity = ri.Cvar_Get ("r_intensity", "1", CVAR_LATCH|CVAR_ARCHIVE );
 	
 	//
@@ -1499,16 +1499,8 @@ void R_Init( void )
 
 	for(i=0;i<MAX_LIGHT_STYLES;i++)
 	{
-		#if 0
-
-		RE_SetLightStyle(i, *(int*)color);
-
-		#else // new Cowcat
-	
 		byteAlias_t *ba = (byteAlias_t *)&color;
 		RE_SetLightStyle(i, ba->i );
-
-		#endif
 	}
 
 	InitOpenGL();
@@ -1649,16 +1641,8 @@ void RE_GetLightStyle(int style, color4ub_t color)
 		return;
 	}
 
-	#if 0
-
-	*(int *)color = *(int *)styleColors[style];
-
-	#else // new Cowcat
-
 	byteAlias_t *baDest = (byteAlias_t *)&color, *baSource = (byteAlias_t *)&styleColors[style];
 	baDest->i = baSource->i;
-
-	#endif
 }
 
 void RE_SetLightStyle(int style, int color)
@@ -1669,16 +1653,6 @@ void RE_SetLightStyle(int style, int color)
 		return;
 	}
 
-	#if 0
-
-	if (*(int*)styleColors[style] != color)
-	{
-		*(int *)styleColors[style] = color;
-		styleUpdated[style] = true;
-	}
-
-	#else // new Cowcat
-
 	byteAlias_t *ba = (byteAlias_t *)&styleColors[style];
 
 	if( ba->i != color)
@@ -1686,8 +1660,6 @@ void RE_SetLightStyle(int style, int color)
 		ba->i = color;
 		styleUpdated[style] = true;
 	}
-
-	#endif
 }
 
 /*

@@ -148,16 +148,6 @@ void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, byte *color, flo
 	// constant color all the way around
 	// should this be identity and let the shader specify from entity?
 
-	#if 0
-
-	* ( unsigned int * ) &tess.vertexColors[ndx] = 
-	* ( unsigned int * ) &tess.vertexColors[ndx+1] = 
-	* ( unsigned int * ) &tess.vertexColors[ndx+2] = 
-	* ( unsigned int * ) &tess.vertexColors[ndx+3] = 
-		* ( unsigned int * )color;
-
-	#else // new Cowcat
-
 	byteAlias_t *baSource = (byteAlias_t *)color, *baDest;
 	baDest = (byteAlias_t *)&tess.vertexColors[ndx + 0];
 	baDest->ui = baSource->ui;
@@ -167,8 +157,6 @@ void RB_AddQuadStampExt( vec3_t origin, vec3_t left, vec3_t up, byte *color, flo
 	baDest->ui = baSource->ui;
 	baDest = (byteAlias_t *)&tess.vertexColors[ndx + 3];
 	baDest->ui = baSource->ui;
-
-	#endif
 	
 	tess.numVertexes += 4;
 	tess.numIndexes += 6;
@@ -957,18 +945,8 @@ void RB_SurfacePolychain( srfPoly_t *p )
 		tess.texCoords[numv][0][0] = p->verts[i].st[0];
 		tess.texCoords[numv][0][1] = p->verts[i].st[1];
 
-		#if 0
-
-		*(int *)&tess.vertexColors[numv] = *(int *)p->verts[ i ].modulate;
-
-		numv++;
-
-		#else // new Cowcat
-
 		byteAlias_t *baDest = (byteAlias_t *)&tess.vertexColors[numv++], *baSource = (byteAlias_t *)&p->verts[ i ].modulate;
 		baDest->i = baSource->i;
-
-		#endif
 	}
 
 	// generate fan indexes into the tess array

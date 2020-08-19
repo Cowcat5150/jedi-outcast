@@ -1081,7 +1081,7 @@ void RB_SetGL2D (void)
 
 	// set time for 2D shaders
 	backEnd.refdef.time = ri.Milliseconds();
-	backEnd.refdef.floatTime = backEnd.refdef.time * 0.001f; // f - Cowcat
+	backEnd.refdef.floatTime = backEnd.refdef.time * 0.001f;
 }
 
 
@@ -1118,7 +1118,7 @@ const void *RB_StretchPic ( const void *data )
 
 	cmd = (const stretchPicCommand_t *)data;
 
-	if ( !backEnd.projection2D ) // put this here - cowcat
+	if ( !backEnd.projection2D )
 	{
 		RB_SetGL2D();
 	}
@@ -1135,12 +1135,6 @@ const void *RB_StretchPic ( const void *data )
 		RB_BeginSurface( shader, 0 );
 	}
 
-	/*
-	if ( !backEnd.projection2D ) {
-		RB_SetGL2D();	//set culling and other states
-	}
-	*/
-
 	RB_CHECKOVERFLOW( 4, 6 );
 	numVerts = tess.numVertexes;
 	numIndexes = tess.numIndexes;
@@ -1155,22 +1149,11 @@ const void *RB_StretchPic ( const void *data )
 	tess.indexes[ numIndexes + 4 ] = numVerts + 0;
 	tess.indexes[ numIndexes + 5 ] = numVerts + 1;
 
-	#if 0
-
-	*(int *)tess.vertexColors[ numVerts ] =
-		*(int *)tess.vertexColors[ numVerts + 1 ] =
-		*(int *)tess.vertexColors[ numVerts + 2 ] =
-		*(int *)tess.vertexColors[ numVerts + 3 ] = *(int *)backEnd.color2D;
-
-	#else // new Cowcat
-
 	byteAlias_t *baDest = NULL, *baSource = (byteAlias_t *)&backEnd.color2D;
 	baDest = (byteAlias_t *)&tess.vertexColors[ numVerts + 0 ]; baDest->ui = baSource->ui;
 	baDest = (byteAlias_t *)&tess.vertexColors[ numVerts + 1 ]; baDest->ui = baSource->ui;
 	baDest = (byteAlias_t *)&tess.vertexColors[ numVerts + 2 ]; baDest->ui = baSource->ui;
 	baDest = (byteAlias_t *)&tess.vertexColors[ numVerts + 3 ]; baDest->ui = baSource->ui;
-
-	#endif
 
 	tess.xyz[ numVerts ][0] = cmd->x;
 	tess.xyz[ numVerts ][1] = cmd->y;

@@ -114,8 +114,7 @@ void R_IssueRenderCommands( qboolean runPerformanceCounters )
 	cmdList = &backEndData->commands;
 
 	// add an end-of-list command
-	//*(int *)(cmdList->cmds + cmdList->used) = RC_END_OF_LIST;
-	byteAlias_t *ba = (byteAlias_t *)&cmdList->cmds[cmdList->used]; // new Cowcat
+	byteAlias_t *ba = (byteAlias_t *)&cmdList->cmds[cmdList->used];
 	ba->ui = RC_END_OF_LIST;
 
 	// clear it out, in case this is a sync and not a buffer flip
@@ -163,8 +162,6 @@ render thread if needed.
 ============
 */
 
-#if 1
-
 void *R_GetCommandBuffer( int bytes )
 {
 	renderCommandList_t	*cmdList;
@@ -188,38 +185,6 @@ void *R_GetCommandBuffer( int bytes )
 	return cmdList->cmds + cmdList->used - bytes;
 }
 
-#else // test new Cowcat
-
-void *R_GetCommandBufferReserved( int bytes, int reservedBytes )
-{
-	renderCommandList_t	*cmdList;
-
-	cmdList = &backEndData->commands;
-	bytes = PAD( bytes, sizeof( void * ) );
-
-	// always leave room for the end of list command
-	if ( cmdList->used + bytes + sizeof( int ) * reservedBytes > MAX_RENDER_COMMANDS )
-	{
-		if ( bytes > MAX_RENDER_COMMANDS - sizeof( int ) )
-		{
-			Com_Error( ERR_FATAL, "R_GetCommandBuffer: bad size %i", bytes );
-		}
-
-		// if we run out of room, just start dropping commands
-		return NULL;
-	}
-
-	cmdList->used += bytes;
-
-	return cmdList->cmds + cmdList->used - bytes;
-}
-
-void *R_GetCommandBuffer( int bytes )
-{
-	return R_GetCommandBufferReserved( bytes, PAD( sizeof ( swapBuffersCommand_t ), sizeof ( void * ) ) );
-}
-
-#endif
 
 /*
 =============

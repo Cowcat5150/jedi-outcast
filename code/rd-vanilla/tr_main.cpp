@@ -1333,16 +1333,6 @@ void R_SortDrawSurfs( drawSurf_t *drawSurfs, int numDrawSurfs )
 		return;
 	}
 
-	#if 0 // now in RenderView - Cowcat
-	// if we overflowed MAX_DRAWSURFS, the drawsurfs
-	// wrapped around in the buffer and we will be missing
-	// the first surfaces, not the last ones
-	if ( numDrawSurfs > MAX_DRAWSURFS )
-	{
-		numDrawSurfs = MAX_DRAWSURFS;
-	}
-	#endif
-
 	// sort the drawsurfs by sort type, then orientation, then shader
 	R_RadixSort( drawSurfs, numDrawSurfs );
 
@@ -1639,7 +1629,7 @@ or a mirror / remote location
 void R_RenderView (viewParms_t *parms)
 {
 	int	firstDrawSurf;
-	int	numDrawSurfs; // new Cowcat
+	int	numDrawSurfs;
 
 	if ( parms->viewportWidth <= 0 || parms->viewportHeight <= 0 ) {
 		return;
@@ -1651,17 +1641,6 @@ void R_RenderView (viewParms_t *parms)
 		color4ub_t	whitecolor = {0xff, 0xff, 0xff, 0xff};
 		color4ub_t	blackcolor = {0x00, 0x00, 0x00, 0xff};
 
-		#if 0
-
-		for(i=0;i<MAX_LIGHT_STYLES;i++)
-		{
-			RE_SetLightStyle(i,  *(int*)blackcolor);
-		}
-
-		RE_SetLightStyle(r_debugStyle->integer,  *(int*)whitecolor);
-
-		#else // new Cowcat
-
 		byteAlias_t *ba = (byteAlias_t *)&blackcolor;
 
 		for(i=0;i<MAX_LIGHT_STYLES;i++)
@@ -1671,8 +1650,6 @@ void R_RenderView (viewParms_t *parms)
 
 		ba = (byteAlias_t *)&whitecolor;
 		RE_SetLightStyle(r_debugStyle->integer,  ba->i);
-
-		#endif
 	}
 
 	tr.viewCount++;
@@ -1698,7 +1675,6 @@ void R_RenderView (viewParms_t *parms)
 
 	R_GenerateDrawSurfs();
 
-	// Cowcat
 	// if we overflowed MAX_DRAWSURFS, the drawsurfs
 	// wrapped around in the buffer and we will be missing
 	// the first surfaces, not the last ones
@@ -1706,7 +1682,6 @@ void R_RenderView (viewParms_t *parms)
 	{
 		numDrawSurfs = MAX_DRAWSURFS;
 	}
-	//
 
 	R_SortDrawSurfs( tr.refdef.drawSurfs + firstDrawSurf, tr.refdef.numDrawSurfs - firstDrawSurf );
 

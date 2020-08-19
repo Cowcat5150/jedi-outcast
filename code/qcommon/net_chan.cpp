@@ -450,8 +450,7 @@ qboolean NET_GetLoopPacket (netsrc_t sock, netadr_t *net_from, msg_t *net_messag
 	}
 
 	//Get length of packet.
-	//int length = *(int*)(loop->loopData + i);
-	byteAlias_t *ba = (byteAlias_t *)&loop->loopData[i]; // new Cowcat
+	byteAlias_t *ba = (byteAlias_t *)&loop->loopData[i];
 	const int length = ba->i;
 
 	i += 4;
@@ -488,7 +487,7 @@ void NET_SendLoopPacket (netsrc_t sock, int length, const void *data, netadr_t t
 	loop = &loopbacks[sock^1];
 
 	//Make sure there is enough free space in the buffer.
-#ifdef _DEBUG	// new Cowcat
+#ifdef _DEBUG
 	int freeSpace;
 
 	if(loop->send >= loop->get) {
@@ -507,8 +506,7 @@ void NET_SendLoopPacket (netsrc_t sock, int length, const void *data, netadr_t t
 	}
 
 	//Write length of packet.
-	//*(int*)(loop->loopData + i) = length;
-	byteAlias_t *ba = (byteAlias_t *)&loop->loopData[i]; // new Cowcat
+	byteAlias_t *ba = (byteAlias_t *)&loop->loopData[i];
 	ba->i = length;
 
 	i += 4;

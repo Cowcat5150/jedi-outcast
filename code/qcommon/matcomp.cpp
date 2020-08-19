@@ -63,8 +63,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_X)|=((unsigned int)(val))<<MC_SHIFT_X;
-	byteAlias_t *ba = (byteAlias_t *)&comp[MC_POS_X];	// new Cowcat
+	byteAlias_t *ba = (byteAlias_t *)&comp[MC_POS_X];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_X;
 
 	val=(int)(mat[1][3]/MC_SCALE_Y);
@@ -74,8 +73,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_Y)|=((unsigned int)(val))<<MC_SHIFT_Y;
-	ba = (byteAlias_t *)&comp[MC_POS_Y];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_Y];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_Y;
 
 
@@ -86,8 +84,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_Z)|=((unsigned int)(val))<<MC_SHIFT_Z;
-	ba = (byteAlias_t *)&comp[MC_POS_Z];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_Z];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_Z;
 
 	val=(int)(mat[0][0]/MC_SCALE_VECT);
@@ -97,8 +94,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V11)|=((unsigned int)(val))<<MC_SHIFT_V11;
-	ba = (byteAlias_t *)&comp[MC_POS_V11];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V11];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V11;
 
 	val=(int)(mat[0][1]/MC_SCALE_VECT);
@@ -108,8 +104,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V12)|=((unsigned int)(val))<<MC_SHIFT_V12;
-	ba = (byteAlias_t *)&comp[MC_POS_V12];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V12];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V12;
 
 	val=(int)(mat[0][2]/MC_SCALE_VECT);
@@ -119,8 +114,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V13)|=((unsigned int)(val))<<MC_SHIFT_V13;
-	ba = (byteAlias_t *)&comp[MC_POS_V13];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V13];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V13;
 
 
@@ -131,8 +125,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V21)|=((unsigned int)(val))<<MC_SHIFT_V21;
-	ba = (byteAlias_t *)&comp[MC_POS_V21];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V21];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V21;
 
 
@@ -143,8 +136,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V22)|=((unsigned int)(val))<<MC_SHIFT_V22;
-	ba = (byteAlias_t *)&comp[MC_POS_V22];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V22];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V22;
 
 	val=(int)(mat[1][2]/MC_SCALE_VECT);
@@ -154,8 +146,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V23)|=((unsigned int)(val))<<MC_SHIFT_V23;
-	ba = (byteAlias_t *)&comp[MC_POS_V23];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V23];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V23;
 
 
@@ -166,8 +157,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V31)|=((unsigned int)(val))<<MC_SHIFT_V31;
-	ba = (byteAlias_t *)&comp[MC_POS_V31];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V31];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V31;
 
 	val=(int)(mat[2][1]/MC_SCALE_VECT);
@@ -177,8 +167,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V32)|=((unsigned int)(val))<<MC_SHIFT_V32;
-	ba = (byteAlias_t *)&comp[MC_POS_V32];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V32];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V32;
 
 	val=(int)(mat[2][2]/MC_SCALE_VECT);
@@ -188,8 +177,7 @@ void MC_Compress(const float mat[3][4],unsigned char * _comp)
 	if (val<0)
 		val=0;
 
-	//*(unsigned int *)(comp+MC_POS_V33)|=((unsigned int)(val))<<MC_SHIFT_V33;
-	ba = (byteAlias_t *)&comp[MC_POS_V33];	// new Cowcat
+	ba = (byteAlias_t *)&comp[MC_POS_V33];
 	ba->ui |= ((uint32_t)val) << MC_SHIFT_V33;
 
 	// I added this because the line above actually ORs data into an int at the 22 byte (from 0), and therefore technically
