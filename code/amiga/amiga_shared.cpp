@@ -64,7 +64,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 
 // Used to determine where to store user-specific files
-static char homePath[MAX_OSPATH] = { 0 };
+//static char homePath[MAX_OSPATH] = { 0 };
 
 qboolean Sys_RandomBytes( byte *string, int len )
 {

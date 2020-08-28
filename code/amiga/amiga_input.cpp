@@ -58,7 +58,7 @@ cvar_t *joy_threshold    = NULL;
 
 qboolean mouse_avail;
 qboolean mouse_active = qtrue;
-int mx = 0, my = 0;
+//int mx = 0, my = 0;
 
 struct Library *KeymapBase = 0;
 
@@ -94,7 +94,6 @@ void IN_DeactivateMouse( qboolean isFullscreen )
 void IN_Frame (void) 
 {
 	// IN_JoyMove(); // FIXME: disable if on desktop?
-	//Sys_SendKeyEvents(keycatch);
 
 	#if 0
 
@@ -164,12 +163,9 @@ void IN_Frame (void)
 		}
 	}
 
-	IN_ProcessEvents(keycatch);
-
 	#endif
-
-	//Sys_SendKeyEvents(keycatch);
 	
+	IN_ProcessEvents(keycatch);
 }
 
 
@@ -230,7 +226,7 @@ void IN_Shutdown(void)
 
 void IN_Restart(void)
 {
-	ri.Printf(PRINT_ALL, "IN_Restart\n");
+	IN_Shutdown();
 	IN_Init();
 }
 
@@ -403,7 +399,7 @@ extern "C" {
 	int GetMessages68k( struct MsgPort *port, struct MsgStruct *msg, int maxmsg );
 }
 
-static int GetEvents(void *port, void *msgarray, int arraysize)
+static int GetEvents(void *port, void *msgarray, int maxmsg)
 {
 	extern int GetMessages68k(struct MsgPort *port, struct MsgStruct *msg, int maxmsg);
 	struct PPCArgs args;
@@ -415,14 +411,14 @@ static int GetEvents(void *port, void *msgarray, int arraysize)
 	args.PP_StackSize = 0;
 	args.PP_Regs[PPREG_A0] = (ULONG)msgarray;
 	args.PP_Regs[PPREG_A1] = (ULONG)port;
-	args.PP_Regs[PPREG_D0] = arraysize;
+	args.PP_Regs[PPREG_D0] = maxmsg;
 
 	Run68K(&args);
 
 	return args.PP_Regs[PPREG_D0];
 }
 
-//static void Sys_SendKeyEvents(qboolean keycatch)
+
 static void IN_ProcessEvents( qboolean keycatch )
 {
 	UWORD res;
@@ -480,16 +476,15 @@ static void IN_ProcessEvents( qboolean keycatch )
 
 				if (mouse_active)
 				{
-					mx = events[i].MouseX;
-					my = events[i].MouseY;
-
-					Sys_QueEvent(msgTime, SE_MOUSE, mx, my, 0, NULL);
+					Sys_QueEvent(msgTime, SE_MOUSE, events[i].MouseX, events[i].MouseY, 0, NULL);
 				}
 
 				break;
 
 			case IDCMP_MOUSEBUTTONS:
-	
+
+				#if 0
+
 				switch (events[i].Code & ~IECODE_UP_PREFIX)
 				{
 					case IECODE_LBUTTON:
@@ -504,10 +499,27 @@ static void IN_ProcessEvents( qboolean keycatch )
 						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE3, keyDown(events[i].Code), 0, NULL);
 						break;
 				}
+
+				#else
+
+				unsigned short b = 0;
+
+				switch (events[i].Code & ~IECODE_UP_PREFIX)
+				{
+					case IECODE_LBUTTON: b = A_MOUSE1; break;
+					case IECODE_RBUTTON: b = A_MOUSE2; break;
+					case IECODE_MBUTTON: b = A_MOUSE3; break;
+				}
+
+				Sys_QueEvent(msgTime, SE_KEY, b, keyDown(events[i].Code), 0, NULL);
+
+				#endif
+			
 		}
 
 		i++;
 	}
+
 }
 
 #endif
@@ -521,8 +533,8 @@ void install_grabs (void)
 void uninstall_grabs (void)
 {
 	//mglGrabFocus(GL_FALSE);
-	mx = 0;
-	my = 0;
+	//mx = 0;
+	//my = 0;
 	mouse_active = qtrue;
 }
 

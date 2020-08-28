@@ -509,11 +509,6 @@ void GLimp_Init(void)
 
 void GLimp_Shutdown(void)
 {
-	if (mhandler) 
-		MouseHandlerOff();
-
-	mglEnablePointer(); // Cowcat
-
 	IN_Shutdown();
 
 	GLW_RestoreGamma();
@@ -529,33 +524,14 @@ void GLimp_Shutdown(void)
 
 void GLimp_EndFrame(void)
 {
-	#if 1 // enabled for now - Cowcat
 	if (r_finish->modified)
 	{
 		mglEnableSync(r_finish->integer);
 		r_finish->modified = qfalse;
 	}
-	#endif
 
 	//mglUnlockDisplay(); // why if we are using SMART lock ? - Cowcat
 	mglSwitchDisplay();
-
-	/*
-	if (!r_fullscreen->integer && !in_nograb->integer)
-	{
-		static uint32 lastGrab = 0;
-		uint32 now;
-
-		// Capture the pointer in window mode, unless user wants nograb!
-		now = Sys_Milliseconds();
-
-		if (now - lastGrab > 1000)
-		{
-			IIntuition->SetWindowAttrs((struct Window *) mglGetWindowHandle(), WA_GrabFocus, 100, TAG_DONE);
-			lastGrab = now;
-		}
-	}
-	*/
 
 	#if 0 // that goes to IN_Frame - left for reference - Cowcat
 
@@ -596,24 +572,8 @@ void GLimp_EndFrame(void)
 	#endif
 }
 
-void *GLimp_RendererSleep(void)
-{
-}
-
-void GLimp_FrontEndSleep(void)
-{
-}
-
-void GLimp_WakeRenderer(void *)
-{
-}
-
 /*
 void GLimp_LogComment(char const *)
 {
 }
 */
-
-qboolean GLimp_SpawnRenderThread(void (*)())
-{
-}
