@@ -121,7 +121,7 @@ void CQuickSpriteSystem::Flush(void)
 	if ( qglLockArraysEXT )
 	{
 		qglLockArraysEXT(0, mNextVert);
-		GLimp_LogComment( "glLockArraysEXT\n" );
+		//GLimp_LogComment( "glLockArraysEXT\n" );
 	}
 
 	#else
@@ -177,7 +177,7 @@ void CQuickSpriteSystem::Flush(void)
 	if (qglUnlockArraysEXT) 
 	{
 		qglUnlockArraysEXT();
-		GLimp_LogComment( "glUnlockArraysEXT\n" );
+		//GLimp_LogComment( "glUnlockArraysEXT\n" );
 	}
 
 	#else
@@ -208,6 +208,8 @@ void CQuickSpriteSystem::StartGroup(textureBundle_t *bundle, uint32_t glbits, in
 		mUseFog = qfalse;
 	}
 
+	#if !defined(AMIGAOS) && !defined(MORPHOS) // foliage disappears (MorphOS case)- Cowcat
+
 	int cullingOn;
 	qglGetIntegerv(GL_CULL_FACE,&cullingOn);
 
@@ -222,6 +224,8 @@ void CQuickSpriteSystem::StartGroup(textureBundle_t *bundle, uint32_t glbits, in
 	}
 
 	qglDisable(GL_CULL_FACE);
+
+	#endif
 }
 
 
@@ -231,10 +235,14 @@ void CQuickSpriteSystem::EndGroup(void)
 
 	qglColor4ub(255,255,255,255);
 
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
+
 	if(mTurnCullBackOn)
 	{
 		qglEnable(GL_CULL_FACE);
 	}
+
+	#endif
 }
 
 
