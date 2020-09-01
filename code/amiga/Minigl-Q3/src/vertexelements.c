@@ -892,7 +892,7 @@ static INLINE void E_ToScreen(GLcontext context, const int vnum)
 
 static INLINE void V_ToScreen(GLcontext context, const int i)
 {
-	float w = 1.f / context->VertexBuffer[i].bw;
+	float w = 1.f / context->VertexBuffer[i].bw; 
 
 	context->VertexBuffer[i].v.x = context->ax + context->VertexBuffer[i].bx * w * context->sx;
 	context->VertexBuffer[i].v.y = context->ay - context->VertexBuffer[i].by * w * context->sy;
@@ -1530,6 +1530,7 @@ static void E_DrawTriFan(GLcontext context, const int count, UWORD *idx)
 		}
 	}
 }
+
 
 static void E_DrawTriStrip(GLcontext context, const int count, const UWORD *idx)
 {
@@ -2775,14 +2776,13 @@ void GLUnlockArrays(GLcontext context)
 	PostDrawUnlock(context);
 }
 
-
 //called during lock:
 static INLINE void PreDrawIsLocked(GLcontext context)
 {
 	if (context->ShadeModel == GL_FLAT && context->UpdateCurrentColor == GL_TRUE)
 	{
-		context->UpdateCurrentColor = GL_FALSE;
 		W3D_SetCurrentColor(context->w3dContext, &context->CurrentColor);
+		context->UpdateCurrentColor = GL_FALSE;
 	}
 }
 
@@ -2809,8 +2809,8 @@ static INLINE void PreDraw(GLcontext context)
 
 	if (context->ShadeModel == GL_FLAT && context->UpdateCurrentColor == GL_TRUE)
 	{
-		context->UpdateCurrentColor = GL_FALSE;
 		W3D_SetCurrentColor(context->w3dContext, &context->CurrentColor);
+		context->UpdateCurrentColor = GL_FALSE;
 	}
 
 	#ifdef AUTOMATIC_LOCKING_ENABLE
@@ -2889,6 +2889,8 @@ void GLDrawElements(GLcontext context, GLenum mode, GLsizei count, GLenum type, 
 	ULONG	*ul;
 	UWORD	*idx;
 	static EDrawfn E_Draw;
+	GLuint ShadeModel_bypass; // Cowcat
+
 
 #ifdef VA_SANITY_CHECK
 	GLuint ShadeModel_bypass;
@@ -2995,11 +2997,18 @@ void GLDrawElements(GLcontext context, GLenum mode, GLsizei count, GLenum type, 
 	}
 
 #endif
-	#ifdef __VBCC__ // just for Q3 - Cowcat
 
-	GLuint ShadeModel_bypass; 
+	// Cowcat
 
 	ShadeModel_bypass = 0;
+
+	if ( !(context->ClientState & GLCS_COLOR) )
+	{
+		glShadeModel(GL_FLAT);
+		ShadeModel_bypass |= 0x01;
+	}
+	
+	#ifdef __VBCC__ // just for Q3
 	
 	if((context->ShadeModel == GL_FLAT) && (context->ClientState & GLCS_COLOR))
 	{
@@ -3009,7 +3018,9 @@ void GLDrawElements(GLcontext context, GLenum mode, GLsizei count, GLenum type, 
 
 	#endif
 
-	// vertex arrays bugfix for non textured arrays - crash in ppc / debugger hit with 68k
+	//
+
+	// TPFlags bugfix for varrays without textures - crash in ppc / debugger hit with 68k - Cowcat
 
 	if(context->Texture2D_State[0] == GL_TRUE)
 	{
@@ -3145,6 +3156,14 @@ void GLDrawElements(GLcontext context, GLenum mode, GLsizei count, GLenum type, 
 	}
 
 #endif
+	
+	// Cowcat
+
+	if(ShadeModel_bypass & 1)
+	{
+		glShadeModel(GL_SMOOTH);
+	}
+
 
 	#ifdef __VBCC__ // Just for Q3
 
@@ -3154,5 +3173,7 @@ void GLDrawElements(GLcontext context, GLenum mode, GLsizei count, GLenum type, 
 	}
 
 	#endif
+
+	//
 }
 
