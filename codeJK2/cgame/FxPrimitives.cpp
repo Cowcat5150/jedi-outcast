@@ -590,6 +590,7 @@ bool COrientedParticle::Cull()
 
 	// Check if it's behind the viewer
 	if ( (DotProduct( cg.refdef.viewaxis[0], dir )) < 0 )
+	//if ( mRefEnt.reType != RT_LINE && (DotProduct( cg.refdef.viewaxis[0], dir )) < 0 ) // test Cowcat
 	{
 		return true;
 	}

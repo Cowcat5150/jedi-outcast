@@ -1115,10 +1115,10 @@ void CFxScheduler::PlayEffect( const char *file, vec3_t origin, vec3_t forward )
 void CFxScheduler::AddScheduledEffects( void )
 {
 	TScheduledEffect::iterator	itr, next;
-	vec3_t						origin;
-	vec3_t						axis[3];
-	int							oldEntNum = -1, oldBoltIndex = -1, oldModelNum = -1;
-	qboolean					doesBoltExist  = qfalse;
+	vec3_t				origin;
+	vec3_t				axis[3];
+	int				oldEntNum = -1, oldBoltIndex = -1, oldModelNum = -1;
+	qboolean			doesBoltExist = false;
 
 	for ( itr = mFxSchedule.begin(); itr != mFxSchedule.end(); /* do nothing */ )
 	{

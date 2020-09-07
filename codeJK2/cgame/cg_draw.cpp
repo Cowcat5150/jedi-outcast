@@ -40,7 +40,8 @@ qboolean cg_forceCrosshair = qfalse;
 extern int g_rocketLockEntNum;
 extern int g_rocketLockTime;
 extern int g_rocketSlackTime;
-/*
+
+/* // Cowcat
 vec3_t	vfwd;
 vec3_t	vright;
 vec3_t	vup;
@@ -2451,7 +2452,7 @@ void CG_DrawActive( stereoFrame_t stereoView ) {
 	}
 
 	//FIXME: these globals done once at start of frame for various funcs
-	/*
+	/* // Cowcat
 	AngleVectors (cg.refdefViewAngles, vfwd, vright, vup);
 	VectorCopy( vfwd, vfwd_n );
 	VectorCopy( vright, vright_n );
