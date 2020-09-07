@@ -24,6 +24,8 @@ This file is part of Jedi Knight 2.
 #include "../../code/qcommon/sstring.h"
 typedef sstring_t fxString_t;
 
+#include <algorithm>
+
 #ifndef FX_SCHEDULER_H_INC
 #define FX_SCHEDULER_H_INC
 
@@ -32,10 +34,10 @@ using namespace std;
 
 #define FX_FILE_PATH	"effects"
 
-#define FX_MAX_TRACE_DIST			WORLD_SIZE
-#define FX_MAX_EFFECTS				128		// how many effects the system can store
+#define FX_MAX_TRACE_DIST		WORLD_SIZE
+#define FX_MAX_EFFECTS			150		// how many effects the system can store -was 128- Cowcat
 #define FX_MAX_EFFECT_COMPONENTS	24		// how many primitives an effect can hold, this should be plenty
-#define FX_MAX_PRIM_NAME			32
+#define FX_MAX_PRIM_NAME		32
 	
 //-----------------------------------------------
 // These are spawn flags for primitiveTemplates
@@ -372,6 +374,181 @@ struct SEffectTemplate
 };
 
 
+template<typename T, int N>
+class PoolAllocator
+{
+public:
+	PoolAllocator()
+		: pool (new T[N])
+		, freeAndAllocated (new int[N])
+		, numFree (N)
+		, highWatermark (0)
+	{
+		for ( int i = 0; i < N; i++ )
+		{
+			freeAndAllocated[i] = i;
+		}
+	}
+
+	T *Alloc()
+	{
+		if ( numFree == 0 )
+		{
+			return NULL;
+		}
+
+		T *ptr = new (&pool[freeAndAllocated[0]]) T;
+
+		std::rotate (freeAndAllocated, freeAndAllocated + 1, freeAndAllocated + N);
+		numFree--;
+
+		highWatermark = Q_max(highWatermark, N - numFree);
+
+		return ptr;
+	}
+
+	void TransferTo ( PoolAllocator<T, N>& allocator )
+	{
+		allocator.freeAndAllocated = freeAndAllocated;
+		allocator.highWatermark = highWatermark;
+		allocator.numFree = numFree;
+		allocator.pool = pool;
+
+		highWatermark = 0;
+		numFree = N;
+		freeAndAllocated = NULL;
+		pool = NULL;
+	}
+
+	bool OwnsPtr ( const T *ptr ) const
+	{
+		return ptr >= pool && ptr < (pool + N);
+	}
+
+	void Free ( T *ptr )
+	{
+		for ( int i = numFree; i < N; i++ )
+		{
+			T *p = &pool[freeAndAllocated[i]];
+
+			if ( p == ptr )
+			{
+				if ( i > numFree )
+				{
+					std::rotate (freeAndAllocated + numFree, freeAndAllocated + i, freeAndAllocated + i + 1);
+				}
+
+				p->~T();
+				numFree++;
+
+				break;
+			}
+		}
+	}
+
+	int GetHighWatermark() const { return highWatermark; }
+
+	~PoolAllocator()
+	{
+		for ( int i = numFree; i < N; i++ )
+		{
+			T *p = &pool[freeAndAllocated[i]];
+
+			p->~T();
+		}
+
+		delete [] freeAndAllocated;
+		delete [] pool;
+	}
+
+private:
+	PoolAllocator ( const PoolAllocator<T, N>& );
+	PoolAllocator& operator = ( const PoolAllocator<T, N>& );
+
+	T *pool;
+
+	// The first 'numFree' elements are the indexes of the free slots.
+	// The remaining elements are the indexes of the allocated slots.
+	int *freeAndAllocated;
+	int numFree;
+
+	int highWatermark;
+};
+
+template<typename T, int N>
+class PagedPoolAllocator
+{
+	public:
+		PagedPoolAllocator ()
+			: numPages (1)
+			, pages (new PoolAllocator<T, N>[1]())
+		{
+		}
+
+		T *Alloc ()
+		{
+			T *ptr = NULL;
+			for ( int i = 0; i < numPages && ptr == NULL; i++ )
+			{
+				ptr = pages[i].Alloc ();
+			}
+
+			if ( ptr == NULL )
+			{
+				PoolAllocator<T, N> *newPages = new PoolAllocator<T, N>[numPages + 1] ();
+				for ( int i = 0; i < numPages; i++ )
+				{
+					pages[i].TransferTo (newPages[i]);
+				}
+
+				delete[] pages;
+				pages = newPages;
+
+				ptr = pages[numPages].Alloc ();
+				if ( ptr == NULL )
+				{
+					return NULL;
+				}
+
+				numPages++;
+			}
+
+			return ptr;
+		}
+
+		void Free ( T *ptr )
+		{
+			for ( int i = 0; i < numPages; i++ )
+			{
+				if ( pages[i].OwnsPtr (ptr) )
+				{
+					pages[i].Free (ptr);
+					break;
+				}
+			}
+		}
+
+		int GetHighWatermark () const
+		{
+			int total = 0;
+			for ( int i = 0; i < numPages; i++ )
+			{
+				total += pages[i].GetHighWatermark ();
+			}
+
+			return total;
+		}
+
+		~PagedPoolAllocator ()
+		{
+			delete[] pages;
+		}
+
+	private:
+		int numPages;
+		PoolAllocator<T, N> *pages;
+};
+
 
 //-----------------------------------------------------------------
 //
@@ -397,11 +574,6 @@ private:
 		int		mClientID;		// FIXME: redundant??
 		vec3_t	mOrigin;
 		vec3_t	mAxis[3];
-
-		bool operator <= (const int time) const 
-		{
-			return mStartTime <= time;
-		}
 	};
 
 	// this makes looking up the index based on the string name much easier
@@ -416,6 +588,7 @@ private:
 	// List of scheduled effects that will need to be created at the correct time.
 	TScheduledEffect	mFxSchedule;
 
+	PagedPoolAllocator<SScheduledEffect, 1024> mScheduledEffectsPool;
 
 	// Private function prototypes
 	SEffectTemplate *GetNewEffectTemplate( int *id, const char *file );
