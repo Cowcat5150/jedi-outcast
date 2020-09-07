@@ -59,7 +59,7 @@ cvar_t *r_vertexbuffersize;
 cvar_t *r_glbuffers;
 cvar_t *r_perspective_fast;
 cvar_t *r_customtexturesize;
-//cvar_t *r_mintriarea;
+cvar_t *r_mintriarea;
 
 extern cvar_t *in_nograb;
 
@@ -111,7 +111,7 @@ static qboolean GLW_StartDriverAndSetMode( int mode, int colorbits, qboolean ful
 	r_closeworkbench = Cvar_Get("r_closeworkbench", "0", CVAR_ARCHIVE);
 	r_perspective_fast = Cvar_Get("r_perspective_fast", "0", CVAR_ARCHIVE | CVAR_LATCH);
 	r_customtexturesize = Cvar_Get("r_customtexturesize", "0", CVAR_ARCHIVE | CVAR_LATCH);
-	//r_mintriarea = Cvar_Get("r_mintriarea", "0", CVAR_ARCHIVE | CVAR_LATCH);
+	r_mintriarea = Cvar_Get("r_mintriarea", "4.0", CVAR_ARCHIVE ); // 640 x 480 / 75000
 
 	mglChoosePixelDepth(depth); // default 16
 
@@ -232,7 +232,8 @@ static qboolean GLW_StartDriverAndSetMode( int mode, int colorbits, qboolean ful
 		ri.Printf(PRINT_ALL, "GL_Perspective_Correction_hint: fast\n");
 	}
 	
-	#if 0
+	#if 1
+
 	if(r_mintriarea->value) // screenwidth * screenheight/75000 (rounded)
 	{
 		mglMinTriArea(r_mintriarea->value);

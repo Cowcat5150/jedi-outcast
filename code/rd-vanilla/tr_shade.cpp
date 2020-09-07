@@ -26,6 +26,7 @@ This file is part of Jedi Academy.
 
 #if defined(AMIGAOS)
 #include <mgl/mglmacros.h>
+extern cvar_t *r_mintriarea;
 #endif
 
 /*
@@ -278,11 +279,11 @@ static void R_DrawStripElementsAmiga( int numIndexes, const glIndex_t *indexes )
 	#endif
 
 	unsigned int VertexBufferPointer = 0;
-	
+
 	int indexes0 = indexes[0];
 	int indexes1 = indexes[1];
 	int indexes2 = indexes[2];
-
+	
 	// prime the strip
 	ElementIndex[VertexBufferPointer++] = indexes0;
 	ElementIndex[VertexBufferPointer++] = indexes1;
@@ -291,7 +292,7 @@ static void R_DrawStripElementsAmiga( int numIndexes, const glIndex_t *indexes )
 	last0 = indexes0;
 	last1 = indexes1;
 	last2 = indexes2;
-	
+
 	even = qfalse;
 
 	for ( i = 3; i < numIndexes; i += 3 )
@@ -401,6 +402,18 @@ static void R_DrawElements( int numIndexes, const glIndex_t *indexes )
 	// anything else will cause no drawing
 
 	#else
+
+	#if defined(AMIGAOS)
+
+	// Check: Models at distance got wrong rendering with default mgl mintriarea 0.5.
+	if( backEnd.currentEntity->e.ghoul2 && !backEnd.currentEntity->e.hModel )
+		CC->MinTriArea = 0.3;
+
+	else
+		//CC->MinTriArea = 10.0;
+		CC->MinTriArea = r_mintriarea->value;
+
+	#endif
 
 	int primitives = r_primitives->integer;
 
