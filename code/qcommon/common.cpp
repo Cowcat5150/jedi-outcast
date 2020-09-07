@@ -1453,7 +1453,9 @@ void Com_Frame( void )
 
 		} while ( (timeVal = Com_TimeVal(minMsec)) != 0 );
 
-		IN_Frame(); // was in amiga_main() - Cowcat
+		#if !defined(AMIGAOS) && !defined(MORPHOS)
+		IN_Frame();
+		#endif
 
 		lastTime = com_frameTime;
 		com_frameTime = Com_EventLoop();

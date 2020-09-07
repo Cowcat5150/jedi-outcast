@@ -474,8 +474,8 @@ sysEvent_t Sys_GetEvent(void)
 		eventTail++;
 		return eventQue[ ( eventTail - 1 ) & MASK_QUED_EVENTS ];
 	}
-	
-	//IN_Frame(); // test - watch out Com_Frame - Cowcat
+
+	IN_Frame(); // test - watch out Com_Frame - Cowcat
 
 	memset( &ev, 0, sizeof( ev ) );
 	ev.evTime = Sys_Milliseconds();
