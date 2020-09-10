@@ -328,7 +328,7 @@ Sys_Quit
 void Sys_Quit( void ) 
 {
 	//CL_Shutdown(); // new - disabled Cowcat
-//	IN_Shutdown();
+	//IN_Shutdown();
 
 	Sys_Exit(0);
 }
@@ -341,14 +341,12 @@ Sys_Print
 */
 void Sys_Print( const char *msg ) 
 {
-	//IExec->DebugPrintF("%s", msg);
 	//Conbuf_AppendText( msg );
 	if(!consoleoutput)
 		return;
 
 	fputs(msg, stdout);
 }
-
 
 
 /*
@@ -434,54 +432,29 @@ char *Sys_GetClipboardData(void)
 }
 
 
-#define MAX_QUED_EVENTS		256
-#define MASK_QUED_EVENTS 	(MAX_QUED_EVENTS - 1)
+#define MAX_QUED_EVENTS		128
+#define MASK_QUED_EVENTS 	( MAX_QUED_EVENTS - 1 )
 
-static sysEvent_t	eventQue[MAX_QUED_EVENTS] = {};
-static sysEvent_t	*lastEvent = nullptr;
+static sysEvent_t	eventQue[ MAX_QUED_EVENTS ];
+static sysEvent_t	*lastEvent = eventQue + MAX_QUED_EVENTS - 1;
 static uint32_t		eventHead = 0, eventTail = 0;
 
 sysEvent_t Sys_GetEvent(void)
 {
 	sysEvent_t	ev;
-	
-	#if 0
-
-	if (eventHead > eventTail) 
-	{
-		eventTail++;
-		return eventQue [(eventTail - 1) & MASK_QUED_EVENTS ];
-	}
-
-	// Console Commands
-	char 	*s;
-
-	if (s)
-	{
-		char *b;
-		int len;
-		
-		len = strlen(s) + 1;
-		b = (char *)malloc(len);
-		strcpy (b, s);
-		Sys_QueEvent(0, SE_CONSOLE, 0, 0, len, b);
-	}
-	#endif
 
 	// return if we have data
-	if ( eventHead > eventTail ) 
-	{
-		eventTail++;
-		return eventQue[ ( eventTail - 1 ) & MASK_QUED_EVENTS ];
-	}
+	if ( eventHead - eventTail > 0 ) 
+		return eventQue[ ( eventTail++ ) & MASK_QUED_EVENTS ];
 
-	IN_Frame(); // test - watch out Com_Frame - Cowcat
+	IN_Frame(); // it was on Com_Frame - Cowcat
 
+	// create an empty event on return
 	memset( &ev, 0, sizeof( ev ) );
 	ev.evTime = Sys_Milliseconds();
 
 	return ev;
-}	
+}
 
 /*
 ================
@@ -500,27 +473,15 @@ void Sys_QueEvent( int evTime, sysEventType_t evType, int value, int value2, int
 	if ( evTime == 0 )
 		evTime = Sys_Milliseconds();
 
-
-	if ( evType == SE_MOUSE && lastEvent && lastEvent->evType == SE_MOUSE )
+	if ( evType == SE_MOUSE && lastEvent->evType == SE_MOUSE && eventHead != eventTail )
 	{
-	  	if ( eventTail == eventHead )
-		{
-			lastEvent->evValue = value;
-			lastEvent->evValue2 = value2;
-			eventTail--;
-		}
-			
-		else
-		{
-			lastEvent->evValue += value;
-			lastEvent->evValue2 += value2;
-		}
-
+		lastEvent->evValue += value;
+		lastEvent->evValue2 += value2;
 		lastEvent->evTime = evTime;
 		return;
 	}
-
-	ev = &eventQue[ eventHead & MASK_QUED_EVENTS ];
+	
+	ev = &eventQue[	eventHead & MASK_QUED_EVENTS ];
 
 	if ( eventHead - eventTail >= MAX_QUED_EVENTS )
 	{
@@ -597,17 +558,6 @@ int main(int argc, char **argv)
 
 	while( 1 ) 
 	{
-		/*
-		if( com_busyWait->integer )
-		{
-			bool shouldSleep = false;
-
-			if( shouldSleep )
-				Sys_Sleep(5);
-		}
-		*/
-
-		//IN_Frame(); // now in qcommon/com_frame
 		Com_Frame();
 	}
 

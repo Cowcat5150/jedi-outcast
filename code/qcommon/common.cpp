@@ -130,16 +130,20 @@ A raw string should NEVER be passed as fmt, because of "%f" type crashers.
 void QDECL Com_Printf( const char *fmt, ... ) {
 	va_list		argptr;
 	char		msg[MAXPRINTMSG];
+	int		len; // Quake3e
 
 	va_start (argptr,fmt);
-	Q_vsnprintf (msg, sizeof(msg), fmt, argptr);
+	len = Q_vsnprintf (msg, sizeof(msg), fmt, argptr);
 	va_end (argptr);
 
-	if ( rd_buffer ) {
-		if ((strlen (msg) + strlen(rd_buffer)) > (unsigned)(rd_buffersize - 1)) {
+	if ( rd_buffer )
+	{
+		//if ((strlen (msg) + strlen(rd_buffer)) > (unsigned)(rd_buffersize - 1)) {
+		if ( len + strlen(rd_buffer) > (unsigned)(rd_buffersize - 1)) { // Quake3e
 			rd_flush(rd_buffer);
 			*rd_buffer = 0;
 		}
+
 		Q_strcat (rd_buffer, strlen(rd_buffer), msg);
 		return;
 	}
@@ -777,11 +781,23 @@ void Com_PushEvent( sysEvent_t *event ) {
 Com_GetEvent
 =================
 */
-sysEvent_t	Com_GetEvent( void ) {
-	if ( com_pushedEventsHead > com_pushedEventsTail ) {
+sysEvent_t Com_GetEvent( void )
+{
+	#if 0
+
+	if ( com_pushedEventsHead > com_pushedEventsTail )
+	{
 		com_pushedEventsTail++;
 		return com_pushedEvents[ (com_pushedEventsTail-1) & (MAX_PUSHED_EVENTS-1) ];
 	}
+	
+	#else // quake3e
+
+	if ( com_pushedEventsHead - com_pushedEventsTail > 0)
+		return com_pushedEvents[ (com_pushedEventsTail++) & (MAX_PUSHED_EVENTS-1) ];
+
+	#endif
+	
 	return Com_GetRealEvent();
 }
 
