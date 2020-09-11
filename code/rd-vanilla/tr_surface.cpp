@@ -51,19 +51,6 @@ RB_CheckOverflow
 */
 void RB_CheckOverflow( int verts, int indexes )
 {
-	#if 0
-	
-	if ( tess.shader == tr.shadowShader )
-	{
-		if (tess.numVertexes + verts < SHADER_MAX_VERTEXES/2 && tess.numIndexes + indexes < SHADER_MAX_INDEXES)
-		{
-			return;
-		}
-	}
-	
-	else 
-	#endif // new Cowcat
-
 	if (tess.numVertexes + verts < SHADER_MAX_VERTEXES && tess.numIndexes + indexes < SHADER_MAX_INDEXES)
 	{
 		return;
@@ -215,12 +202,16 @@ RB_SurfaceOrientedQuad
 */
 static void RB_SurfaceOrientedQuad( void )
 {
+	//ri.Printf( PRINT_ALL, "SurfaceOrientedQuad\n" ); // what really adds ? - Cowcat
+
 	vec3_t	left, up;
 	float	radius;
 
 	// calculate the xyz locations for the four corners
 	radius = backEnd.currentEntity->e.radius;
-	MakeNormalVectors( backEnd.currentEntity->e.axis[0], left, up );
+	//MakeNormalVectors( backEnd.currentEntity->e.axis[0], left, up );
+	VectorCopy( backEnd.currentEntity->e.axis[1], left );
+	VectorCopy( backEnd.currentEntity->e.axis[2], up );
 
 	if ( backEnd.currentEntity->e.rotation == 0 ) 
 	{
@@ -1208,6 +1199,65 @@ static void RB_SurfaceSaberGlow()
 /*
 ** LerpMeshVertexes
 */
+
+void VectorArrayNormalize(vec4_t *normals, unsigned int count)
+{
+	// assert(count);
+
+	#if defined(__PPC__)
+	{
+		float half = 0.5;
+		float one  = 1.0;
+		float *components = (float *)normals;
+
+		// Vanilla PPC code, but since PPC has a reciprocal square root estimate instruction,
+		// runs *much* faster than calling sqrt().  We'll use a single Newton-Raphson
+		// refinement step to get a little more precision.  This seems to yeild results
+		// that are correct to 3 decimal places and usually correct to at least 4 (sometimes 5).
+		// (That is, for the given input range of about 0.6 to 2.0).
+
+		do
+		{
+			float x, y, z;
+			float B, y0, y1;
+			
+			x = components[0];
+			y = components[1];
+			z = components[2];
+			components += 4;
+
+			B = x*x + y*y + z*z;
+
+		#ifdef __GNUC__
+			asm("frsqrte %0,%1" : "=f" (y0) : "f" (B));
+		#else
+			y0 = __frsqrte(B);
+		#endif
+
+			y1 = y0 + half * y0 * (one - (B * y0 * y0));
+
+			x = x * y1;
+			y = y * y1;
+			components[-4] = x;
+			z = z * y1;
+			components[-3] = y;
+			components[-2] = z;
+
+		} while(count--);
+	}
+
+	#else	// No assembly version for this architecture, or C_ONLY defined
+		// given the input, it's safe to call VectorNormalizeFast
+
+	while (count--)
+	{
+		VectorNormalizeFast(normals[0]);
+		normals++;
+	}
+
+	#endif
+}
+
 static void LerpMeshVertexes (md3Surface_t *surf, float backlerp) 
 {
 	short	*oldXyz, *newXyz, *oldNormals, *newNormals;
@@ -1299,8 +1349,10 @@ static void LerpMeshVertexes (md3Surface_t *surf, float backlerp)
 			outNormal[1] = uncompressedOldNormal[1] * oldNormalScale + uncompressedNewNormal[1] * newNormalScale;
 			outNormal[2] = uncompressedOldNormal[2] * oldNormalScale + uncompressedNewNormal[2] * newNormalScale;
 
-			VectorNormalize (outNormal);
+			//VectorNormalize (outNormal);
 		}
+
+		VectorArrayNormalize((vec4_t *)tess.normal[tess.numVertexes], numVerts);
 	}
 }
 
