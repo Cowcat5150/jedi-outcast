@@ -215,7 +215,6 @@ static float R_BytesPerTex (int format)
 		//"RGB5 " 
 		return 2;
 		break;
-		
 	case GL_RGBA8:
 		//"RGBA8" 
 		return 4;
@@ -307,72 +306,75 @@ void R_ImageList_f( void )
 
 		ri.Printf (PRINT_ALL,  "%4i: %4i %4i  %s ",i, image->width, image->height,yesno[image->mipmap] );
 
-		switch ( image->internalFormat ) {
-		case 1:
-			ri.Printf( PRINT_ALL, "I    " );
-			break;
-		case 2:
-			ri.Printf( PRINT_ALL, "IA   " );
-			break;
-		case 3:
-			ri.Printf( PRINT_ALL, "RGB  " );
-			break;
-		case 4:
-			ri.Printf( PRINT_ALL, "RGBA " );
-			break;
+		switch ( image->internalFormat )
+		{
+			case 1:
+				ri.Printf( PRINT_ALL, "I    " );
+				break;
+			case 2:
+				ri.Printf( PRINT_ALL, "IA   " );
+				break;
+			case 3:
+				ri.Printf( PRINT_ALL, "RGB  " );
+				break;
+			case 4:
+				ri.Printf( PRINT_ALL, "RGBA " );
+				break;
 
-		#if !defined(AMIGAOS)
+			#if !defined(AMIGAOS)
 
-		case GL_RGBA8:
-			ri.Printf( PRINT_ALL, "RGBA8" );
-			break;
-		case GL_RGB8:
-			ri.Printf( PRINT_ALL, "RGB8 " );
-			break;
-		case GL_RGB4_S3TC:
-			ri.Printf( PRINT_ALL, "S3TC " );
-			break;
-		case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
-			ri.Printf( PRINT_ALL, "DXT1 " );
-			break;
-		case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
-			ri.Printf( PRINT_ALL, "DXT5 " );
-			break;
-		case GL_RGBA4:
-			ri.Printf( PRINT_ALL, "RGBA4" );
-			break;
-		case GL_RGB5:
-			ri.Printf( PRINT_ALL, "RGB5 " );
-			break;
+			case GL_RGBA8:
+				ri.Printf( PRINT_ALL, "RGBA8" );
+				break;
+			case GL_RGB8:
+				ri.Printf( PRINT_ALL, "RGB8 " );
+				break;
+			case GL_RGB4_S3TC:
+				ri.Printf( PRINT_ALL, "S3TC " );
+				break;
+			case GL_COMPRESSED_RGB_S3TC_DXT1_EXT:
+				ri.Printf( PRINT_ALL, "DXT1 " );
+				break;
+			case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+				ri.Printf( PRINT_ALL, "DXT5 " );
+				break;
+			case GL_RGBA4:
+				ri.Printf( PRINT_ALL, "RGBA4" );
+				break;
+			case GL_RGB5:
+				ri.Printf( PRINT_ALL, "RGB5 " );
+				break;
 
-		#endif
+			#endif
 
-		default:
-			ri.Printf( PRINT_ALL, "???? " );
+			default:
+				ri.Printf( PRINT_ALL, "???? " );
 		}
 
-		switch ( image->wrapClampMode ) {
-		case GL_REPEAT:
-			ri.Printf( PRINT_ALL, "rept " );
-			break;
-		case GL_CLAMP:
-			ri.Printf( PRINT_ALL, "clmp " );
-			break;
+		switch ( image->wrapClampMode )
+		{
+			case GL_REPEAT:
+				ri.Printf( PRINT_ALL, "rept " );
+				break;
+			case GL_CLAMP:
+				ri.Printf( PRINT_ALL, "clmp " );
+				break;
 
-		#if !defined(AMIGAOS)
-		case GL_CLAMP_TO_EDGE:
-			ri.Printf( PRINT_ALL, "clpE " );
-			break;
-		#endif
+			#if !defined(AMIGAOS)
+			case GL_CLAMP_TO_EDGE:
+				ri.Printf( PRINT_ALL, "clpE " );
+				break;
+			#endif
 
-		default:
-			ri.Printf( PRINT_ALL, "%4i ", image->wrapClampMode );
-			break;
+			default:
+				ri.Printf( PRINT_ALL, "%4i ", image->wrapClampMode );
+				break;
 		}
 		
 		ri.Printf( PRINT_ALL, "%s\n", image->imgName );
 		i++;
 	}
+
 	ri.Printf (PRINT_ALL, " ---------\n");
 	ri.Printf (PRINT_ALL, "      -w-- -h-- -mm- -if- wrap --name-------\n");
 	ri.Printf (PRINT_ALL, " %i total texels (not including mipmaps)\n", texels );
@@ -624,7 +626,7 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 	int *pformat, word *pUploadWidth, word *pUploadHeight )
 {
 
-	float	rMax = 0, gMax = 0, bMax = 0;
+	//float	rMax = 0, gMax = 0, bMax = 0; // Cowcat
 	int	width = *pUploadWidth;
 	int	height = *pUploadHeight; 
 
@@ -727,6 +729,8 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 
 	    	for ( i = 0; i < c; i++ )
 		{
+			#if 0 // no need for this - Cowcat
+
 		    	if ( scan[i*4+0] > rMax )
 				rMax = scan[i*4+0];
 
@@ -735,6 +739,8 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 
 			if ( scan[i*4+2] > bMax )
 				bMax = scan[i*4+2];
+
+			#endif
 
 			if ( scan[i*4 + 3] != 255 ) 
 			{
@@ -746,7 +752,7 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 	    	// select proper internal format
 	    	if ( samples == 3 )
 	    	{
-			#if !defined(AMIGAOS) && !defined(MORPHOS)
+			#if !defined(AMIGAOS)
 
 		    	if ( glConfig.textureCompression == TC_S3TC && allowTC )
 		    	{
@@ -801,7 +807,7 @@ static void Upload32( unsigned *data, GLenum format, qboolean mipmap, qboolean p
 
 	    	else if ( samples == 4 )
 	    	{
-			#if !defined(AMIGAOS) && !defined(MORPHOS)
+			#if !defined(AMIGAOS)
 
 		    	if ( glConfig.textureCompression == TC_S3TC_DXT && allowTC)
 		    	{
@@ -965,26 +971,20 @@ static void GL_ResetBinds(void)
 //
 void R_Images_DeleteLightMaps(void)
 {
-	qboolean bEraseOccured = qfalse;
-
-	for (AllocatedImages_t::iterator itImage = AllocatedImages.begin(); itImage != AllocatedImages.end(); bEraseOccured?itImage:++itImage)
+	for (AllocatedImages_t::iterator itImage = AllocatedImages.begin(); itImage != AllocatedImages.end(); /* empty */)
 	{			
-		bEraseOccured = qfalse;
-
 		image_t *pImage = (*itImage).second;
 		
 		if (pImage->imgName[0] == '$' /*&& strstr(pImage->imgName,"lightmap")*/)	// loose check, but should be ok
 		{
 			R_Images_DeleteImageContents(pImage);
-#ifdef _WIN32
-			itImage = AllocatedImages.erase(itImage);
-#else
-			AllocatedImages_t::iterator itTemp = itImage;
-			itImage++;
-			AllocatedImages.erase(itTemp);
-#endif
 
-			bEraseOccured = qtrue;
+			AllocatedImages.erase(itImage++);
+		}
+
+		else
+		{
+			++itImage;
 		}
 	}
 
@@ -994,12 +994,10 @@ void R_Images_DeleteLightMaps(void)
 
 // special function currently only called by Dissolve code...
 //
-
 void R_Images_DeleteImage(image_t *pImage)
 {		
 	// Even though we supply the image handle, we need to get the corresponding iterator entry...
 	//
-
 
 	AllocatedImages_t::iterator itImage = AllocatedImages.find(pImage->imgName);
 
@@ -1060,23 +1058,21 @@ void RE_RegisterImages_Info_f( void )
 // currently, this just goes through all the images and dumps any not referenced on this level...
 //
 
-
 qboolean RE_RegisterImages_LevelLoadEnd(void)
 {
 	//ri.Printf( PRINT_DEVELOPER, "RE_RegisterImages_LevelLoadEnd():\n");
 
-	qboolean bEraseOccured = qfalse;
+	qboolean imageDeleted = qtrue;
 
-	for (AllocatedImages_t::iterator itImage = AllocatedImages.begin(); itImage != AllocatedImages.end(); bEraseOccured?itImage:++itImage)
+	for (AllocatedImages_t::iterator itImage = AllocatedImages.begin(); itImage != AllocatedImages.end(); /* blank */)
 	{			
-		bEraseOccured = qfalse;
+		qboolean bEraseOccured = qfalse;
 
 		image_t *pImage = (*itImage).second;
 
 		// don't un-register system shaders (*fog, *dlight, *white, *default), but DO de-register lightmaps ("$<mapname>/lightmap%d")
 		if (pImage->imgName[0] != '*' ) // || !strncmp(pImage->imgName, "*scratch", 8 ) )
 		{
-
 			// image used on this level?
 			//
 			if ( pImage->iLastLevelUsedOn != RE_RegisterMedia_GetLevel() )
@@ -1085,15 +1081,16 @@ qboolean RE_RegisterImages_LevelLoadEnd(void)
 				//ri.Printf( PRINT_DEVELOPER, "Dumping image \"%s\"\n",pImage->imgName);
 
 				R_Images_DeleteImageContents(pImage);
-#ifdef _WIN32
-				itImage = AllocatedImages.erase(itImage);
-#else
-				AllocatedImages_t::iterator itTemp = itImage;
-				itImage++;
-				AllocatedImages.erase(itTemp);
-#endif
+
+				AllocatedImages.erase(itImage++);
 				bEraseOccured = qtrue;
+				imageDeleted = qtrue;
 			}
+		}
+
+		if ( !bEraseOccured )
+		{
+			++itImage;
 		}
 	}
 
@@ -1101,9 +1098,8 @@ qboolean RE_RegisterImages_LevelLoadEnd(void)
 
 	GL_ResetBinds();
 
-	return bEraseOccured;
+	return imageDeleted;
 }
-
 
 
 // returns image_t struct if we already have this, else NULL. No disk-open performed 
@@ -1302,46 +1298,6 @@ image_t	*R_FindImageFile( const char *name, qboolean mipmap, qboolean allowPicmi
 	return image;
 }
 
-
-
-// EF dlight image creation code
-/*
-================
-R_CreateDlightImage
-================
-*/
-
-/*
-#define	DLIGHT_SIZE	16
-
-static void R_CreateDlightImage( void )
-{
-	int	x,y;
-	byte	data[DLIGHT_SIZE][DLIGHT_SIZE][4];
-	int	b;
-
-	// make a centered inverse-square falloff blob for dynamic lighting
-	for (x=0 ; x<DLIGHT_SIZE ; x++) {
-		for (y=0 ; y<DLIGHT_SIZE ; y++) {
-			float	d;
-
-			d = ( DLIGHT_SIZE/2 - 0.5 - x ) * ( DLIGHT_SIZE/2 - 0.5 - x ) +
-				( DLIGHT_SIZE/2 - 0.5 - y ) * ( DLIGHT_SIZE/2 - 0.5 - y );
-			b = 4000 / d;
-			if (b > 255) {
-				b = 255;
-			} else if ( b < 75 ) {
-				b = 0;
-			}
-			data[y][x][0] = 
-			data[y][x][1] = 
-			data[y][x][2] = 255;
-			data[y][x][3] = b/8;			
-		}
-	}
-	tr.dlightImage = R_CreateImage("*dlight", (byte *)data, DLIGHT_SIZE, DLIGHT_SIZE, qfalse, qfalse, GL_CLAMP );
-}
-*/
 
 // Holomatch dlight image creation code
 /*
@@ -1665,11 +1621,6 @@ void R_CreateBuiltinImages( void )
 	// scratchimage is usually used for cinematic drawing
 	for(x=0;x<NUM_SCRATCH_IMAGES;x++)
 	{
-		// scratchimage is usually used for cinematic drawing
-		//tr.scratchImage[x] = R_CreateImage(va("*scratch%d",x), (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
-		//tr.scratchImage[x] = R_CreateImage("*scratch", (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
-		//tr.scratchImage[x] = R_CreateImage("*scratch", (byte *)data, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
-
 		#if defined(AMIGAOS)
 		tr.scratchImage[x] = R_CreateImage("*scratch", NULL, DEFAULT_SIZE, DEFAULT_SIZE, GL_RGBA, qfalse, qfalse, qfalse, GL_CLAMP);
 		#else
@@ -1833,14 +1784,15 @@ static char *CommaParse( char **data_p )
 	while ( 1 )
 	{
 		// skip whitespace
-		while( (c = *data) <= ' ')
+		while( (c = *(const unsigned char* /*eurofix*/)data) <= ' ')
 		{
-			if( !c ) {
+			if( !c )
+			{
 				break;
 			}
+
 			data++;
 		}
-
 
 		c = *data;
 
@@ -2013,6 +1965,7 @@ bool RE_SplitSkins(const char *INname, char *skinhead, char *skintorso, char *sk
 		char *p = strchr(name, '|');
 		*p=0;
 		p++;
+
 		//fill in the base path
 		strcpy (skinhead, name);
 		strcpy (skintorso, name);
@@ -2021,21 +1974,26 @@ bool RE_SplitSkins(const char *INname, char *skinhead, char *skintorso, char *sk
 		//now get the the individual files
 		
 		//advance to second
-		char *p2 = strchr(p, '|'); 
-		assert(p2);
+		char *p2 = strchr(p, '|');
+
+		if(!p2)
+		{
+			return false;
+		}
+
 		*p2=0;
 		p2++;
 		strcat (skinhead, p);
 		strcat (skinhead, ".skin");
 
-
 		//advance to third
 		p = strchr(p2, '|');
-		assert(p);
+
 		if (!p)
 		{
 			return false;
 		}
+
 		*p=0;
 		p++;
 		strcat (skintorso,p2);
@@ -2046,11 +2004,95 @@ bool RE_SplitSkins(const char *INname, char *skinhead, char *skintorso, char *sk
 		
 		return true;
 	}
+
 	return false;
 }
 
 
-qhandle_t RE_RegisterIndividualSkin( const char *name , qhandle_t hSkin);
+// given a name, go get the skin we want and return
+qhandle_t RE_RegisterIndividualSkin( const char *name , qhandle_t hSkin) 
+{
+	skin_t		*skin;
+	skinSurface_t	*surf;
+	char		*text, *text_p;
+	char		*token;
+	char		surfName[MAX_QPATH];
+
+	// load and parse the skin file
+	ri.FS_ReadFile( name, (void **)&text );
+
+	if ( !text )
+	{
+		ri.Printf( PRINT_ERROR, "WARNING: RE_RegisterSkin( '%s' ) failed to load!\n", name );
+		return 0;
+	}
+
+	assert (tr.skins[hSkin]);	//should already be setup, but might be an 3part append
+
+	skin = tr.skins[hSkin];
+
+	text_p = text;
+
+	while ( text_p && *text_p ) 
+	{
+		// get surface name
+		token = CommaParse( &text_p );
+		Q_strncpyz( surfName, token, sizeof( surfName ) );
+
+		if ( !token[0] ) {
+			break;
+		}
+
+		// lowercase the surface name so skin compares are faster
+		Q_strlwr( surfName );
+
+		if ( *text_p == ',' ) {
+			text_p++;
+		}
+
+		if ( !strncmp( token, "tag_", 4 ) ) {	//these aren't in there, but just in case you load an id style one...
+			continue;
+		}
+		
+		// parse the shader name
+		token = CommaParse( &text_p );
+
+#ifndef JK2_MODE
+		if ( !strcmp( &surfName[strlen(surfName)-4], "_off") )
+		{
+			if ( !strcmp( token ,"*off" ) )
+			{
+				continue;	//don't need these double offs
+			}
+
+			surfName[strlen(surfName)-4] = 0;	//remove the "_off"
+		}
+#endif
+
+		if ( (unsigned)skin->numSurfaces >= ARRAY_LEN( skin->surfaces ) )
+		{
+			assert( ARRAY_LEN( skin->surfaces ) > (unsigned)skin->numSurfaces );
+			ri.Printf( PRINT_WARNING, "WARNING: RE_RegisterSkin( '%s' ) more than %u surfaces!\n", name, (unsigned int)ARRAY_LEN(skin->surfaces) );
+			break;
+		}
+
+		surf = skin->surfaces[ skin->numSurfaces ] = (skinSurface_t *) Hunk_Alloc( sizeof( *skin->surfaces[0] ), qtrue );
+		Q_strncpyz( surf->name, surfName, sizeof( surf->name ) );
+		surf->shader = R_FindShader( token, lightmapsNone, stylesDefault, qtrue );
+		skin->numSurfaces++;
+	}
+
+	ri.FS_FreeFile( text );
+
+	// never let a skin have 0 shaders
+	if ( skin->numSurfaces == 0 )
+	{
+		return 0;	// use default skin
+	}
+
+	return hSkin;
+}
+
 
 /*
 ===============
@@ -2140,20 +2182,6 @@ qhandle_t RE_RegisterSkin( const char *name)
 		//three part
 		hSkin = RE_RegisterIndividualSkin(skinhead, hSkin);
 
-		#if 0
-
-		if (hSkin)
-		{
-			hSkin = RE_RegisterIndividualSkin(skintorso, hSkin);
-
-			if (hSkin)
-			{
-				hSkin = RE_RegisterIndividualSkin(skinlower, hSkin);
-			}
-		}
-
-		#else // don´t load skin multiple times - new Cowcat
-
 		if (hSkin && strcmp( skinhead, skintorso))
 		{
 			hSkin = RE_RegisterIndividualSkin(skintorso, hSkin);
@@ -2165,8 +2193,6 @@ qhandle_t RE_RegisterSkin( const char *name)
 			hSkin = RE_RegisterIndividualSkin(skinlower, hSkin);
 
 		}
-
-		#endif
 	}
 
 	else
@@ -2176,87 +2202,6 @@ qhandle_t RE_RegisterSkin( const char *name)
 	}
 
 	return(hSkin);
-}
-
-// given a name, go get the skin we want and return
-qhandle_t RE_RegisterIndividualSkin( const char *name , qhandle_t hSkin) 
-{
-	skin_t		*skin;
-	skinSurface_t	*surf;
-	char		*text, *text_p;
-	char		*token;
-	char		surfName[MAX_QPATH];
-
-	// load and parse the skin file
-	ri.FS_ReadFile( name, (void **)&text );
-
-	if ( !text )
-	{
-		ri.Printf( PRINT_ERROR, "WARNING: RE_RegisterSkin( '%s' ) failed to load!\n", name );
-		return 0;
-	}
-
-	assert (tr.skins[hSkin]);	//should already be setup, but might be an 3part append
-
-	skin = tr.skins[hSkin];
-
-	text_p = text;
-
-	while ( text_p && *text_p ) 
-	{
-		// get surface name
-		token = CommaParse( &text_p );
-		Q_strncpyz( surfName, token, sizeof( surfName ) );
-
-		if ( !token[0] ) {
-			break;
-		}
-		// lowercase the surface name so skin compares are faster
-		Q_strlwr( surfName );
-
-		if ( *text_p == ',' ) {
-			text_p++;
-		}
-
-		if ( !strncmp( token, "tag_", 4 ) ) {	//these aren't in there, but just in case you load an id style one...
-			continue;
-		}
-		
-		// parse the shader name
-		token = CommaParse( &text_p );
-
-#ifndef JK2_MODE
-		if ( !strcmp( &surfName[strlen(surfName)-4], "_off") )
-		{
-			if ( !strcmp( token ,"*off" ) )
-			{
-				continue;	//don't need these double offs
-			}
-			surfName[strlen(surfName)-4] = 0;	//remove the "_off"
-		}
-#endif
-		if ((int)(sizeof( skin->surfaces) / sizeof( skin->surfaces[0] )) <= skin->numSurfaces)
-		{
-			assert( (int)(sizeof( skin->surfaces) / sizeof( skin->surfaces[0] )) > skin->numSurfaces );
-			ri.Printf( PRINT_ERROR, "WARNING: RE_RegisterSkin( '%s' ) more than %u surfaces!\n", name, (unsigned int)ARRAY_LEN(skin->surfaces) );
-			break;
-		}
-
-		surf = skin->surfaces[ skin->numSurfaces ] = (skinSurface_t *) Hunk_Alloc( sizeof( *skin->surfaces[0] ), qtrue );
-		Q_strncpyz( surf->name, surfName, sizeof( surf->name ) );
-		surf->shader = R_FindShader( token, lightmapsNone, stylesDefault, qtrue );
-		skin->numSurfaces++;
-	}
-
-	ri.FS_FreeFile( text );
-
-	// never let a skin have 0 shaders
-	if ( skin->numSurfaces == 0 )
-	{
-		return 0;	// use default skin
-	}
-
-	return hSkin;
 }
 
 
