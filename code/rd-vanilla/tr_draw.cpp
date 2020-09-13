@@ -44,7 +44,7 @@ void RE_StretchRaw (int x, int y, int w, int h, int cols, int rows, const byte *
 		return;
 	}
 
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 	if ( tess.numIndexes ) {
 		RB_EndSurface();
@@ -537,7 +537,7 @@ static void RE_Blit(float fX0, float fY0, float fX1, float fY1, float fX2, float
 	//
 	// some junk they had at the top of other StretchRaw code...
 	//
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 //	qglFinish();
 
 	GL_Bind( pImage );
@@ -884,7 +884,7 @@ qboolean RE_ProcessDissolve(void)
 //
 qboolean RE_InitDissolve(qboolean bForceCircularExtroWipe)
 {
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 //	ri.Printf( PRINT_ALL, "RE_InitDissolve()\n");
 	qboolean bReturn = qfalse;

@@ -49,7 +49,6 @@ This file is part of Jedi Academy.
 	#include "../qcommon/MiniHeap.h"
 #endif
 
-
 #ifdef FINAL_BUILD
 #define G2API_DEBUG (0) // please don't change this
 #else

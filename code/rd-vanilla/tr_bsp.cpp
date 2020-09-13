@@ -196,7 +196,7 @@ static	void R_LoadLightmaps( lump_t *l, const char *psMapName, world_t &worldDat
 	buf = fileBase + l->fileofs;
 
 	// we are about to upload textures
-	//R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 	// create all the lightmaps
 	worldData.startLightMapIndex = tr.numLightmaps;
@@ -752,6 +752,10 @@ static	void R_LoadSubmodels( lump_t *l, world_t &worldData, int index  ) {
 		model = R_AllocModel();
 
 		assert( model != NULL );			// this should never happen
+
+		if ( model == NULL ) {
+			ri.Error( ERR_DROP, "R_LoadSubmodels: R_AllocModel() failed");
+		}
 
 		model->type = MOD_BRUSH;
 		model->bmodel = out;

@@ -146,7 +146,7 @@ static void AddSkyPolygon (int nump, vec3_t vecs)
 	}
 }
 
-#define	ON_EPSILON	0.1f	// point on plane side epsilon - now float - Cowcat
+#define	ON_EPSILON	0.1f	// point on plane side epsilon
 #define	MAX_CLIP_VERTS	64
 /*
 ================
@@ -830,6 +830,7 @@ void RB_StageIteratorSky( void ) {
 
 		qglPushMatrix ();
 		GL_State( 0 );
+		//GL_Cull(CT_FRONT_SIDED); // test Cowcat
 		qglTranslatef (backEnd.viewParms.ori.origin[0], backEnd.viewParms.ori.origin[1], backEnd.viewParms.ori.origin[2]);
 
 		DrawSkyBox( tess.shader );

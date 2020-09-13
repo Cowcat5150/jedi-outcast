@@ -455,6 +455,7 @@ qboolean R_GetModeInfo( int *width, int *height, int mode )
     return qtrue;
 }
 
+#if 0
 /*
 ** R_ModeList_f
 */
@@ -469,6 +470,7 @@ static void R_ModeList_f( void )
 	}
 	ri.Printf( PRINT_ALL, "\n" );
 }
+#endif
 
 /*
 ==============================================================================
@@ -1178,6 +1180,35 @@ void R_FogColor_f(void)
 			                          atof(ri.Cmd_Argv(3)) * tr.identityLight, 1.0 );
 }
 
+typedef struct consoleCommands_s {
+	const char *cmd;
+	xcommand_t func;
+} consoleCommand_t;
+
+void R_ReloadFonts_f( void );
+
+static consoleCommand_t	commands[] = {
+
+	{ "imagelist",			R_ImageList_f },
+	{ "shaderlist",			R_ShaderList_f },
+	{ "skinlist",			R_SkinList_f },
+	{ "fontlist",			R_FontList_f },
+	{ "screenshot",			R_ScreenShot_f },
+	{ "screenshot_png",		R_ScreenShotPNG_f },
+	{ "screenshot_tga",		R_ScreenShotTGA_f },
+	{ "gfxinfo",			GfxInfo_f },
+	{ "r_atihack",			R_AtiHackToggle_f },
+	{ "r_we",			R_WorldEffect_f },
+	{ "imagecacheinfo",		RE_RegisterImages_Info_f },
+	{ "modellist",			R_Modellist_f },
+	{ "modelcacheinfo",		RE_RegisterModels_Info_f },
+	{ "r_fogDistance",		R_FogDistance_f },
+	{ "r_fogColor",			R_FogColor_f },
+	{ "r_reloadfonts",		R_ReloadFonts_f },
+};
+
+static const size_t numCommands = ARRAY_LEN( commands );
+
 #ifdef _DEBUG
 #define MIN_PRIMITIVES -1
 #else
@@ -1391,32 +1422,8 @@ Ghoul2 Insert End
 
 	ri.Cvar_CheckRange( r_screenshotJpegQuality, 10, 100, qtrue );
 
-	// make sure all the commands added here are also
-	// removed in R_Shutdown
-	ri.Cmd_AddCommand( "imagelist", R_ImageList_f );
-	ri.Cmd_AddCommand( "shaderlist", R_ShaderList_f );
-	ri.Cmd_AddCommand( "skinlist", R_SkinList_f );
-	ri.Cmd_AddCommand( "fontlist", R_FontList_f );
-	ri.Cmd_AddCommand( "modellist", R_Modellist_f );
-	ri.Cmd_AddCommand( "modelist", R_ModeList_f );
-	ri.Cmd_AddCommand( "r_atihack", R_AtiHackToggle_f );
-	ri.Cmd_AddCommand( "screenshot", R_ScreenShot_f );
-	ri.Cmd_AddCommand( "screenshot_png", R_ScreenShotPNG_f );
-	ri.Cmd_AddCommand( "screenshot_tga", R_ScreenShotTGA_f );
-	ri.Cmd_AddCommand( "gfxinfo", GfxInfo_f );
-	ri.Cmd_AddCommand( "r_fogDistance", R_FogDistance_f);
-	ri.Cmd_AddCommand( "r_fogColor", R_FogColor_f);
-	ri.Cmd_AddCommand( "modelcacheinfo", RE_RegisterModels_Info_f);
-	ri.Cmd_AddCommand( "imagecacheinfo", RE_RegisterImages_Info_f);
-extern void R_WorldEffect_f(void);	//TR_WORLDEFFECTS.CPP
-	ri.Cmd_AddCommand( "r_we", R_WorldEffect_f );
-extern void R_ReloadFonts_f(void);
-	ri.Cmd_AddCommand( "r_reloadfonts", R_ReloadFonts_f );
-	
-	//ri.Cmd_AddCommand( "minimize", GLimp_Minimize ); // Cowcat
-
-	// make sure all the commands added above are also
-	// removed in R_Shutdown
+	for ( size_t i = 0; i < numCommands; i++ )
+		ri.Cmd_AddCommand( commands[i].cmd, commands[i].func );
 }
 
 // need to do this hackery so ghoul2 doesn't crash the game because of ITS hackery...
@@ -1531,75 +1538,52 @@ extern void R_ShutdownWorldEffects(void);
 
 void RE_Shutdown( qboolean destroyWindow, qboolean restarting )
 {
-	// Need this temporarily.
-#ifdef _WIN32
-	tr.wv = ri.GetWinVars();
-#endif
+	for ( size_t i = 0; i < numCommands; i++ )
+		ri.Cmd_RemoveCommand( commands[i].cmd );
 
-	ri.Cmd_RemoveCommand ("imagelist");
-	ri.Cmd_RemoveCommand ("shaderlist");
-	ri.Cmd_RemoveCommand ("skinlist");
-	ri.Cmd_RemoveCommand ("fontlist");
-	ri.Cmd_RemoveCommand ("modellist");
-	ri.Cmd_RemoveCommand ("modelist" );
-	ri.Cmd_RemoveCommand ("r_atihack");
-	ri.Cmd_RemoveCommand ("screenshot");
-	ri.Cmd_RemoveCommand ("screenshot_png");
-	ri.Cmd_RemoveCommand ("screenshot_tga");	
-	ri.Cmd_RemoveCommand ("gfxinfo");
-	ri.Cmd_RemoveCommand ("r_fogDistance");
-	ri.Cmd_RemoveCommand ("r_fogColor");
-	ri.Cmd_RemoveCommand ("modelcacheinfo");
-	ri.Cmd_RemoveCommand ("imagecacheinfo");
-	ri.Cmd_RemoveCommand ("r_we");
-	ri.Cmd_RemoveCommand ("r_reloadfonts");
+	#if !defined(AMIGAOS) && !defined(MORPHOS)
 
-	//ri.Cmd_RemoveCommand ("minimize"); // Cowcat
+	if ( r_DynamicGlow && r_DynamicGlow->integer )
+	{
+		// Release the Glow Vertex Shader.
+		if ( tr.glowVShader )
+		{
+			qglDeleteProgramsARB( 1, &tr.glowVShader );
+		}
+
+		// Release Pixel Shader.
+		if ( tr.glowPShader )
+		{
+			if ( qglCombinerParameteriNV  )
+			{
+				// Release the Glow Regcom call list.
+				qglDeleteLists( tr.glowPShader, 1 );
+			}
+			else if ( qglGenProgramsARB )
+			{
+				// Release the Glow Fragment Shader.
+				qglDeleteProgramsARB( 1, &tr.glowPShader );
+			}
+		}
+
+		// Release the scene glow texture.
+		qglDeleteTextures( 1, &tr.screenGlow );
+
+		// Release the scene texture.
+		qglDeleteTextures( 1, &tr.sceneImage );
+
+		// Release the blur texture.
+		qglDeleteTextures( 1, &tr.blurImage );
+	}
+
+	#endif
 
 	R_ShutdownWorldEffects();
 	R_ShutdownFonts();
 
 	if ( tr.registered )
 	{
-		#if !defined(AMIGAOS) && !defined(MORPHOS)
-
-		if ( r_DynamicGlow && r_DynamicGlow->integer )
-		{
-			// Release the Glow Vertex Shader.
-			if ( tr.glowVShader )
-			{
-				qglDeleteProgramsARB( 1, &tr.glowVShader );
-			}
-
-			// Release Pixel Shader.
-			if ( tr.glowPShader )
-			{
-				if ( qglCombinerParameteriNV  )
-				{
-					// Release the Glow Regcom call list.
-					qglDeleteLists( tr.glowPShader, 1 );
-				}
-				else if ( qglGenProgramsARB )
-				{
-					// Release the Glow Fragment Shader.
-					qglDeleteProgramsARB( 1, &tr.glowPShader );
-				}
-			}
-
-			// Release the scene glow texture.
-			qglDeleteTextures( 1, &tr.screenGlow );
-
-			// Release the scene texture.
-			qglDeleteTextures( 1, &tr.sceneImage );
-
-			// Release the blur texture.
-			qglDeleteTextures( 1, &tr.blurImage );
-		}
-
-		#endif
-
-//		R_SyncRenderThread();
-		R_ShutdownCommandBuffers();
+		R_IssuePendingRenderCommands();
 
 		if (destroyWindow)
 		{
@@ -1613,7 +1597,8 @@ void RE_Shutdown( qboolean destroyWindow, qboolean restarting )
 	}
 
 	// shut down platform specific OpenGL stuff
-	if ( destroyWindow ) {
+	if ( destroyWindow )
+	{
 		GLimp_Shutdown();
 	}
 
@@ -1629,7 +1614,7 @@ Touch all images to make sure they are resident
 */
 void RE_EndRegistration( void )
 {
-	R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 }
 
 

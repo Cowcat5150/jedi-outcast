@@ -85,22 +85,6 @@ void R_PerformanceCounters( void )
 
 /*
 ====================
-R_InitCommandBuffers
-====================
-*/
-void R_InitCommandBuffers( void ) {
-}
-
-/*
-====================
-R_ShutdownCommandBuffers
-====================
-*/
-void R_ShutdownCommandBuffers( void ) {
-}
-
-/*
-====================
 R_IssueRenderCommands
 ====================
 */
@@ -138,18 +122,17 @@ void R_IssueRenderCommands( qboolean runPerformanceCounters )
 
 /*
 ====================
-R_SyncRenderThread
+R_IssuePendingRenderCommands
 
 Issue any pending commands and wait for them to complete.
-After exiting, the render thread will have completed its work
-and will remain idle and the main thread is free to issue
-OpenGL calls until R_IssueRenderCommands is called.
 ====================
 */
-void R_SyncRenderThread( void ) {
+void R_IssuePendingRenderCommands( void )
+{
 	if ( !tr.registered ) {
 		return;
 	}
+
 	R_IssueRenderCommands( qfalse );
 }
 
@@ -167,6 +150,9 @@ void *R_GetCommandBuffer( int bytes )
 	renderCommandList_t	*cmdList;
 
 	cmdList = &backEndData->commands;
+	bytes = PAD(bytes, sizeof(void *));
+
+	assert(cmdlist);
 
 	// always leave room for the end of list command
 	if ( cmdList->used + bytes + 4 > MAX_RENDER_COMMANDS )
@@ -399,15 +385,17 @@ void RE_BeginFrame( stereoFrame_t stereoFrame )
 			ri.Cvar_Set( "r_measureOverdraw", "0" );
 			r_measureOverdraw->modified = qfalse;
 		}
+
 		else if ( r_shadows->integer == 2 )
 		{
 			ri.Printf( PRINT_ALL, "Warning: stencil shadows and overdraw measurement are mutually exclusive\n" );
 			ri.Cvar_Set( "r_measureOverdraw", "0" );
 			r_measureOverdraw->modified = qfalse;
 		}
+
 		else
 		{
-			R_SyncRenderThread();
+			R_IssuePendingRenderCommands();
 			qglEnable( GL_STENCIL_TEST );
 			qglStencilMask( ~0U );
 			qglClearStencil( 0U );
@@ -416,11 +404,13 @@ void RE_BeginFrame( stereoFrame_t stereoFrame )
 		}
 		r_measureOverdraw->modified = qfalse;
 	}
+
 	else
 	{
 		// this is only reached if it was on and is now off
-		if ( r_measureOverdraw->modified ) {
-			R_SyncRenderThread();
+		if ( r_measureOverdraw->modified )
+		{
+			R_IssuePendingRenderCommands();
 			qglDisable( GL_STENCIL_TEST );
 			r_measureOverdraw->modified = qfalse;
 		}
@@ -431,9 +421,9 @@ void RE_BeginFrame( stereoFrame_t stereoFrame )
 	//
 	// texturemode stuff
 	//
-	if ( r_textureMode->modified || r_ext_texture_filter_anisotropic->modified)
+	if ( r_textureMode->modified || r_ext_texture_filter_anisotropic->modified )
 	{
-		R_SyncRenderThread();
+		R_IssuePendingRenderCommands();
 		GL_TextureMode( r_textureMode->string );
 		r_textureMode->modified = qfalse;
 		r_ext_texture_filter_anisotropic->modified = qfalse;
@@ -442,33 +432,39 @@ void RE_BeginFrame( stereoFrame_t stereoFrame )
 	//
 	// gamma stuff
 	//
-	if ( r_gamma->modified ) {
+	if ( r_gamma->modified )
+	{
 		r_gamma->modified = qfalse;
 
-		R_SyncRenderThread();
+		R_IssuePendingRenderCommands();
 		R_SetColorMappings();
 	}
 
-    // check for errors
-    if ( !r_ignoreGLErrors->integer ) {
-        int	err;
+    	// check for errors
+    	if ( !r_ignoreGLErrors->integer )
+	{
+        	int	err;
 
-		R_SyncRenderThread();
-        if ( ( err = qglGetError() ) != GL_NO_ERROR ) {
-            Com_Error( ERR_FATAL, "RE_BeginFrame() - glGetError() failed (0x%x)!\n", err );
-        }
-    }
+		R_IssuePendingRenderCommands();
+		
+		if ( ( err = qglGetError() ) != GL_NO_ERROR ) {
+			Com_Error( ERR_FATAL, "RE_BeginFrame() - glGetError() failed (0x%x)!\n", err );
+		}
+	}
 
 	//
 	// draw buffer stuff
 	//
 	cmd = (drawBufferCommand_t *) R_GetCommandBuffer( sizeof( *cmd ) );
+
 	if ( !cmd ) {
 		return;
 	}
+
 	cmd->commandId = RC_DRAW_BUFFER;
 
-	if ( glConfig.stereoEnabled ) {
+	if ( glConfig.stereoEnabled )
+	{
 		if ( stereoFrame == STEREO_LEFT ) {
 			cmd->buffer = (int)GL_BACK_LEFT;
 		} else if ( stereoFrame == STEREO_RIGHT ) {
@@ -476,13 +472,17 @@ void RE_BeginFrame( stereoFrame_t stereoFrame )
 		} else {
 			Com_Error( ERR_FATAL, "RE_BeginFrame: Stereo is enabled, but stereoFrame was %i", stereoFrame );
 		}
-	} else {
+	}
+
+	else
+	{
 		if ( stereoFrame != STEREO_CENTER ) {
 			Com_Error( ERR_FATAL, "RE_BeginFrame: Stereo is disabled, but stereoFrame was %i", stereoFrame );
 		}
+
 //		if ( !Q_stricmp( r_drawBuffer->string, "GL_FRONT" ) ) {
 //			cmd->buffer = (int)GL_FRONT;
-//		} else 
+//		} else
 		{
 			cmd->buffer = (int)GL_BACK;
 		}
@@ -504,6 +504,7 @@ void RE_EndFrame( int *frontEndMsec, int *backEndMsec )
 	if ( !tr.registered ) {
 		return;
 	}
+
 	cmd = (swapBuffersCommand_t *) R_GetCommandBuffer( sizeof( *cmd ) );
 
 	if ( !cmd ) {
@@ -513,17 +514,18 @@ void RE_EndFrame( int *frontEndMsec, int *backEndMsec )
 
 	R_IssueRenderCommands( qtrue );
 
-	// use the other buffers next frame, because another CPU
-	// may still be rendering into the current ones
 	R_InitNextFrame();
 
 	if ( frontEndMsec ) {
 		*frontEndMsec = tr.frontEndMsec;
 	}
+
 	tr.frontEndMsec = 0;
+
 	if ( backEndMsec ) {
 		*backEndMsec = backEnd.pc.msec;
 	}
+
 	backEnd.pc.msec = 0;
 	
 	for(int i=0;i<MAX_LIGHT_STYLES;i++)

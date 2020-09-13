@@ -477,10 +477,11 @@ void RE_GetBModelVerts( int bmodelIndex, vec3_t *verts, vec3_t normal )
 R_RecursiveWorldNode
 ================
 */
-static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits ) {
-
-	do {
-		int			newDlights[2];
+static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
+{
+	do
+	{
+		int	newDlights[2];
 
 		// if the node wasn't marked as potentially visible, exit
 		if (node->visframe != tr.visCount) {
@@ -490,11 +491,16 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 		// if the bounding volume is outside the frustum, nothing
 		// inside can be visible OPTIMIZE: don't do this all the way to leafs?
 
-		if ( r_nocull->integer!=1 ) {
-			int		r;
+		if ( r_nocull->integer != 1 )
+		{
+			#if 1
 
-			if ( planeBits & 1 ) {
+			int	r;
+
+			if ( planeBits & 1 )
+			{
 				r = BoxOnPlaneSide(node->mins, node->maxs, &tr.viewParms.frustum[0]);
+
 				if (r == 2) {
 					return;						// culled
 				}
@@ -503,8 +509,10 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 				}
 			}
 
-			if ( planeBits & 2 ) {
+			if ( planeBits & 2 )
+			{
 				r = BoxOnPlaneSide(node->mins, node->maxs, &tr.viewParms.frustum[1]);
+
 				if (r == 2) {
 					return;						// culled
 				}
@@ -513,8 +521,10 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 				}
 			}
 
-			if ( planeBits & 4 ) {
+			if ( planeBits & 4 )
+			{
 				r = BoxOnPlaneSide(node->mins, node->maxs, &tr.viewParms.frustum[2]);
+
 				if (r == 2) {
 					return;						// culled
 				}
@@ -523,8 +533,10 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 				}
 			}
 
-			if ( planeBits & 8 ) {
+			if ( planeBits & 8 )
+			{
 				r = BoxOnPlaneSide(node->mins, node->maxs, &tr.viewParms.frustum[3]);
+
 				if (r == 2) {
 					return;						// culled
 				}
@@ -533,8 +545,10 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 				}
 			}
 
-			if ( planeBits & 16 ) {
+			if ( planeBits & 16 )
+			{
 				r = BoxOnPlaneSide(node->mins, node->maxs, &tr.viewParms.frustum[4]);
+
 				if (r == 2) {
 					return;						// culled
 				}
@@ -542,6 +556,26 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 					planeBits &= ~16;			// all descendants will also be in front
 				}
 			}
+
+			#else // test Cowcat
+
+			int i, r;
+
+			for(i = 0; i < 5; i++)
+			{
+				if( !(planeBits & (1 << i)) )
+					continue;
+
+				r = BoxOnPlaneSide(node->mins, node->maxs, &tr.viewParms.frustum[i]);
+
+				if (r == 2)
+					return;
+
+				else if (r == 1)
+					planeBits &= ~(1 << i);
+			}
+
+			#endif
 
 		}
 
@@ -554,21 +588,25 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 		{
 			newDlights[0] = 0;
 			newDlights[1] = 0;
+
 			if ( dlightBits ) 
 			{
 				int	i;
+
 				for ( i = 0 ; i < tr.refdef.num_dlights ; i++ )
 				{
 					dlight_t	*dl;
 					float		dist;
 
-					if ( dlightBits & ( 1 << i ) ) {
+					if ( dlightBits & ( 1 << i ) )
+					{
 						dl = &tr.refdef.dlights[i];
 						dist = DotProduct( dl->origin, node->plane->normal ) - node->plane->dist;
 						
 						if ( dist > -dl->radius ) {
 							newDlights[0] |= ( 1 << i );
 						}
+
 						if ( dist < dl->radius ) {
 							newDlights[1] |= ( 1 << i );
 						}
@@ -576,26 +614,28 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 				}
 			}
 		}
+
 		else
 		{
 			newDlights[0] = dlightBits;
 			newDlights[1] = dlightBits;
 		}
+
 		// recurse down the children, front side first
 		R_RecursiveWorldNode (node->children[0], planeBits, newDlights[0] );
 
 		// tail recurse
 		node = node->children[1];
 		dlightBits = newDlights[1];
+
 	} while ( 1 );
 
 	{
-
 		if(node->nummarksurfaces == 0) // test Cowcat
 			return;
 
 		// leaf node, so add mark surfaces
-		int			c;
+		int		c;
 		msurface_t	*surf, **mark;
 
 		tr.pc.c_leafs++;
@@ -624,7 +664,9 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 		// add the individual surfaces
 		mark = node->firstmarksurface;
 		c = node->nummarksurfaces;
-		while (c--) {
+
+		while (c--)
+		{
 			// the surface may have already been added if it
 			// spans multiple leafs
 			surf = *mark;

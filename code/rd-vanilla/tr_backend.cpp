@@ -485,6 +485,7 @@ static void RB_BeginDrawingView (void)
 	// we will need to change the projection matrix before drawing
 	// 2D images again
 	backEnd.projection2D = qfalse;
+	//qglEnable(MGL_PERSPECTIVE_MAPPING); // test Cowcat
 
 	//
 	// set the modelview matrix for the viewer
@@ -1045,7 +1046,7 @@ void RB_RenderDrawSurfList( drawSurf_t *drawSurfs, int numDrawSurfs )
 /*
 ============================================================================
 
-RENDER BACK END THREAD FUNCTIONS
+RENDER BACK END FUNCTIONS
 
 ============================================================================
 */
@@ -1063,13 +1064,12 @@ void RB_SetGL2D (void)
 	// set 2D virtual screen size
 	qglViewport( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
 	qglScissor( 0, 0, glConfig.vidWidth, glConfig.vidHeight );
-	qglMatrixMode(GL_PROJECTION);
-    	qglLoadIdentity ();
-	qglOrtho (0, 640, 480, 0, 0, 1);
 
+	qglMatrixMode(GL_PROJECTION);
+	qglLoadIdentity ();
+	qglOrtho (0, 640, 480, 0, 0, 1);
 	qglMatrixMode(GL_MODELVIEW);
-	
-    	qglLoadIdentity ();
+	qglLoadIdentity ();
 
 	GL_State( GLS_DEPTHTEST_DISABLE | GLS_SRCBLEND_SRC_ALPHA | GLS_DSTBLEND_ONE_MINUS_SRC_ALPHA );
 
@@ -1078,6 +1078,8 @@ void RB_SetGL2D (void)
 	#if !defined(AMIGAOS)
 	qglDisable( GL_CLIP_PLANE0 );
 	#endif
+
+	//qglDisable(MGL_PERSPECTIVE_MAPPING); // test Cowcat
 
 	// set time for 2D shaders
 	backEnd.refdef.time = ri.Milliseconds();
@@ -1128,7 +1130,7 @@ const void *RB_StretchPic ( const void *data )
 	if ( shader != tess.shader )
 	{
 		if ( tess.numIndexes ) {
-			RB_EndSurface();	//this might change culling and other states
+			RB_EndSurface();
 		}
 
 		backEnd.currentEntity = &backEnd.entity2D;
@@ -1194,8 +1196,6 @@ RB_DrawRotatePic
 */
 const void *RB_RotatePic ( const void *data ) 
 {
-	//ri.Printf( PRINT_ALL, "RotatePic\n");
-
 	const rotatePicCommand_t	*cmd;
 	image_t				*image;
 	shader_t			*shader;
@@ -1249,8 +1249,6 @@ RB_DrawRotatePic2
 */
 const void *RB_RotatePic2 ( const void *data ) 
 {
-	//ri.Printf( PRINT_ALL, "RotatePic2\n");
-
 	const rotatePicCommand_t	*cmd;
 	image_t				*image;
 	shader_t			*shader;
@@ -1602,6 +1600,7 @@ const void *RB_SwapBuffers( const void *data )
 
 	// we measure overdraw by reading back the stencil buffer and
 	// counting up the number of increments that have happened
+
 	#if !defined(AMIGAOS)
 
 	if ( r_measureOverdraw->integer )
@@ -1620,6 +1619,7 @@ const void *RB_SwapBuffers( const void *data )
 		backEnd.pc.c_overDraw += sum;
 		Z_Free( stencilReadback );
 	}
+
 	#endif
 
     	if ( !glState.finishCalled ) {
@@ -1660,9 +1660,6 @@ const void *RB_WorldEffects( const void *data )
 /*
 ====================
 RB_ExecuteRenderCommands
-
-This function will be called syncronously if running without
-smp extensions, or asyncronously by another thread.
 ====================
 */
 void RB_ExecuteRenderCommands( const void *data )
@@ -1673,6 +1670,8 @@ void RB_ExecuteRenderCommands( const void *data )
 
 	while ( 1 )
 	{
+		data = PADP(data, sizeof(void *));
+
 		switch ( *(const int *)data ) {
 
 		case RC_SET_COLOR:
@@ -1704,7 +1703,7 @@ void RB_ExecuteRenderCommands( const void *data )
 			break;
 		case RC_END_OF_LIST:
 		default:
-			// stop rendering on this thread
+			// stop rendering
 			t2 = ri.Milliseconds ();
 			backEnd.pc.msec = t2 - t1;
 			return;

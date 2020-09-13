@@ -346,12 +346,15 @@ myGlMultMatrix
 
 ==========================
 */
+
 void myGlMultMatrix( const float *a, const float *b, float *out )
 {
 	int	i, j;
 
 	for ( i = 0 ; i < 4 ; i++ )
 	{
+		#if 0
+
 		for ( j = 0 ; j < 4 ; j++ )
 		{
 			out[ i * 4 + j ] =
@@ -360,8 +363,23 @@ void myGlMultMatrix( const float *a, const float *b, float *out )
 				+ a [ i * 4 + 2 ] * b [ 2 * 4 + j ]
 				+ a [ i * 4 + 3 ] * b [ 3 * 4 + j ];
 		}
+
+		#else // Cowcat
+
+		float a0 = a[i * 4 + 0];
+		float a1 = a[i * 4 + 1];
+		float a2 = a[i * 4 + 2];
+		float a3 = a[i * 4 + 3];
+
+		for ( j = 0 ; j < 4 ; j++ )
+		{
+			out[ i * 4 + j ] = a0 * b [ 0 * 4 + j ] + a1 * b [ 1 * 4 + j ] + a2 * b [ 2 * 4 + j ] + a3 * b [ 3 * 4 + j ];
+		}
+
+		#endif
 	}
 }
+
 
 /*
 =================
@@ -372,6 +390,7 @@ Does NOT produce any GL calls
 Called by both the front end and the back end
 =================
 */
+
 void R_RotateForEntity( const trRefEntity_t *ent, const viewParms_t *viewParms, orientationr_t *ori )
 {
 //	float	glMatrix[16];
@@ -736,6 +755,7 @@ void R_MirrorVector (vec3_t in, orientation_t *surface, orientation_t *camera, v
 R_PlaneForSurface
 =============
 */
+
 void R_PlaneForSurface (surfaceType_t *surfType, cplane_t *plane)
 {
 	srfTriangles_t	*tri;
@@ -1554,7 +1574,7 @@ void R_DebugGraphics( void )
 	}
 
 	// the render thread can't make callbacks to the main thread
-	//R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 	GL_Bind( tr.whiteImage);
 	GL_Cull( CT_FRONT_SIDED );

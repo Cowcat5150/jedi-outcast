@@ -3405,7 +3405,7 @@ static inline const int *R_FindLightmap( const int *lightmapIndex )
 	} 
 
 	// sync up render thread, because we're going to have to load an image 
-	//R_SyncRenderThread(); 
+	R_IssuePendingRenderCommands(); //
 
 	// attempt to load an external lightmap 
 	Com_sprintf( fileName, sizeof(fileName), "$%s/" EXTERNAL_LIGHTMAP, tr.worldDir, *lightmapIndex ); 
@@ -3492,7 +3492,7 @@ shader_t *R_FindShader( const char *name, const int *lightmapIndex, const byte *
 
 	// make sure the render thread is stopped, because we are probably
 	// going to have to upload an image
-	//R_SyncRenderThread();
+	R_IssuePendingRenderCommands();
 
 	// clear the global shader
 	ClearGlobalShader();
