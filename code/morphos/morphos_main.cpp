@@ -192,8 +192,15 @@ void Sys_Error(const char *fmt, ...)
 
 void Sys_Print(const char *msg)
 {
-	if (consoleoutput)
-		fputs(msg, stdout);
+	char cmsg[4096] = { 0 }; // MAXPRINTMSG
+
+	if (!consoleoutput)
+		return;
+
+	Q_strncpyz( cmsg, msg, sizeof( cmsg ) );
+	Q_StripColor( cmsg );
+
+	fputs( cmsg, stdout );
 }
 
 qboolean Sys_LowPhysicalMemory()

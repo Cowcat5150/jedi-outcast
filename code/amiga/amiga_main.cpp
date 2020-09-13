@@ -53,12 +53,7 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 #define DeleteExtIO(p) DeleteIORequest(p)
 #endif
 
-extern struct Library *SocketBase;
-
-
-/*
-
-*/
+//extern struct Library *SocketBase;
 
 #define MEM_THRESHOLD 96*1024*1024
 
@@ -341,11 +336,16 @@ Sys_Print
 */
 void Sys_Print( const char *msg ) 
 {
+	char cmsg[4096] = { 0 }; // MAXPRINTMSG
+
 	//Conbuf_AppendText( msg );
 	if(!consoleoutput)
 		return;
 
-	fputs(msg, stdout);
+	Q_strncpyz( cmsg, msg, sizeof( cmsg ) );
+	Q_StripColor( cmsg );
+
+	fputs(cmsg, stdout);
 }
 
 
@@ -444,7 +444,7 @@ sysEvent_t Sys_GetEvent(void)
 	sysEvent_t	ev;
 
 	// return if we have data
-	if ( eventHead - eventTail > 0 ) 
+	if ( eventHead - eventTail > 0 )
 		return eventQue[ ( eventTail++ ) & MASK_QUED_EVENTS ];
 
 	IN_Frame(); // it was on Com_Frame - Cowcat
