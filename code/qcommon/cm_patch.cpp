@@ -831,13 +831,13 @@ static qboolean CM_ValidateFacet( facet_t *facet ) {
 CM_AddFacetBevels
 ==================
 */
-void CM_AddFacetBevels( facet_t *facet ) {
-
-	int i, j, k, l;
-	int axis, dir, order, flipped;
-	float plane[4], d, newplane[4];
+void CM_AddFacetBevels( facet_t *facet )
+{
+	int	i, j, k, l;
+	int	axis, dir, order, flipped;
+	float	plane[4], d, newplane[4];
 	winding_t *w, *w2;
-	vec3_t mins, maxs, vec, vec2;
+	vec3_t	mins, maxs, vec, vec2;
 
 #ifndef ADDBEVELS
 	return;
@@ -846,49 +846,63 @@ void CM_AddFacetBevels( facet_t *facet ) {
 	Vector4Copy( planes[ facet->surfacePlane ].plane, plane );
 
 	w = BaseWindingForPlane( plane,  plane[3] );
-	for ( j = 0 ; j < facet->numBorders && w ; j++ ) {
-		if (facet->borderPlanes[j] == facet->surfacePlane) continue;
+
+	for ( j = 0 ; j < facet->numBorders && w ; j++ )
+	{
+		if (facet->borderPlanes[j] == facet->surfacePlane)
+			continue;
+
 		Vector4Copy( planes[ facet->borderPlanes[j] ].plane, plane );
 
-		if ( !facet->borderInward[j] ) {
+		if ( !facet->borderInward[j] )
+		{
 			VectorSubtract( vec3_origin, plane, plane );
 			plane[3] = -plane[3];
 		}
 
 		ChopWindingInPlace( &w, plane, plane[3], 0.1f );
 	}
-	if ( !w ) {
+
+	if ( !w )
 		return;
-	}
 
 	WindingBounds(w, mins, maxs);
 
 	// add the axial planes
 	order = 0;
+
 	for ( axis = 0 ; axis < 3 ; axis++ )
 	{
 		for ( dir = -1 ; dir <= 1 ; dir += 2, order++ )
 		{
 			VectorClear(plane);
 			plane[axis] = dir;
-			if (dir == 1) {
+
+			if (dir == 1)
 				plane[3] = maxs[axis];
-			}
-			else {
+
+			else
 				plane[3] = -mins[axis];
-			}
+
 			//if it's the surface plane
-			if (CM_PlaneEqual(&planes[facet->surfacePlane], plane, &flipped)) {
+			if (CM_PlaneEqual(&planes[facet->surfacePlane], plane, &flipped))
 				continue;
-			}
+
 			// see if the plane is allready present
-			for ( i = 0 ; i < facet->numBorders ; i++ ) {
+			for ( i = 0 ; i < facet->numBorders ; i++ )
+			{
 				if (CM_PlaneEqual(&planes[facet->borderPlanes[i]], plane, &flipped))
 					break;
 			}
 
-			if ( i == facet->numBorders ) {
-				if (facet->numBorders > 4 + 6 + 16) Com_Printf(S_COLOR_RED"ERROR: too many bevels\n");
+			if ( i == facet->numBorders )
+			{
+				if (facet->numBorders > 4 + 6 + 16)
+				{
+					Com_Printf(S_COLOR_RED"ERROR: too many bevels\n");
+					continue;
+				}
+
 				facet->borderPlanes[facet->numBorders] = CM_FindPlane2(plane, &flipped);
 				facet->borderNoAdjust[facet->numBorders] = 0;
 				facet->borderInward[facet->numBorders] = flipped;
@@ -896,6 +910,7 @@ void CM_AddFacetBevels( facet_t *facet ) {
 			}
 		}
 	}
+
 	//
 	// add the edge bevels
 	//
@@ -903,14 +918,19 @@ void CM_AddFacetBevels( facet_t *facet ) {
 	for ( j = 0 ; j < w->numpoints ; j++ )
 	{
 		k = (j+1)%w->numpoints;
+
 		VectorSubtract (w->p[j], w->p[k], vec);
+
 		//if it's a degenerate edge
 		if (VectorNormalize (vec) < 0.5)
 			continue;
+
 		CM_SnapVector(vec);
+
 		for ( k = 0; k < 3 ; k++ )
 			if ( vec[k] == -1 || vec[k] == 1 )
 				break;	// axial
+
 		if ( k < 3 )
 			continue;	// only test non-axial edges
 
@@ -923,8 +943,10 @@ void CM_AddFacetBevels( facet_t *facet ) {
 				VectorClear (vec2);
 				vec2[axis] = dir;
 				CrossProduct (vec, vec2, plane);
+
 				if (VectorNormalize (plane) < 0.5)
 					continue;
+
 				plane[3] = DotProduct (w->p[j], plane);
 
 				// if all the points of the facet winding are
@@ -932,62 +954,86 @@ void CM_AddFacetBevels( facet_t *facet ) {
 				for ( l = 0 ; l < w->numpoints ; l++ )
 				{
 					d = DotProduct (w->p[l], plane) - plane[3];
+
 					if (d > 0.1)
 						break;	// point in front
 				}
+
 				if ( l < w->numpoints )
 					continue;
 
 				//if it's the surface plane
-				if (CM_PlaneEqual(&planes[facet->surfacePlane], plane, &flipped)) {
+				if (CM_PlaneEqual(&planes[facet->surfacePlane], plane, &flipped))
 					continue;
-				}
+
 				// see if the plane is allready present
-				for ( i = 0 ; i < facet->numBorders ; i++ ) {
-					if (CM_PlaneEqual(&planes[facet->borderPlanes[i]], plane, &flipped)) {
-							break;
-					}
+				for ( i = 0 ; i < facet->numBorders ; i++ )
+				{
+					if (CM_PlaneEqual(&planes[facet->borderPlanes[i]], plane, &flipped))
+						break;
 				}
 
-				if ( i == facet->numBorders ) {
-					if (facet->numBorders > 4 + 6 + 16) Com_Printf(S_COLOR_RED"ERROR: too many bevels\n");
+				if ( i == facet->numBorders )
+				{
+					if (facet->numBorders > 4 + 6 + 16)
+					{
+						Com_Printf(S_COLOR_RED"ERROR: too many bevels\n");
+						continue;
+					}
+
 					facet->borderPlanes[facet->numBorders] = CM_FindPlane2(plane, &flipped);
 
-					for ( k = 0 ; k < facet->numBorders ; k++ ) {
+					for ( k = 0 ; k < facet->numBorders ; k++ )
+					{
 						if (facet->borderPlanes[facet->numBorders] ==
 							facet->borderPlanes[k]) Com_Printf("WARNING: bevel plane already used\n");
 					}
 
 					facet->borderNoAdjust[facet->numBorders] = 0;
 					facet->borderInward[facet->numBorders] = flipped;
+
 					//
 					w2 = CopyWinding(w);
 					Vector4Copy(planes[facet->borderPlanes[facet->numBorders]].plane, newplane);
+
 					if (!facet->borderInward[facet->numBorders])
 					{
 						VectorNegate(newplane, newplane);
 						newplane[3] = -newplane[3];
 					} //end if
+
 					ChopWindingInPlace( &w2, newplane, newplane[3], 0.1f );
-					if (!w2) {
+
+					if (!w2)
+					{
 						Com_DPrintf("WARNING: CM_AddFacetBevels... invalid bevel\n");
 						continue;
 					}
+
 					else {
 						FreeWinding(w2);
 					}
+
 					//
 					facet->numBorders++;
 					//already got a bevel
-//					break;
+					//break;
 				}
 			}
 		}
 	}
+
 	FreeWinding( w );
 
 #ifndef BSPC
 	//add opposite plane
+
+	if (facet->numBorders > 4 + 6 + 16)
+	{
+		Com_Printf(S_COLOR_RED"ERROR: too many bevels\n");
+		return;
+	}
+
 	facet->borderPlanes[facet->numBorders] = facet->surfacePlane;
 	facet->borderNoAdjust[facet->numBorders] = 0;
 	facet->borderInward[facet->numBorders] = qtrue;

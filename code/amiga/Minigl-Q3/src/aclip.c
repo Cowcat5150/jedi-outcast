@@ -65,7 +65,7 @@ static void LerpFlat(MGLVertex *a, MGLVertex *b, MGLVertex *r, float t)
 
 typedef void (*TCLerpfn)(MGLVertex *, MGLVertex *, MGLVertex *, float);
 
-TCLerpfn TCLerp = (TCLerpfn)LerpFlat;
+TCLerpfn TCLerpFlat = (TCLerpfn)LerpFlat;
 
 #endif
 
@@ -154,7 +154,7 @@ static void A_ClipBottom(MGLVertex *a, MGLVertex *b, MGLVertex *r)
 	r->v.color.g = LERP(t, a->v.color.g, b->v.color.g);
 	r->v.color.b = LERP(t, a->v.color.b, b->v.color.b);
 	r->v.color.a = LERP(t, a->v.color.a, b->v.color.a);
-
+	
 	r->v.u = LERP(t, a->v.u, b->v.u);
 	r->v.v = LERP(t, a->v.v, b->v.v);
 
@@ -180,7 +180,7 @@ static void A_ClipLeft(MGLVertex *a, MGLVertex *b, MGLVertex *r)
 	r->v.color.g = LERP(t, a->v.color.g, b->v.color.g);
 	r->v.color.b = LERP(t, a->v.color.b, b->v.color.b);
 	r->v.color.a = LERP(t, a->v.color.a, b->v.color.a);
-
+	
 	r->v.u = LERP(t, a->v.u, b->v.u);
 	r->v.v = LERP(t, a->v.v, b->v.v);
 
@@ -226,7 +226,7 @@ static void A_ClipRight(MGLVertex *a, MGLVertex *b, MGLVertex *r)
 	r->v.color.g = LERP(t, a->v.color.g, b->v.color.g);
 	r->v.color.b = LERP(t, a->v.color.b, b->v.color.b);
 	r->v.color.a = LERP(t, a->v.color.a, b->v.color.a);
-
+	
 	r->v.u = LERP(t,a->v.u, b->v.u);
 	r->v.v = LERP(t,a->v.v, b->v.v);
 
@@ -272,7 +272,7 @@ static void A_ClipFront(MGLVertex *a, MGLVertex *b, MGLVertex *r)
 	r->v.color.g = LERP(t, a->v.color.g, b->v.color.g);
 	r->v.color.b = LERP(t, a->v.color.b, b->v.color.b);
 	r->v.color.a = LERP(t, a->v.color.a, b->v.color.a);
-
+	
 	r->v.u = LERP(t, a->v.u, b->v.u);
 	r->v.v = LERP(t, a->v.v, b->v.v);
 
@@ -310,7 +310,7 @@ static void A_ClipBack(MGLVertex *a, MGLVertex *b, MGLVertex *r)
 	r->v.color.g = LERP(t, a->v.color.g, b->v.color.g);
 	r->v.color.b = LERP(t, a->v.color.b, b->v.color.b);
 	r->v.color.a = LERP(t, a->v.color.a, b->v.color.a);
-
+	
 	r->v.u = LERP(t, a->v.u, b->v.u);
 	r->v.v = LERP(t, a->v.v, b->v.v);
 
@@ -347,7 +347,7 @@ static void AF_ClipWZero(MGLVertex *a, MGLVertex *b, MGLVertex *r)
 
 	r->v.u = LERP(t, a->v.u, b->v.u);
 	r->v.v = LERP(t, a->v.v, b->v.v);
-
+	
 	r->bx = LERP(t, a->bx, b->bx);
 	r->by = LERP(t, a->by, b->by);
 	r->bz = LERP(t, a->bz, b->bz);

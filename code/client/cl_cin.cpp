@@ -1921,11 +1921,13 @@ static void PlayCinematic(const char *arg, const char *s, qboolean qbInGame)
 			psAudioFile = "music/cinematic_1";
 #ifdef JK2_MODE
 			hCrawl = re.RegisterShaderNoMip( va("menu/video/tc_%d", sp_language->integer) ); // was sp_language->string - cowcat
+			//hCrawl = re.RegisterShader( va("menu/video/tc_%d", sp_language->integer) ); // test - cowcat
 
 			if(!hCrawl)
 			{
 				// failed, so go back to english
 				hCrawl = re.RegisterShaderNoMip( "menu/video/tc_0" );
+				//hCrawl = re.RegisterShader( "menu/video/tc_0" ); // test - cowcat
 			}
 #else
 			hCrawl = re.RegisterShaderNoMip( va("menu/video/tc_%s",se_language->string) );

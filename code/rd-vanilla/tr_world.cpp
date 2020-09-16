@@ -493,8 +493,6 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 
 		if ( r_nocull->integer != 1 )
 		{
-			#if 1
-
 			int	r;
 
 			if ( planeBits & 1 )
@@ -556,27 +554,6 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 					planeBits &= ~16;			// all descendants will also be in front
 				}
 			}
-
-			#else // test Cowcat
-
-			int i, r;
-
-			for(i = 0; i < 5; i++)
-			{
-				if( !(planeBits & (1 << i)) )
-					continue;
-
-				r = BoxOnPlaneSide(node->mins, node->maxs, &tr.viewParms.frustum[i]);
-
-				if (r == 2)
-					return;
-
-				else if (r == 1)
-					planeBits &= ~(1 << i);
-			}
-
-			#endif
-
 		}
 
 		if ( node->contents != -1 ) {
@@ -584,7 +561,7 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 		}
 
 		// determine which dlights are needed
-		if ( r_nocull->integer!=2 ) 
+		if ( r_nocull->integer != 2 ) 
 		{
 			newDlights[0] = 0;
 			newDlights[1] = 0;
@@ -674,7 +651,6 @@ static void R_RecursiveWorldNode( mnode_t *node, int planeBits, int dlightBits )
 			mark++;
 		}
 	}
-
 }
 
 /*

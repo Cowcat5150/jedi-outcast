@@ -1531,7 +1531,6 @@ static void E_DrawTriFan(GLcontext context, const int count, UWORD *idx)
 	}
 }
 
-
 static void E_DrawTriStrip(GLcontext context, const int count, const UWORD *idx)
 {
 	int	i;
@@ -1684,6 +1683,7 @@ static void E_DrawTriStrip(GLcontext context, const int count, const UWORD *idx)
 					}
 
 					i++;
+
 				} while (i < size-2);
 
 				size -= backface + (first-oldfirst);

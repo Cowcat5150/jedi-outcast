@@ -140,7 +140,7 @@ void GLimp_Init(void)
 	}
 
 	r_lowvideomemory = Cvar_Get("r_lowvideomemory", "0", CVAR_ARCHIVE); // Cowcat
-	r_customtexturesize = Cvar_Get("r_customtexturesize", "0", CVAR_ARCHIVE | CVAR_LATCH);
+	r_customtexturesize = Cvar_Get("r_customtexturesize", "0", CVAR_ARCHIVE | CVAR_LATCH); // Cowcat
 
 	TinyGLBase = OpenLibrary("tinygl.library", 0);
 
@@ -337,8 +337,6 @@ void GLimp_Init(void)
 							glConfig.version_string = (const char *) qglGetString (GL_VERSION);
 							glConfig.extensions_string = (const char *) qglGetString (GL_EXTENSIONS);
 
-							//qglGetIntegerv( GL_MAX_TEXTURE_SIZE, &glConfig.maxTextureSize );
-
 							if ( strstr( glConfig.extensions_string, "GL_ARB_multitexture" ) )
 							{
 								// Cowcat
@@ -366,6 +364,14 @@ void GLimp_Init(void)
 								{
 									qglLockArraysEXT = stub_glLockArraysEXT;
 									qglUnlockArraysEXT = stub_glUnlockArraysEXT;
+								}
+							}
+
+							if ( strstr( glConfig.extensions_string, "GL_S3_s3tc" ) )
+							{
+								if ( r_ext_compressed_textures->integer )
+								{
+									glConfig.textureCompression = TC_S3TC;
 								}
 							}
 
