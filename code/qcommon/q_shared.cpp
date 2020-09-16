@@ -854,6 +854,10 @@ int Q_stricmpn (const char *s1, const char *s2, int n)
 	return 0;		// strings are equal
 }
 
+int Q_stricmp (const char *s1, const char *s2) {
+	return (s1 && s2) ? Q_stricmpn (s1, s2, 99999) : -1;
+}
+
 int Q_strncmp (const char *s1, const char *s2, int n)
 {
 	int	c1, c2;
@@ -1001,6 +1005,7 @@ Strips coloured strings in-place using multiple passes: "fgs^^56fds" -> "fgs^6fd
 (Also strips ^8 and ^9)
 ==================
 */
+
 void Q_StripColor(char *text)
 {
 	qboolean doPass = qtrue;
@@ -1036,6 +1041,7 @@ void Q_StripColor(char *text)
 		}
 	}
 }
+
 
 /*
 Q_strstrip

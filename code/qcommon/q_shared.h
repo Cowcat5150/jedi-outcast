@@ -567,7 +567,7 @@ extern	const vec3_t	axisDefault[3];
 float Q_fabs( float f );
 float Q_rsqrt( float f );		// reciprocal square root
 
-#define SQRTFAST( x ) ( 1.0f / Q_rsqrt( x ) )
+#define SQRTFAST( x ) ( (x) * Q_rsqrt( x ) ) // cl_input.cpp
 
 #define Q_min(x,y) ((x)<(y)?(x):(y))
 #define Q_max(x,y) ((x)>(y)?(x):(y))
@@ -1046,9 +1046,9 @@ qboolean Q_isintegral( float f );
 
 #if 1
 // portable case insensitive compare
-int		Q_strncmp (const char *s1, const char *s2, int n);
-int		Q_stricmpn (const char *s1, const char *s2, int n);
-inline  int Q_stricmp (const char *s1, const char *s2) {return Q_stricmpn (s1, s2, 99999);}
+int	Q_strncmp (const char *s1, const char *s2, int n);
+int	Q_stricmpn (const char *s1, const char *s2, int n);
+int 	Q_stricmp (const char *s1, const char *s2);
 char	*Q_strlwr( char *s1 );
 char	*Q_strupr( char *s1 );
 char	*Q_strrchr( const char* string, int c );

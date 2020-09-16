@@ -126,6 +126,8 @@ vec4_t g_color_table[Q_COLOR_BITS+1] = {
 #pragma warning(disable : 4305)		// truncation from const double to float
 #endif
 
+#if defined SP_GAME
+
 vec3_t	bytedirs[NUMVERTEXNORMALS] =
 {
 {-0.525731, 0.000000, 0.850651}, {-0.442863, 0.238856, 0.864188}, 
@@ -210,6 +212,9 @@ vec3_t	bytedirs[NUMVERTEXNORMALS] =
 {-0.425325, 0.688191, -0.587785}, {-0.425325, -0.688191, -0.587785}, 
 {-0.587785, -0.425325, -0.688191}, {-0.688191, -0.587785, -0.425325}
 };
+
+#endif
+
 #ifdef _MSC_VER
 #pragma warning(default : 4305)		// truncation from const double to float
 #endif
@@ -259,6 +264,7 @@ signed short ClampShort( int i )
 	return i;
 }
 
+#if defined SP_GAME
 
 // this isn't a real cheap function to call!
 int DirToByte( vec3_t dir )
@@ -298,6 +304,7 @@ void ByteToDir( int b, vec3_t dir )
 	VectorCopy (bytedirs[b], dir);
 }
 
+#endif
 
 unsigned ColorBytes3 (float r, float g, float b)
 {
@@ -367,6 +374,7 @@ Returns false if the triangle is degenrate.
 The normal will point out of the clock for clockwise ordered points
 =====================
 */
+
 qboolean PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const vec3_t c )
 {
 	vec3_t	d1, d2;
@@ -382,6 +390,7 @@ qboolean PlaneFromPoints( vec4_t plane, const vec3_t a, const vec3_t b, const ve
 	plane[3] = DotProduct( a, plane );
 	return qtrue;
 }
+
 
 /*
 ===============
@@ -414,10 +423,6 @@ void RotatePointAroundVector( vec3_t dst, const vec3_t dir, const vec3_t point, 
 	m[2][2] = t * dir[2] * dir[2] + c;
 
 	VectorRotate( point, m, dst );
-
-	//dst[0] = DotProduct( point, m[0] );
-	//dst[1] = DotProduct( point, m[1] );
-	//dst[2] = DotProduct( point, m[2] );
 }
 
 #else // test
@@ -478,39 +483,25 @@ void vectoangles( const vec3_t value1, vec3_t angles )
 	{
 		yaw = 0;
 
-		if ( value1[2] > 0 ) {
+		if ( value1[2] > 0 )
 			pitch = 90;
-		}
 
-		else {
+		else
 			pitch = 270;
-		}
 	}
 
 	else
 	{
-		if ( value1[0] ) {
-			yaw = ( atan2 ( value1[1], value1[0] ) * 180 / M_PI );
-		}
+		yaw = ( atan2 ( value1[1], value1[0] ) * 180 / M_PI );
 
-		else if ( value1[1] > 0 ) {
-			yaw = 90;
-		}
-
-		else {
-			yaw = 270;
-		}
-
-		if ( yaw < 0 ) {
+		if ( yaw < 0 )
 			yaw += 360;
-		}
 
-		forward = sqrt ( value1[0]*value1[0] + value1[1]*value1[1] );
-		pitch = ( atan2(value1[2], forward) * 180 / M_PI );
+		forward = sqrt( value1[0] * value1[0] + value1[1] * value1[1] );
+		pitch = ( atan2( value1[2], forward ) * 180 / M_PI );
 
-		if ( pitch < 0 ) {
+		if ( pitch < 0 )
 			pitch += 360;
-		}
 	}
 
 	angles[PITCH] = -pitch;
@@ -518,8 +509,11 @@ void vectoangles( const vec3_t value1, vec3_t angles )
 	angles[ROLL] = 0;
 }
 
+
 void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal )
 {
+	#if 1
+
 	float d;
 	vec3_t n;
 	float inv_denom;
@@ -535,6 +529,16 @@ void ProjectPointOnPlane( vec3_t dst, const vec3_t p, const vec3_t normal )
 	dst[0] = p[0] - d * n[0];
 	dst[1] = p[1] - d * n[1];
 	dst[2] = p[2] - d * n[2];
+
+	#else // test
+
+	float d = DotProduct( normal, p );
+
+	dst[0] = p[0] - d * normal[0];
+	dst[1] = p[1] - d * normal[1];
+	dst[2] = p[2] - d * normal[2];
+
+	#endif
 }
 
 /*
@@ -584,6 +588,7 @@ float Q_rsqrt( float number )
 	return y;
 }
 
+
 float Q_fabs( float f )
 {
 	byteAlias_t fi;
@@ -591,18 +596,6 @@ float Q_fabs( float f )
 	fi.i &= 0x7FFFFFFF;
 	return fi.f;
 }
-
-//============================================================
-
-
-//float	AngleMod(float a) {
-//	a = (360.0/65536) * ((int)(a*(65536/360.0)) & 65535);
-//	return a;
-//}
-
-
-
-//============================================================
 
 
 /*
@@ -634,6 +627,7 @@ BoxOnPlaneSide
 Returns 1, 2, or 1 + 2
 ==================
 */
+
 int BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 {
 	float	dist[2];
@@ -647,6 +641,7 @@ int BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 
 		if (p->dist >= emaxs[p->type])
 			return 2;
+
 		return 3;
 	}
 
@@ -670,7 +665,7 @@ int BoxOnPlaneSide(vec3_t emins, vec3_t emaxs, struct cplane_s *p)
 
 	if (dist[1] < p->dist)
 		sides |= 2;
-
+	
 	return sides;
 }
 
@@ -687,18 +682,8 @@ float RadiusFromBounds( const vec3_t mins, const vec3_t maxs )
 
 	for (i=0 ; i<3 ; i++)
 	{
-		#if 0
-
-		a = Q_fabs( mins[i] );
-		b = Q_fabs( maxs[i] );
-
-		#else // Cowcat
-
 		a = fabs( mins[i] );
 		b = fabs( maxs[i] );
-
-		#endif
-
 		corner[i] = a > b ? a : b;
 	}
 
@@ -708,10 +693,11 @@ float RadiusFromBounds( const vec3_t mins, const vec3_t maxs )
 
 void ClearBounds( vec3_t mins, vec3_t maxs )
 {
-	mins[0] = mins[1] = mins[2] =  WORLD_SIZE;	//99999;	// I used WORLD_SIZE instead of MAX_WORLD_COORD...
-	maxs[0] = maxs[1] = maxs[2] = -WORLD_SIZE;	//-99999;	// ... so it would definately be beyond furthese legal.
+	mins[0] = mins[1] = mins[2] = 1000000; // WORLD_SIZE;	//99999;	// I used WORLD_SIZE instead of MAX_WORLD_COORD...
+	maxs[0] = maxs[1] = maxs[2] = -1000000; //-WORLD_SIZE;	//-99999;	// ... so it would definately be beyond furthese legal.
 }
 
+#if defined SP_GAME
 
 vec_t DistanceHorizontal( const vec3_t p1, const vec3_t p2 )
 {
@@ -720,6 +706,8 @@ vec_t DistanceHorizontal( const vec3_t p1, const vec3_t p2 )
 	VectorSubtract( p2, p1, v );
 	return sqrt( v[0]*v[0] + v[1]*v[1] );	//Leave off the z component
 }
+
+#endif
 
 vec_t DistanceHorizontalSquared( const vec3_t p1, const vec3_t p2 )
 {
@@ -768,28 +756,22 @@ int PlaneTypeForNormal (vec3_t normal)
 MatrixMultiply
 ================
 */
+#if defined SP_GAME
+
 void MatrixMultiply(float in1[3][3], float in2[3][3], float out[3][3])
 {
-	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] +
-				in1[0][2] * in2[2][0];
-	out[0][1] = in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] +
-				in1[0][2] * in2[2][1];
-	out[0][2] = in1[0][0] * in2[0][2] + in1[0][1] * in2[1][2] +
-				in1[0][2] * in2[2][2];
-	out[1][0] = in1[1][0] * in2[0][0] + in1[1][1] * in2[1][0] +
-				in1[1][2] * in2[2][0];
-	out[1][1] = in1[1][0] * in2[0][1] + in1[1][1] * in2[1][1] +
-				in1[1][2] * in2[2][1];
-	out[1][2] = in1[1][0] * in2[0][2] + in1[1][1] * in2[1][2] +
-				in1[1][2] * in2[2][2];
-	out[2][0] = in1[2][0] * in2[0][0] + in1[2][1] * in2[1][0] +
-				in1[2][2] * in2[2][0];
-	out[2][1] = in1[2][0] * in2[0][1] + in1[2][1] * in2[1][1] +
-				in1[2][2] * in2[2][1];
-	out[2][2] = in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] +
-				in1[2][2] * in2[2][2];
+	out[0][0] = in1[0][0] * in2[0][0] + in1[0][1] * in2[1][0] + in1[0][2] * in2[2][0];
+	out[0][1] = in1[0][0] * in2[0][1] + in1[0][1] * in2[1][1] + in1[0][2] * in2[2][1];
+	out[0][2] = in1[0][0] * in2[0][2] + in1[0][1] * in2[1][2] + in1[0][2] * in2[2][2];
+	out[1][0] = in1[1][0] * in2[0][0] + in1[1][1] * in2[1][0] + in1[1][2] * in2[2][0];
+	out[1][1] = in1[1][0] * in2[0][1] + in1[1][1] * in2[1][1] + in1[1][2] * in2[2][1];
+	out[1][2] = in1[1][0] * in2[0][2] + in1[1][1] * in2[1][2] + in1[1][2] * in2[2][2];
+	out[2][0] = in1[2][0] * in2[0][0] + in1[2][1] * in2[1][0] + in1[2][2] * in2[2][0];
+	out[2][1] = in1[2][0] * in2[0][1] + in1[2][1] * in2[1][1] + in1[2][2] * in2[2][1];
+	out[2][2] = in1[2][0] * in2[0][2] + in1[2][1] * in2[1][2] + in1[2][2] * in2[2][2];
 }
 
+#endif
 
 void AngleVectors( const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 {
@@ -837,6 +819,7 @@ void AngleVectors( const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 /*
 ** assumes "src" is normalized
 */
+
 void PerpendicularVector( vec3_t dst, const vec3_t src )
 {
 	int	pos;
@@ -850,12 +833,10 @@ void PerpendicularVector( vec3_t dst, const vec3_t src )
 	*/
 	for ( pos = 0, i = 2; i >= 0; i-- )
 	{
-		//if ( Q_fabs( src[i] ) < minelem )
-		if ( fabs( src[i] ) < minelem ) // Cowcat
+		if ( fabs( src[i] ) < minelem )
 		{
 			pos = i;
-			//minelem = Q_fabs( src[i] );
-			minelem = fabs( src[i] ); // Cowcat
+			minelem = fabs( src[i] );
 		}
 	}
 
