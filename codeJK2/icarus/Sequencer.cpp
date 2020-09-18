@@ -26,6 +26,7 @@ This file is part of Jedi Knight 2.
 #include "g_shared.h"
 
 #include "assert.h"
+#include <algorithm>
 
 // Sequencer 
 
@@ -186,7 +187,7 @@ Deletes parsing stream
 */
 void CSequencer::DeleteStream( bstream_t *bstream )
 {
-	vector<bstream_t*>::iterator finder = find(m_streamsCreated.begin(), m_streamsCreated.end(), bstream);
+	std::vector<bstream_t*>::iterator finder = std::find(m_streamsCreated.begin(), m_streamsCreated.end(), bstream);
 	if(finder != m_streamsCreated.end())
 	{
 		m_streamsCreated.erase(finder);
@@ -2259,13 +2260,7 @@ int CSequencer::DestroySequence( CSequence *sequence )
 	{
 		if((*tsi).second == sequence)
 		{
-#ifdef _WIN32
-			tsi = m_taskSequences.erase(tsi);
-#else
-			taskSequence_m::iterator itTemp = tsi;
-			tsi++;
-			m_taskSequences.erase(itTemp);
-#endif
+			m_taskSequences.erase(tsi++);
 		}
 		else
 		{

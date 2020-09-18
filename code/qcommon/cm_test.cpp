@@ -20,7 +20,6 @@ This file is part of Jedi Academy.
 
 #undef _P // Cowcat
 
-using namespace std;
 
 class CPoint
 {

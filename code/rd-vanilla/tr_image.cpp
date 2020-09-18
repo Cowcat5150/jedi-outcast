@@ -912,7 +912,7 @@ public:
 	bool operator()(const char *s1, const char *s2) const { return(Q_stricmp(s1, s2) < 0); } 
 };
 
-typedef map <const char *, image_t *, CStringComparator> AllocatedImages_t;
+typedef std::map <const char *, image_t *, CStringComparator> AllocatedImages_t;
 AllocatedImages_t AllocatedImages;
 AllocatedImages_t::iterator itAllocatedImages;
 
@@ -1879,7 +1879,7 @@ public:
 };
 */
 
-typedef map<sstring_t,char * /*, CStringComparator*/ >	AnimationCFGs_t;
+typedef std::map<sstring_t,char * /*, CStringComparator*/ >	AnimationCFGs_t;
 AnimationCFGs_t AnimationCFGs;
 
 // I added this function for development purposes (and it's VM-safe) so we don't have problems

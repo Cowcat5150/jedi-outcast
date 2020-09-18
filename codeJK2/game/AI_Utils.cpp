@@ -94,6 +94,7 @@ int AI_GetGroupSize( gentity_t *ent, int radius )
 	return AI_GetGroupSize( ent->currentOrigin, radius, ent->client->playerTeam, ent );
 }
 
+#if 0
 extern int NAV_FindClosestWaypointForPoint( gentity_t *ent, vec3_t point );
 int AI_ClosestGroupEntityNumToPoint( AIGroupInfo_t &group, vec3_t point )
 {
@@ -125,6 +126,7 @@ int AI_ClosestGroupEntityNumToPoint( AIGroupInfo_t &group, vec3_t point )
 
 	return closest;
 }
+#endif
 
 void AI_SetClosestBuddy( AIGroupInfo_t *group )
 {

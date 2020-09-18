@@ -29,9 +29,6 @@ typedef sstring_t fxString_t;
 #ifndef FX_SCHEDULER_H_INC
 #define FX_SCHEDULER_H_INC
 
-using namespace std;
-
-
 #define FX_FILE_PATH	"effects"
 
 #define FX_MAX_TRACE_DIST		WORLD_SIZE
@@ -57,16 +54,16 @@ using namespace std;
 #define FX_CHEAP_ORG_CALC		0x00100	// Origin is calculated relative to passed in axis unless this is on.
 #define FX_CHEAP_ORG2_CALC		0x00200	// Origin2 is calculated relative to passed in axis unless this is on.
 #define FX_VEL_IS_ABSOLUTE		0x00400	// Velocity isn't relative to passed in axis with this flag on.
-#define FX_ACCEL_IS_ABSOLUTE	0x00800	// Acceleration isn't relative to passed in axis with this flag on.
+#define FX_ACCEL_IS_ABSOLUTE		0x00800	// Acceleration isn't relative to passed in axis with this flag on.
 
-#define FX_RAND_ROT_AROUND_FWD	0x01000	// Randomly rotates up and right around forward vector
-#define FX_EVEN_DISTRIBUTION	0x02000	// When you have a delay, it normally picks a random time to play.  When
+#define FX_RAND_ROT_AROUND_FWD		0x01000	// Randomly rotates up and right around forward vector
+#define FX_EVEN_DISTRIBUTION		0x02000	// When you have a delay, it normally picks a random time to play.  When
 										// this flag is on, it generates an even time distribution
-#define FX_RGB_COMPONENT_INTERP	0x04000	// Picks a color on the line defined by RGB min & max, default is to pick color in cube defined by min & max
+#define FX_RGB_COMPONENT_INTERP		0x04000	// Picks a color on the line defined by RGB min & max, default is to pick color in cube defined by min & max
 
 #define FX_AFFECTED_BY_WIND		0x10000 // we take into account our wind vector when we spawn in
 
-#define FX_SND_LESS_ATTENUATION	0x20000	// attenuate sounds less
+#define FX_SND_LESS_ATTENUATION		0x20000	// attenuate sounds less
 
 //-----------------------------------------------------------------
 //
@@ -80,13 +77,13 @@ class CMediaHandles
 {
 private:
 
-	vector<int>	mMediaList;
+	std::vector<int>	mMediaList;
 
 public:
 
 	void	AddHandle( int item )	{ mMediaList.push_back( item );	}
-	int		GetHandle()				{ if (mMediaList.size()==0) {return 0;}
-										else {return mMediaList[irand(0,(int)mMediaList.size()-1)];} }
+	int	GetHandle()		{ if (mMediaList.size()==0) {return 0;}
+					else {return mMediaList[irand(0,(int)mMediaList.size()-1)];} }
 
 	void operator=(const CMediaHandles &that );
 };
@@ -110,28 +107,29 @@ private:
 
 public:
 
-	CFxRange()										{mMin=0; mMax=0;}
+	CFxRange()		{mMin=0; mMax=0;}
 
 	inline void		SetRange(float min,float max)	{mMin=min; mMax=max;}
-	inline void		SetMin(float min)				{mMin=min;}
-	inline void		SetMax(float max)				{mMax=max;}
+	inline void		SetMin(float min)		{mMin=min;}
+	inline void		SetMax(float max)		{mMax=max;}
 
-	inline float	GetMax() const					{return mMax;}
-	inline float	GetMin() const					{return mMin;}
+	inline float	GetMax() const				{return mMax;}
+	inline float	GetMin() const				{return mMin;}
 
 	inline float	GetVal(float percent) const		{return (mMin + (mMax - mMin) * percent);}
-	inline float	GetVal() const					{if(mMin == mMax){return mMin;}
-														return flrand(mMin, mMax);}
-	inline int		GetRoundedVal() const			{if(mMin == mMax){return mMin;}
-														return (int)(flrand(mMin, mMax) + 0.5f);}
+	inline float	GetVal() const				{if(mMin == mMax){return mMin;}
+										return flrand(mMin, mMax);}
+	inline int		GetRoundedVal() const		{if(mMin == mMax){return mMin;}
+										return (int)(flrand(mMin, mMax) + 0.5f);}
 
 	inline void		ForceRange(float min,float max)	{if(mMin < min){mMin=min;} if(mMin > max){mMin=max;}
-														if(mMax < min){mMax=min;} if(mMax > max){mMax=max;}}
-	inline void		Sort()							{if(mMin > mMax){float temp = mMin; mMin=mMax;mMax=temp;}}
+								if(mMax < min){mMax=min;} if(mMax > max){mMax=max;}}
+
+	inline void		Sort()				{if(mMin > mMax){float temp = mMin; mMin=mMax;mMax=temp;}}
+
 	void operator=(const CFxRange &that)			{mMin=that.mMin; mMax=that.mMax;}
 
-	bool operator==(const CFxRange &rhs) const		{ return ((mMin == rhs.mMin) &&
-															  (mMax == rhs.mMax)); }
+	bool operator==(const CFxRange &rhs) const		{ return ((mMin == rhs.mMin) && (mMax == rhs.mMax)); }
 };
 
 
@@ -178,9 +176,9 @@ public:
 
 	// These kinds of things should not even be allowed to be accessed publicly
 	bool			mCopy;
-	int				mRefCount;		// For a copy of a primitive...when we figure out how many items we want to spawn, 
-									//	we'll store that here and then decrement us for each we actually spawn.  When we 
-									//	hit zero, we are no longer used and so we can just free ourselves
+	int			mRefCount;		// For a copy of a primitive...when we figure out how many items we want to spawn, 
+							// we'll store that here and then decrement us for each we actually spawn.  When we 
+							// hit zero, we are no longer used and so we can just free ourselves
 
 	char			mName[FX_MAX_PRIM_NAME];
 
@@ -189,7 +187,7 @@ public:
 	CFxRange		mSpawnDelay;
 	CFxRange		mSpawnCount;
 	CFxRange		mLife;
-	int				mCullRange;
+	int			mCullRange;
 
 	CMediaHandles	mMediaHandles;
 	CMediaHandles	mImpactFxHandles;
@@ -197,8 +195,8 @@ public:
 	CMediaHandles	mEmitterFxHandles;
 	CMediaHandles	mPlayFxHandles;
 
-	int				mFlags;			// These need to get passed on to the primitive
-	int				mSpawnFlags;	// These are only used to control spawning, but never get passed to prims.
+	int			mFlags;		// These need to get passed on to the primitive
+	int			mSpawnFlags;	// These are only used to control spawning, but never get passed to prims.
 
 	vec3_t			mMin;
 	vec3_t			mMax;
@@ -211,7 +209,7 @@ public:
 	CFxRange		mOrigin2Y;
 	CFxRange		mOrigin2Z;
 
-	CFxRange		mRadius;		// spawn on sphere/ellipse/disk stuff.
+	CFxRange		mRadius;	// spawn on sphere/ellipse/disk stuff.
 	CFxRange		mHeight;
 
 	CFxRange		mRotation;
@@ -577,13 +575,13 @@ private:
 	};
 
 	// this makes looking up the index based on the string name much easier
-	typedef map<fxString_t, int>				TEffectID;
+	typedef std::map<fxString_t, int>		TEffectID;
 
-	typedef list<SScheduledEffect*>			TScheduledEffect;
+	typedef std::list<SScheduledEffect*>		TScheduledEffect;
 
 	// Effects
 	SEffectTemplate		mEffectTemplates[FX_MAX_EFFECTS];
-	TEffectID			mEffectIDs;								// if you only have the unique effect name, you'll have to use this to get the ID.
+	TEffectID		mEffectIDs;			// if you only have the unique effect name, you'll have to use this to get the ID.
 
 	// List of scheduled effects that will need to be created at the correct time.
 	TScheduledEffect	mFxSchedule;

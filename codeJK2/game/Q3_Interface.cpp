@@ -80,7 +80,7 @@ extern cvar_t	*g_skippingcin;
 
 extern qboolean	stop_icarus;
 
-#define stringIDExpand(str, strEnum)	str, strEnum, ENUM2STRING(strEnum)
+#define stringIDExpand(str, strEnum) {str, strEnum}, ENUM2STRING(strEnum)
 //#define stringIDExpand(str, strEnum)	str,strEnum
 
 /*

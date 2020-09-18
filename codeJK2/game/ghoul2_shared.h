@@ -16,6 +16,9 @@ This file is part of Jedi Knight 2.
 */
 // Copyright 2001-2013 Raven Software
 
+// not used
+#if 0
+
 #pragma once
 #if !defined(GHOUL2_SHARED_H_INC)
 #define GHOUL2_SHARED_H_INC
@@ -29,7 +32,6 @@ Ghoul2 Insert Start
 #include <map>
 #pragma warning (pop)
 #pragma warning (disable:4503)	// decorated name length xceeded, name was truncated
-using namespace std;
 /*
 Ghoul2 Insert End
 */
@@ -423,3 +425,5 @@ enum EG2_Collision
 //====================================================================
 
 #endif // GHOUL2_SHARED_H_INC
+
+#endif // 0

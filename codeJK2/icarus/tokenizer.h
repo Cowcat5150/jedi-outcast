@@ -40,7 +40,6 @@ This file is part of Jedi Knight 2.
 	#pragma warning (disable:4503)		// decorated name length xceeded, name was truncated
 #endif
 
-using namespace std;
 
 #include "../../tools/Ibize/ibize_platform.h"
 
@@ -301,7 +300,7 @@ protected:
 	char*			m_symbolName;
 };
 
-typedef map<const char *, CSymbol*, lessstr> symbolmap_t;
+typedef std::map<const char *, CSymbol*, lessstr> symbolmap_t;
 
 class CDirectiveSymbol : public CSymbol
 {

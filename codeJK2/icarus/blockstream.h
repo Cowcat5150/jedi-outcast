@@ -28,6 +28,7 @@ This file is part of Jedi Knight 2.
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #ifdef _MSC_VER
 	#pragma warning (push, 3)	//go back down to 3 for the stl include
@@ -38,7 +39,6 @@ This file is part of Jedi Knight 2.
 	#pragma warning (pop)
 #endif
 
-using namespace std;
 
 #define IBI_HEADER_ID_LENGTH 4 // Length of IBI_HEADER_ID + 1 for the null terminating byte.
 #define	IBI_EXT			".IBI"	//(I)nterpreted (B)lock (I)nstructions
@@ -124,7 +124,7 @@ protected:
 
 class CBlock
 {
-	typedef vector< CBlockMember * >	blockMember_v;
+	typedef std::vector< CBlockMember * >	blockMember_v;
 
 public:
 
