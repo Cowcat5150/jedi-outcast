@@ -785,27 +785,14 @@ Q_strncpyz
 Safe strncpy that ensures a trailing zero
 =============
 */
-void Q_strncpyz( char *dest, const char *src, int destsize, qboolean bBarfIfTooLong/* = qfalse */ )
+void Q_strncpyz( char *dest, const char *src, int destsize )
 {
-	if ( !dest ) {
-		Com_Error( ERR_FATAL, "Q_strncpyz: NULL dest" );
-	}
-	if ( !src ) {
-		Com_Error( ERR_FATAL, "Q_strncpyz: NULL src" );
-	}
-	if ( destsize < 1 ) {
-		Com_Error(ERR_FATAL,"Q_strncpyz: destsize < 1" ); 
-	}
+	assert(src);
+	assert(dest);
+	assert(destsize);
 
-	if (bBarfIfTooLong)
-	{
-		if ( strlen(src)+1 > (size_t)destsize)
-		{
-			Com_Error(ERR_FATAL,"String dest buffer too small to hold string \"%s\" %d > %d\n(source addr = %x, dest addr = %x",src, strlen(src)+1, destsize, src, dest);
-		}
-	}
 	strncpy( dest, src, destsize-1 );
-    dest[destsize-1] = 0;
+	dest[destsize-1] = 0;
 }
 
         

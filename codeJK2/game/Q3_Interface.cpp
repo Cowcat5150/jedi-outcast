@@ -1011,7 +1011,7 @@ static int Q3_PlaySound( int taskID, int entID, const char *name, const char *ch
 	soundChannel_t	voice_chan = CHAN_VOICE; // set a default so the compiler doesn't bitch
 	qboolean		type_voice = qfalse;
 
-	Q_strncpyz( finalName, name, MAX_QPATH, 0 );
+	Q_strncpyz( finalName, name, MAX_QPATH);
 	Q_strupr(finalName);
 	//G_AddSexToMunroString( finalName, qtrue );
 

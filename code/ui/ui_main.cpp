@@ -2129,7 +2129,7 @@ qboolean UI_ParseAnimFileSet( const char *animCFG, int *animFileIndex )
 	int			i;
 	char		*slash;
 
-	Q_strncpyz( strippedName, animCFG, sizeof(strippedName), qtrue);
+	Q_strncpyz( strippedName, animCFG, sizeof(strippedName));
 	slash = strrchr( strippedName, '/' );
 	if ( slash ) 
 	{
@@ -2247,7 +2247,7 @@ static qboolean UI_ParseColorData(char* buf, playerSpeciesInfo_t &species)
 			COM_EndParseSession(  );
 			return species.ColorCount;
 		}
-		Q_strncpyz( species.ColorShader[species.ColorCount], token, sizeof(species.ColorShader[0]), qtrue );
+		Q_strncpyz( species.ColorShader[species.ColorCount], token, sizeof(species.ColorShader[0]));
 
 		token = COM_ParseExt( &p, qtrue );	//looking for action block {
 		if ( token[0] != '{' )
@@ -2357,7 +2357,7 @@ static void UI_BuildPlayerModel_List( qboolean inGameLoad )
 			buffer[filelen] = 0;	//ensure trailing NULL
 			
 			//record this species
-			Q_strncpyz( uiInfo.playerSpecies[uiInfo.playerSpeciesCount].Name, dirptr, sizeof(uiInfo.playerSpecies[0].Name), qtrue );
+			Q_strncpyz( uiInfo.playerSpecies[uiInfo.playerSpeciesCount].Name, dirptr, sizeof(uiInfo.playerSpecies[0].Name));
 
 			if (!UI_ParseColorData(buffer,uiInfo.playerSpecies[uiInfo.playerSpeciesCount]))
 			{
@@ -2392,7 +2392,7 @@ static void UI_BuildPlayerModel_List( qboolean inGameLoad )
 					{
 						if (uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinHeadCount < MAX_PLAYERMODELS) 
 						{
-							Q_strncpyz(uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinHeadNames[uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinHeadCount++], skinname, sizeof(uiInfo.playerSpecies[0].SkinHeadNames[0]), qtrue);
+							Q_strncpyz(uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinHeadNames[uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinHeadCount++], skinname, sizeof(uiInfo.playerSpecies[0].SkinHeadNames[0]));
 							iSkinParts |= 1<<0;
 						}
 					} else
@@ -2400,7 +2400,7 @@ static void UI_BuildPlayerModel_List( qboolean inGameLoad )
 					{
 						if (uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinTorsoCount < MAX_PLAYERMODELS) 
 						{
-							Q_strncpyz(uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinTorsoNames[uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinTorsoCount++], skinname, sizeof(uiInfo.playerSpecies[0].SkinTorsoNames[0]), qtrue);
+							Q_strncpyz(uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinTorsoNames[uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinTorsoCount++], skinname, sizeof(uiInfo.playerSpecies[0].SkinTorsoNames[0]));
 							iSkinParts |= 1<<1;
 						}
 					} else
@@ -2408,7 +2408,7 @@ static void UI_BuildPlayerModel_List( qboolean inGameLoad )
 					{
 						if (uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinLegCount < MAX_PLAYERMODELS) 
 						{
-							Q_strncpyz(uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinLegNames[uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinLegCount++], skinname, sizeof(uiInfo.playerSpecies[0].SkinLegNames[0]), qtrue);
+							Q_strncpyz(uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinLegNames[uiInfo.playerSpecies[uiInfo.playerSpeciesCount].SkinLegCount++], skinname, sizeof(uiInfo.playerSpecies[0].SkinLegNames[0]));
 							iSkinParts |= 1<<2;
 						}
 					}
