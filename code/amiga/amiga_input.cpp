@@ -58,6 +58,8 @@ cvar_t *joy_threshold    = NULL;
 
 qboolean mouse_avail;
 qboolean mouse_active = qtrue;
+qboolean keycatch;
+
 //int mx = 0, my = 0;
 
 struct Library *KeymapBase = 0;
@@ -65,7 +67,7 @@ struct Library *KeymapBase = 0;
 extern struct Window *win;
 extern qboolean windowmode;
 
-static void IN_ProcessEvents( qboolean keycatch );
+//static void IN_ProcessEvents( qboolean keycatch );
 
 void IN_ActivateMouse( qboolean isFullscreen ) 
 {
@@ -125,7 +127,7 @@ void IN_Frame (void)
 	// Cowcat windowmode mousehandler juggling
 
 	static qboolean mousein;
-	qboolean keycatch = qfalse;
+	keycatch = qfalse;
 
 	if ( windowmode && mouse_avail )
 	{
@@ -165,7 +167,7 @@ void IN_Frame (void)
 
 	#endif
 	
-	IN_ProcessEvents(keycatch);
+	//IN_ProcessEvents(keycatch);
 }
 
 
@@ -418,8 +420,7 @@ static int GetEvents(void *port, void *msgarray, int maxmsg)
 	return args.PP_Regs[PPREG_D0];
 }
 
-
-static void IN_ProcessEvents( qboolean keycatch )
+void IN_ProcessEvents( void )
 {
 	UWORD res;
 	int i;

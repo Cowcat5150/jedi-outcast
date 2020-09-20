@@ -439,6 +439,8 @@ static sysEvent_t	eventQue[ MAX_QUED_EVENTS ];
 static sysEvent_t	*lastEvent = eventQue + MAX_QUED_EVENTS - 1;
 static uint32_t		eventHead = 0, eventTail = 0;
 
+extern void IN_ProcessEvents(void);
+
 sysEvent_t Sys_GetEvent(void)
 {
 	sysEvent_t	ev;
@@ -447,7 +449,8 @@ sysEvent_t Sys_GetEvent(void)
 	if ( eventHead - eventTail > 0 )
 		return eventQue[ ( eventTail++ ) & MASK_QUED_EVENTS ];
 
-	IN_Frame(); // it was on Com_Frame - Cowcat
+	//IN_Frame(); // it was on Com_Frame - Cowcat
+	IN_ProcessEvents();
 
 	// create an empty event on return
 	memset( &ev, 0, sizeof( ev ) );
@@ -558,6 +561,7 @@ int main(int argc, char **argv)
 
 	while( 1 ) 
 	{
+		IN_Frame(); // Check windowmode/mousehandler
 		Com_Frame();
 	}
 
