@@ -228,7 +228,6 @@ void IN_Shutdown(void)
 
 void IN_Restart(void)
 {
-	IN_Shutdown();
 	IN_Init();
 }
 
@@ -268,7 +267,8 @@ static int XLateKey(struct IntuiMessage *ev)
 	return scantokey[ev->Code&0x7f];
 }
 
-static void IN_ProcessEvents(qboolean keycatch)
+//static void IN_ProcessEvents(qboolean keycatch)
+void IN_ProcessEvents( void )
 {
 	struct IntuiMessage *imsg;
 	struct InputEvent ie;
@@ -329,12 +329,7 @@ static void IN_ProcessEvents(qboolean keycatch)
 
 				if (mouse_active)
 				{
-					//Com_Printf("sendkeyevents mousemove\n");
-
-					mx = imsg->MouseX;
-					my = imsg->MouseY;
-
-					Sys_QueEvent(msgTime, SE_MOUSE, mx, my, 0, NULL);
+					Sys_QueEvent(msgTime, SE_MOUSE, imsg->MouseX, imsg->MouseY, 0, NULL);
 				}
 
 				break; // drop through ? Cowcat
@@ -364,18 +359,16 @@ static void IN_ProcessEvents(qboolean keycatch)
 
 				switch (imsg->Code & ~IECODE_UP_PREFIX)
 				{
-
 					case IECODE_LBUTTON:
-						//Com_Printf("sendkeyevents lmousebutton\n");
-						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE1, keyDown(imsg->Code),0, NULL);
+						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE1, keyDown(imsg->Code), 0, NULL);
 						break;
 
 					case IECODE_RBUTTON:
-						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE2, keyDown(imsg->Code),0, NULL);
+						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE2, keyDown(imsg->Code), 0, NULL);
 						break;
 
 					case IECODE_MBUTTON:
-						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE3, keyDown(imsg->Code),0, NULL);
+						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE3, keyDown(imsg->Code), 0, NULL);
 						break;
 				}
 		}
@@ -440,19 +433,21 @@ void IN_ProcessEvents( void )
 
 	while ( i < messages )
 	{
+		UWORD Codekey = events[i].Code;
+
 		switch( events[i].Class )
 		{
 			case IDCMP_RAWKEY:
 
-				if ( keycatch &&  events[i].Code == ( 0x63 & ~IECODE_UP_PREFIX ) ) // windowmode handler workaround
+				if ( keycatch && Codekey == ( 0x63 & ~IECODE_UP_PREFIX ) ) // windowmode handler workaround
 				{
-					Sys_QueEvent(msgTime, SE_KEY, A_MOUSE1, keyDown(events[i].Code), 0, NULL);
+					Sys_QueEvent(msgTime, SE_KEY, A_MOUSE1, keyDown(Codekey), 0, NULL);
 					//Com_Printf ("mouse key RAWKEY\n"); //
 				}
 
 				else
 				{
-					int key = scantokey[ events[i].Code & 0x7f ];
+					int key = scantokey[ Codekey & 0x7f ];
 
 					//Com_Printf ("key encoded %d \n", key); //
 
@@ -465,9 +460,9 @@ void IN_ProcessEvents( void )
 					else
 						res = 1;
 
-					Sys_QueEvent(msgTime, SE_KEY, key, keyDown(events[i].Code), 0, NULL);
+					Sys_QueEvent(msgTime, SE_KEY, key, keyDown(Codekey), 0, NULL);
 
-					if (res == 1)
+					if ( Codekey & ~IECODE_UP_PREFIX && res == 1 )
 						Sys_QueEvent(msgTime, SE_CHAR, events[i].rawkey, 0, 0, NULL);
 				}
 
@@ -486,18 +481,18 @@ void IN_ProcessEvents( void )
 
 				#if 0
 
-				switch (events[i].Code & ~IECODE_UP_PREFIX)
+				switch (Codekey & ~IECODE_UP_PREFIX)
 				{
 					case IECODE_LBUTTON:
-						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE1, keyDown(events[i].Code), 0, NULL);
+						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE1, keyDown(Codekey), 0, NULL);
 						break;
 
 					case IECODE_RBUTTON:
-						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE2, keyDown(events[i].Code), 0, NULL);
+						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE2, keyDown(Codekey), 0, NULL);
 						break;
 
 					case IECODE_MBUTTON:
-						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE3, keyDown(events[i].Code), 0, NULL);
+						Sys_QueEvent(msgTime, SE_KEY, A_MOUSE3, keyDown(Codekey), 0, NULL);
 						break;
 				}
 
@@ -505,14 +500,14 @@ void IN_ProcessEvents( void )
 
 				unsigned short b = 0;
 
-				switch (events[i].Code & ~IECODE_UP_PREFIX)
+				switch (Codekey & ~IECODE_UP_PREFIX)
 				{
 					case IECODE_LBUTTON: b = A_MOUSE1; break;
 					case IECODE_RBUTTON: b = A_MOUSE2; break;
 					case IECODE_MBUTTON: b = A_MOUSE3; break;
 				}
 
-				Sys_QueEvent(msgTime, SE_KEY, b, keyDown(events[i].Code), 0, NULL);
+				Sys_QueEvent(msgTime, SE_KEY, b, keyDown(Codekey), 0, NULL);
 
 				#endif
 			
